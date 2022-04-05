@@ -4,7 +4,7 @@ You can use the [editor on GitHub](https://github.com/dhruvswarup123/ball-e/edit
 
 Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-Find the project proposal [here](proposal.md)
+
 
 ### Markdown
 
