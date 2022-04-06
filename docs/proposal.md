@@ -24,12 +24,12 @@ Because there is a lot that can be done in this project, we propose our delivera
 As a part of the main goals, we want to build on the GUI given to us in Project 4. Our modified version should give the user control to add a point and then extrude points from it in any direction. It should also let the user scale the points to add a "thicker" mesh around that point. The GUI should give an option to enable realtime computation of the base mesh and display it as well. Naturally, that means that we will also implement the algorithm to calculate this base mesh. We will create images that show the original orientation of points, as well as the created base mesh around it. We will also submit videos that show the process of interacting with the GUI. 
 
 
-Define how you will measure the quality / performance of your system (e.g. graphs showing speedup, or quantifying accuracy). It may not be possible to define precise target metrics at this time, but we encourage you to try.
-What questions do you plan to answer with your analysis?
+Though it is not exactly possible to determine what metrics might be the best for measuring the accuracy of the algorithm, we will measure it by how close the results look to the BMesh Paper. But, we want to give us the flexibility of being able to change the algorithm to our liking. The goal is to have a mesh that actually seems like it was wrapped around the spheres. The performance can be measured by how well it can do in terms of the real time calculation of the mesh. In our analysis, we want to measure the time the base mesh takes to generate and how well it scales. The question we want to answer are: Does this work well with many spheres? Is this fast enough to work in real time?
 
 Here is a list of everything that we plan to deliver.  
 1. A GUI for inserting and editing points.
-2. A preview mode for the base mesh generation.
+2. A preview mode for the base mesh generation algorithm.
+3. The algorithm itself.
 
 
 #### Stretch Goals
