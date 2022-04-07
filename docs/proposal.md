@@ -54,3 +54,9 @@ List what resources, e.g. books, papers and/or online resources that are referen
 1. [B-Mesh: A Fast Modeling System for Base Meshes
 of 3D Articulated Shapes](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.357.7134&rep=rep1&type=pdf)
 
+2. [A Generalization of Algebraic Surface Drawing](http://papers.cumincad.org/data/works/att/6094.content.pdf)
+
+3. [A Survey of Unstructured Mesh Generation Technology](https://ima.udg.edu/~sellares/comgeo/owensurv.pdf)
+
+4. [Mesh Generation](https://people.eecs.berkeley.edu/~jrs/meshpapers/BernPlassmann.pdf)
+
