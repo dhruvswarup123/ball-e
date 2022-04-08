@@ -41,7 +41,6 @@ If we manage to complete the main goals, then we want to implement the following
 - Creating a feature to export model as an FBX file. This is an industry standard for storing animation files. 
 
 ### Schedule
-In this section you should organize and plan the tasks and subtasks that your team will execute. Since presentations are ~4 weeks from the due-date of the proposal, you should include a set of tasks for every week.
 Here is approximately how we plan to execute tasks:
 1. 11-17th April: Create the whole GUI for point manipulation. Start the basic algorithm for B-Mesh. 
 2. 18-24th April: Finish the first 2 parts of BMesh, Sphere interpolation, and skin wrapping. Work on the milestone
@@ -49,7 +48,7 @@ Here is approximately how we plan to execute tasks:
 4. 2-8th May: Bug fixes, final tweaks to the GUI, stretch goals
 
 ### Resources
-List what resources, e.g. books, papers and/or online resources that are references for your project. List the computing platform, hardware and software resources that you will use for your project. You have a wide latitude here to use what you have access to, but be aware that you will have to support and trouble-shoot on your platform yourselves. If you are starting from an existing piece of code or system, describe and provide a pointer to it here.
+We plan to use our own machines, as the algorithm should be light enough. These are the resources we found on BMesh. 
 
 1. [B-Mesh: A Fast Modeling System for Base Meshes
 of 3D Articulated Shapes](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.357.7134&rep=rep1&type=pdf)
