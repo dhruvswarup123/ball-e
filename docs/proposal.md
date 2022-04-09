@@ -59,3 +59,4 @@ of 3D Articulated Shapes](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1
 
 4. [Mesh Generation](https://people.eecs.berkeley.edu/~jrs/meshpapers/BernPlassmann.pdf)
 
+5. [B mesh implementation](https://github.com/CorentinDumery/BMesh)
