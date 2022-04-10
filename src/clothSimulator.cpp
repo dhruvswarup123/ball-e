@@ -511,30 +511,25 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 				else {
 					selected->radius = 0.01;
 				}
-				//selected->radius = abs(original_rad - scaleval);
 			}
 		}
 		else if (gui_state == GUI_STATES::GRABBING) {
 			// First change the point to camera coordanates
-			Vector3D campos_vec3d = camera.position();
+			Matrix4f view = getViewMatrix();
+			Matrix4f projection = getProjectionMatrix();
+			Matrix4f viewProjection = projection * view; // World to screen
 
-			Vector4f sphere_pos_world(selected->pos.x, selected->pos.y, selected->pos.z, 1.);
-			Vector4f originalpos_world( original_pos.x, original_pos.y, original_pos.z, 1. );
-			Vector4f campos( campos_vec3d.x, campos_vec3d.y, campos_vec3d.z, 1. );
-			Vector4f movebyvec( (mouse_x - grab_mouse_x)* 0.001, -(mouse_y - grab_mouse_y) * 0.001, 0, 0 );
+			/*Vector4f sphere_worldpos(selected->pos.x, selected->pos.y, selected->pos.z, 1.);
+			Vector4f sphere_screenpos = viewProjection * sphere_worldpos;*/
 
+			// Get the original position of the sphere
+			Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
 
-			Matrix4f c2w = getViewMatrix();
+			Vector4f original_screenpos = viewProjection * original_worldpos;
 
-			// campoint = w2c * (worldpoint - campos)
-			Vector4f campoint = c2w.inverse() * (sphere_pos_world - campos);
+			Vector4f movebyvec(x - grab_mouse_x, -(y - grab_mouse_y), 0, 0 );
 
-			// Add the xy to the xy
-			campoint = originalpos_world + movebyvec;
-
-			// Cam to World
-			//worldpoint = c2w * campoint + campos
-			Vector4f new_sphere_pos_world = c2w * campoint + campos;
+			Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec*0.01);
 			Vector3D sphere_pos_world_v3d( new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2] );
 			selected->pos = sphere_pos_world_v3d;
 
@@ -753,7 +748,7 @@ void ClothSimulator::grab_node() {
 		return;
 	}
 	else {
-		cout << "Grabbed. Move it around" << endl;
+		cout << "Grabbed" << endl;
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
 		original_pos = selected->pos;

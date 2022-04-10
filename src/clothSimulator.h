@@ -133,8 +133,8 @@ private:
 
   // Screen attributes
 
-  double mouse_x;
-  double mouse_y;
+  float mouse_x;
+  float mouse_y;
 
   int screen_w;
   int screen_h;
@@ -152,13 +152,13 @@ private:
   void select_child();
 
 	// Store scaling stuff
-  double scale_mouse_x = 0;
-  double scale_mouse_y = 0;
-  double original_rad = 0;
+  float scale_mouse_x = 0;
+  float scale_mouse_y = 0;
+  float original_rad = 0;
 
   // Stopre grabbing stuff
-  double grab_mouse_x = 0;
-  double grab_mouse_y = 0;
+  float grab_mouse_x = 0;
+  float grab_mouse_y = 0;
   Vector3D original_pos;
 
 
