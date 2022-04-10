@@ -21,14 +21,9 @@ Here are all the keybinds:
 | `x` | Delete the selected sphere |
 
 Additionally, 
-
-Left click and drag to rotate camera
-
-Right click and drag to translate camera
-
-Left click to apply changes (extrude, scale, grab)
-
-Right click to reset changes, when in extrude, grab, or scale mode.
-
+1. Left click and drag to rotate camera
+2. Right click and drag to translate camera
+3. Left click to apply changes (extrude, scale, grab)
+4. Right click to reset changes, when in extrude, grab, or scale mode.
 
 NOTE: The `1`, `3`, `7`, `e`, `g`, `s`, `x` keybinds are the default ones used in Blender for those purposes. They are kept the same for consistency.   
