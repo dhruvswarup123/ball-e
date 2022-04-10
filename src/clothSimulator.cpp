@@ -591,6 +591,7 @@ void ClothSimulator::delete_node() {
 	}
 	else {
 		//delete it  and set selected to NULL
+		cout << "Deleting" << endl;
 	}
 }
 
@@ -599,6 +600,9 @@ void ClothSimulator::extrude_node() {
 		return;
 	}
 	else if (gui_state == GUI_STATES::IDLE){
+		cout << "Created a new node" << endl;
+		cout << "Move it around" << endl;
+
 		// Create a new node
 		// set new node as selected
 		// set state to grab 
@@ -610,6 +614,9 @@ void ClothSimulator::grab_node() {
 		return;
 	}
 	else {
+		cout << "Grabbed. Move it around" << endl;
+		gui_state = GUI_STATES::GRABBING;
+
 		// do grab stuff
 		// set state to grabbing
 		// remove grab state in the callback func
@@ -620,6 +627,8 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	// If grabbing, but click again
 	if (gui_state == GUI_STATES::GRABBING) {
 		gui_state = GUI_STATES::IDLE;
+		cout << "Done grabbing. Cant move it anymore" << endl;
+
 		return;
 	}
 
