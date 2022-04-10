@@ -193,8 +193,6 @@ void ClothSimulator::loadCollisionObjects(vector<CollisionObject*>* objects) { t
  * Initializes the cloth simulation and spawns a new thread to separate
  * rendering from simulation.
  */
-BMesh* bmesh;
-
 void ClothSimulator::init() {
 	bmesh = new BMesh();
 
@@ -241,6 +239,7 @@ void ClothSimulator::init() {
 	camera.configure(camera_info, screen_w, screen_h);
 	canonicalCamera.configure(camera_info, screen_w, screen_h);
 }
+
 
 bool ClothSimulator::isAlive() { return is_alive; }
 
@@ -495,6 +494,7 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
 			left_down = true;
+			// Find point here.
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = true;
@@ -564,10 +564,136 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 				is_paused = true;
 			}
 			break;
+		case 'x':
+		case 'X':
+			// Delete the currently selected sphere
+			delete_node();
+			break;
+		case 'e':
+		case 'E':
+			// Extrude the currently sel sphere
+			extrude_node();
+			break;
+		case 'g':
+		case 'G':
+			// Extrude the currently sel sphere
+			grab_node();
+			break;
 		}
 	}
 
 	return true;
+}
+
+void ClothSimulator::delete_node() {
+	if (selected == NULL) {
+		return;
+	}
+	else {
+		//delete it  and set selected to NULL
+	}
+}
+
+void ClothSimulator::extrude_node() {
+	if (selected == NULL) {
+		return;
+	}
+	else if (gui_state == GUI_STATES::IDLE){
+		// Create a new node
+		// set new node as selected
+		// set state to grab 
+	}
+}
+
+void ClothSimulator::grab_node() {
+	if (selected == NULL) {
+		return;
+	}
+	else {
+		// do grab stuff
+		// set state to grabbing
+		// remove grab state in the callback func
+	}
+}
+
+void ClothSimulator::sceneIntersect(double x, double y) {
+	// If grabbing, but click again
+	if (gui_state == GUI_STATES::GRABBING) {
+		gui_state = GUI_STATES::IDLE;
+		return;
+	}
+
+	// Go over each sphere, and check if it intersects
+	bool found = false;
+	for (SkeletalNode * i : *(bmesh->all_nodes_vector)) {
+
+	}
+
+	// If we found an intersecting sphere
+	if (found) {
+		if (gui_state == GUI_STATES::IDLE) {
+			// select the curr one
+		}
+	}
+	else {
+		if (gui_state == GUI_STATES::IDLE) {
+			// deselect the curr one
+		}
+	}
+	
+}
+
+
+bool ClothSimulator::sphereSelectionTest(double x, double y, Vector4f center, double radius, float & w) {
+	/*
+	* Algorithm for computing from model space coordinates X to
+	* screen space with a depth value using opengl.
+	*
+	* Start with Vector X.
+	* 1. Get P = opengl projection Matrix.
+	*    Get M = opengl Model transform matrix.
+	*
+	* 2. Convert into our personal 462 library matrix representation.
+	*
+	* 3. Model to world space: X = M*X;
+	*
+	* 4. World to homogenous space X = P*X;
+	*
+	* 5. Projection divide.(homogenesous space to 3D unit cube space.)
+	*
+	*  - X.x = X.x/X.w;
+	*  - X.y = X.y/X.w;
+	*  - X.z = X.z/X.w;
+	*
+	* x, y, and z are now in the range [-1, 1].
+	*
+	* 6. Unit cube space to screen space.
+	* screen_x = viewport.x + viewport.width  * (X.x +1)/2;
+	* screen_y = viewport.y + viewport.height * (X.y +1)/2;
+	*
+	* In our case, the input screen coordinates are already in
+	* window space, so we can omit the viewport offset values.
+	*
+	* 7. Note that opengl coordinate shceme is from lower left corner.
+	*/
+
+
+	Matrix4f model;
+	model.setIdentity();
+
+	Matrix4f view = getViewMatrix();
+	Matrix4f projection = getProjectionMatrix();
+
+	Matrix4f viewProjection = projection * view;
+
+	center = projection * model * center;
+	
+	double sx = screen_w * (center[0] + 1) / 2;
+	double sy = screen_h * (center[1] + 1) / 2;
+
+	if (pow(sx - x, 2) + pow(sy - y, 2) <= radius * radius) {
+		return true;
+	}
 }
 
 bool ClothSimulator::dropCallbackEvent(int count, const char** filenames) {

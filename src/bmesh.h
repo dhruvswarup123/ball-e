@@ -23,6 +23,9 @@ public:
 	// Radius of the ball
 	float radius;
 
+	// w coordiante
+	float w = 0; // TODO HOW TO INIT
+
 	// World Coordinate position of the ball
 	Vector3D pos;
 
@@ -36,11 +39,8 @@ public:
 // Contains the tree and other functions that access the tree
 struct BMesh {
 public:
-	BMesh(SkeletalNode* skeletalnodes) : skeletalnodes(skeletalnodes) {
-	};
-
 	BMesh() {
-		skeletalnodes = new SkeletalNode(Vector3D(0, 0, 0), 0.01);
+		root = new SkeletalNode(Vector3D(0, 0, 0), 0.01);
 
 		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.01);
 		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.1);
@@ -50,14 +50,23 @@ public:
 		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.1);
 
 
-		skeletalnodes->children->push_back(chest);
-		skeletalnodes->children->push_back(footL);
-		skeletalnodes->children->push_back(footR);
+		root->children->push_back(chest);
+		root->children->push_back(footL);
+		root->children->push_back(footR);
 
 		chest->children->push_back(arml);
 		chest->children->push_back(armr);
 		chest->children->push_back(head);
 
+
+		all_nodes_vector = new vector<SkeletalNode *>;
+		all_nodes_vector->push_back(root);
+		all_nodes_vector->push_back(chest);
+		all_nodes_vector->push_back(arml);
+		all_nodes_vector->push_back(armr);
+		all_nodes_vector->push_back(head);
+		all_nodes_vector->push_back(footL);
+		all_nodes_vector->push_back(footR);
 	};
 
 	~BMesh() {};
@@ -70,9 +79,10 @@ public:
 
 	// Draw the spheres using the shader
 	void drawSpheres(GLShader& shader);
+	vector<SkeletalNode *> * all_nodes_vector;
 
 private: 
-	SkeletalNode* skeletalnodes;
+	SkeletalNode* root;
 
 	// Temp counter used for the helpers
 	int si = 0;

@@ -7,11 +7,15 @@
 #include "camera.h"
 #include "cloth.h"
 #include "collision/collisionObject.h"
+#include "bmesh.h"
 
 using namespace nanogui;
 
 struct UserShader;
 enum ShaderTypeHint { WIREFRAME = 0, NORMALS = 1, PHONG = 2 };
+
+
+enum GUI_STATES { IDLE, GRABBING };
 
 class ClothSimulator {
 public:
@@ -49,7 +53,7 @@ private:
   std::string m_project_root;
 
   // Camera methods
-
+  void resetCamera_xy();
   virtual void resetCamera();
   virtual Matrix4f getProjectionMatrix();
   virtual Matrix4f getViewMatrix();
@@ -65,6 +69,8 @@ private:
   Cloth *cloth;
   ClothParameters *cp;
   vector<CollisionObject *> *collision_objects;
+
+  BMesh* bmesh;
 
   // OpenGL attributes
 
@@ -108,6 +114,8 @@ private:
   void mouseLeftDragged(double x, double y);
   void mouseRightDragged(double x, double y);
   void mouseMoved(double x, double y);
+  void sceneIntersect(double x, double y);
+  bool sphereSelectionTest(double x, double y, Vector4f center, double radius, float& w);
 
   // Mouse flags
 
@@ -132,6 +140,12 @@ private:
   int screen_h;
 
   bool is_alive = true;
+
+  SkeletalNode * selected = NULL;
+  GUI_STATES gui_state = GUI_STATES::IDLE;
+  void delete_node();
+  void extrude_node();
+  void grab_node();
 
   Vector2i default_window_size = Vector2i(1024, 800);
 };

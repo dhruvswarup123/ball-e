@@ -29,9 +29,7 @@ void BMesh::fpHelper(MatrixXf& positions, SkeletalNode* root) {
 void BMesh::fillPositions(MatrixXf& positions) {
 	si = 0;
 
-	fpHelper(positions, skeletalnodes);
-
-
+	fpHelper(positions, root);
 }
 
 int BMesh::gnlHelper(SkeletalNode* root) {
@@ -48,7 +46,7 @@ int BMesh::gnlHelper(SkeletalNode* root) {
 }
 
 int BMesh::getNumLinks() {
-	return gnlHelper(skeletalnodes);
+	return gnlHelper(root);
 }
 
 void BMesh::dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root) {
@@ -66,5 +64,5 @@ void BMesh::dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root)
 
 void BMesh::drawSpheres(GLShader& shader) {
 	Misc::SphereMesh msm;
-	dsHelper(shader, msm, skeletalnodes);
+	dsHelper(shader, msm, root);
 }
