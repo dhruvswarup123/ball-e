@@ -53,8 +53,9 @@ private:
   std::string m_project_root;
 
   // Camera methods
-  void resetCamera_xy();
   virtual void resetCamera();
+  void resetCamera_yz();
+  void resetCamera_xy();
   virtual Matrix4f getProjectionMatrix();
   virtual Matrix4f getViewMatrix();
 
@@ -100,6 +101,8 @@ private:
 
   CGL::Camera camera;
   CGL::Camera canonicalCamera;
+  CGL::Camera canonicalCamera_xy;
+  CGL::Camera canonicalCamera_yz;
 
   double view_distance;
   double canonical_view_distance;

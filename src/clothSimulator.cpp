@@ -233,6 +233,14 @@ void ClothSimulator::init() {
 	canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
 		view_distance, min_view_distance, max_view_distance);
 
+	canonicalCamera_xy.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
+		view_distance, min_view_distance, max_view_distance);
+	canonicalCamera_xy.rotate_by(-PI / 2, 0);
+
+	canonicalCamera_yz.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
+		view_distance, min_view_distance, max_view_distance);
+	canonicalCamera_yz.rotate_by(0, -PI/2);
+
 	screen_w = default_window_size(0);
 	screen_h = default_window_size(1);
 
@@ -426,6 +434,8 @@ void ClothSimulator::drawPhong(GLShader& shader) {
 // ----------------------------------------------------------------------------
 
 void ClothSimulator::resetCamera() { camera.copy_placement(canonicalCamera); }
+void ClothSimulator::resetCamera_xy() { camera.copy_placement(canonicalCamera_xy); }
+void ClothSimulator::resetCamera_yz() { camera.copy_placement(canonicalCamera_yz); }
 
 Matrix4f ClothSimulator::getProjectionMatrix() {
 	Matrix4f perspective;
@@ -615,7 +625,14 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			is_alive = false;
 			break;
 		case ' ':
+		case '1': // Front view
 			resetCamera();
+			break;
+		case '3': // Side view
+			resetCamera_yz();
+			break;
+		case '7': // top view
+			resetCamera_xy();
 			break;
 		case 'x':
 		case 'X':
