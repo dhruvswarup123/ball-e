@@ -775,9 +775,34 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	// Go over each sphere, and check if it intersects
 	bool found = false;
 
-	/*for (SkeletalNode * node : *(bmesh->all_nodes_vector)) {
-		found = 
-	}*/
+	for (SkeletalNode * node : *(bmesh->all_nodes_vector)) {
+		Matrix4f view = getViewMatrix();
+		Matrix4f projection = getProjectionMatrix();
+		Matrix4f viewProjection = projection * view; // World to screen
+
+		// Get the original position of the sphere
+		Vector4f node_worldpos(node->pos.x, node->pos.y, node->pos.z, 1.);
+		Vector4f node_clippos = viewProjection * node_worldpos;
+
+		// Convert to NDC 
+		node_clippos /= node_clippos[3];
+
+		Vector3D screenCoords;
+		screenCoords.x = (node_clippos[0] + 1.) * screen_w * 0.5;
+		screenCoords.y = (1. - node_clippos[1]) * screen_h * 0.5;
+
+		if (pow(screenCoords.x - x, 2) + pow(screenCoords.y - y, 2) <= 100) {
+			if (selected != NULL) {
+				selected->selected = false;
+			}
+
+			cout << "selecting" << endl;
+			selected = node; // remove this
+			selected->selected = true;
+		}
+	}
+
+	return;
 
 	// If we found an intersecting sphere
 	if (x < 50 && y < 50) {
