@@ -24,3 +24,5 @@ Left click and drag to rotate camera
 Right click and drag to translate camera
 
 Left click to apply changes (extrude, scale, grab)
+
+Right click to reset changes, when in extrude, grab, or scale mode.
