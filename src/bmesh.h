@@ -28,6 +28,7 @@ public:
 
 	// World Coordinate position of the ball
 	Vector3D pos;
+	bool selected = false;
 
 	// The children of the ball
 	// Leaf node == end node -> connects to only one bone
@@ -40,15 +41,14 @@ public:
 struct BMesh {
 public:
 	BMesh() {
-		root = new SkeletalNode(Vector3D(0, 0, 0), 0.01);
+		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05);
 
-		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.01);
-		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.1);
-		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0), 0.1);
-		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0), 0.2);
-		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0), 0.1);
-		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.1);
-
+		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.05);
+		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.05);
+		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0), 0.05);
+		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0), 0.05);
+		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0), 0.05);
+		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.05);
 
 		root->children->push_back(chest);
 		root->children->push_back(footL);
@@ -81,8 +81,8 @@ public:
 	void drawSpheres(GLShader& shader);
 	vector<SkeletalNode *> * all_nodes_vector;
 
-private: 
 	SkeletalNode* root;
+private:
 
 	// Temp counter used for the helpers
 	int si = 0;

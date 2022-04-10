@@ -52,7 +52,12 @@ int BMesh::getNumLinks() {
 void BMesh::dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root) {
 	if (root == NULL) return;
 
-	msm.draw_sphere(shader, root->pos, root->radius);
+	if (root->selected) {
+		msm.draw_sphere(shader, root->pos, root->radius * 2);
+	}
+	else {
+		msm.draw_sphere(shader, root->pos, root->radius);
+	}
 
 	for (int i = 0; i < root->children->size(); i++) {
 		SkeletalNode* child = root->children->at(i);
