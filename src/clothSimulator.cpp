@@ -833,6 +833,7 @@ bool ClothSimulator::sphereSelectionTest(double x, double y, Vector4f center, do
 	if (pow(sx - x, 2) + pow(sy - y, 2) <= radius * radius) {
 		return true;
 	}
+	return false;
 }
 
 bool ClothSimulator::dropCallbackEvent(int count, const char** filenames) {
