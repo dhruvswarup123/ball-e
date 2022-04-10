@@ -482,6 +482,9 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 
 		// Nothing was clicked
 		// check and perform grabbing if needed
+		if (gui_state == GUI_STATES::SCALING) {
+			selected->radius = sqrt(pow(scale_mouse_x - mouse_x, 2) + pow(scale_mouse_y - mouse_y, 2)) * 0.001;
+		}
 	}
 
 	mouse_x = x;
@@ -598,8 +601,10 @@ void ClothSimulator::scale_node() {
 	if (selected == NULL) {
 		return;
 	}
-	else {
+	else if (gui_state == GUI_STATES::IDLE) {
 		gui_state = GUI_STATES::SCALING;
+		scale_mouse_x = mouse_x;
+		scale_mouse_y = mouse_y;
 		cout << "Scaling" << endl;
 	}
 }
