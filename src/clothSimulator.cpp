@@ -773,6 +773,7 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	}
 
 	// Go over each sphere, and check if it intersects
+	// TODO: NO support for layered spheres, NO support for random radius
 	bool found = false;
 
 	for (SkeletalNode * node : *(bmesh->all_nodes_vector)) {
