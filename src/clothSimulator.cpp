@@ -497,7 +497,7 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
 			// Find point here.
-
+			sceneIntersect(mouse_x, mouse_y);
 			left_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
@@ -596,6 +596,7 @@ void ClothSimulator::delete_node() {
 	else {
 		//delete it  and set selected to NULL
 		cout << "Deleting" << endl;
+		selected = NULL;
 	}
 }
 
@@ -605,6 +606,8 @@ void ClothSimulator::extrude_node() {
 	}
 	else if (gui_state == GUI_STATES::IDLE){
 		cout << "Created a new node" << endl;
+
+		gui_state = GUI_STATES::GRABBING;
 		cout << "Move it around" << endl;
 
 		// Create a new node
@@ -638,19 +641,25 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 
 	// Go over each sphere, and check if it intersects
 	bool found = false;
-	for (SkeletalNode * i : *(bmesh->all_nodes_vector)) {
 
-	}
+	/*for (SkeletalNode * i : *(bmesh->all_nodes_vector)) {
+
+	}*/
 
 	// If we found an intersecting sphere
-	if (found) {
+	if (x < 50 && y < 50) {
 		if (gui_state == GUI_STATES::IDLE) {
 			// select the curr one
+			cout << "selecting" << endl;
+			selected = (SkeletalNode*)&found; // remove this
 		}
 	}
 	else {
-		if (gui_state == GUI_STATES::IDLE) {
+		if ((gui_state == GUI_STATES::IDLE) && (selected != NULL)) {
 			// deselect the curr one
+			selected = NULL; // remove this
+			cout << "deselecting" << endl;
+
 		}
 	}
 	
