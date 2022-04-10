@@ -576,24 +576,8 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case GLFW_KEY_ESCAPE:
 			is_alive = false;
 			break;
-		case 'r':
-		case 'R':
-			cloth->reset();
-			break;
 		case ' ':
 			resetCamera();
-			break;
-		case 'p':
-		case 'P':
-			is_paused = !is_paused;
-			break;
-		case 'n':
-		case 'N':
-			if (is_paused) {
-				is_paused = false;
-				drawContents();
-				is_paused = true;
-			}
 			break;
 		case 'x':
 		case 'X':
@@ -615,10 +599,77 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			// Extrude the currently sel sphere
 			scale_node();
 			break;
+		case 'N':
+		case 'n':
+			select_next();
+			break;
+		case 'P':
+		case 'p':
+			select_parent();
+			break;
+		case 'C':
+		case 'c':
+			select_child();
+			break;
 		}
+
+
 	}
 
 	return true;
+}
+
+void ClothSimulator::select_next() {
+	if (selected == NULL) {
+		selected = bmesh->root;
+		selected->selected = true;
+	}
+	else if (selected == bmesh->root) {
+		selected->selected = false;
+		selected = (*bmesh->root->children)[0];
+		selected->selected = true;
+	}
+	else {
+		selected->selected = false;
+
+		int index = rand() % selected->parent->children->size();
+		if ((*selected->parent->children)[index] == selected) {
+			index = (index + 1) % selected->parent->children->size();
+		}
+
+		selected = (*selected->parent->children)[index];
+		selected->selected = true;
+	}
+}
+
+void ClothSimulator::select_parent() {
+	if (selected == NULL) {
+		selected = bmesh->root;
+		selected->selected = true;
+	}
+	else if (selected == bmesh->root) {
+		return;
+	}
+	else {
+		selected->selected = false;
+
+		selected = selected->parent;
+		selected->selected = true;
+	}
+}
+
+void ClothSimulator::select_child() {
+	if (selected == NULL) {
+		selected = bmesh->root;
+		selected->selected = true;
+	}
+	else {
+		if (selected->children->size() == 0) return; // No children
+
+		selected->selected = false;
+		selected = (*selected->children)[0];
+		selected->selected = true;
+	}
 }
 
 void ClothSimulator::scale_node() {

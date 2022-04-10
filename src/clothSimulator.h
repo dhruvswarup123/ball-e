@@ -147,6 +147,9 @@ private:
   void extrude_node();
   void grab_node();
   void scale_node();
+  void select_next();
+  void select_parent();
+  void select_child();
 
   int scale_mouse_x = 0;
   int scale_mouse_y = 0;
