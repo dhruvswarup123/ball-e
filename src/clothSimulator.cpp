@@ -479,6 +479,9 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 	}
 	else if (!left_down && !middle_down && !right_down) {
 		mouseMoved(x, y);
+
+		// Nothing was clicked
+		// check and perform grabbing if needed
 	}
 
 	mouse_x = x;
@@ -493,8 +496,9 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 	case GLFW_PRESS:
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
-			left_down = true;
 			// Find point here.
+
+			left_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = true;
