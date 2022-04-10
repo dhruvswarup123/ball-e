@@ -52,12 +52,14 @@ int BMesh::getNumLinks() {
 void BMesh::dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root) {
 	if (root == NULL) return;
 
+
+	nanogui::Color color(0.0f, 1.0f, 1.0f, 1.0f);
+
 	if (root->selected) {
-		msm.draw_sphere(shader, root->pos, root->radius * 2);
+		color = nanogui::Color(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	else {
-		msm.draw_sphere(shader, root->pos, root->radius);
-	}
+
+	msm.draw_sphere(shader, root->pos, root->radius, color);
 
 	for (int i = 0; i < root->children->size(); i++) {
 		SkeletalNode* child = root->children->at(i);

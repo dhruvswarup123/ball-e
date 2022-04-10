@@ -150,6 +150,7 @@ private:
 
   int scale_mouse_x = 0;
   int scale_mouse_y = 0;
+  double original_rad = 0;
 
   Vector2i default_window_size = Vector2i(1024, 800);
 };

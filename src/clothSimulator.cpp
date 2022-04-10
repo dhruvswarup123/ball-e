@@ -273,9 +273,16 @@ void ClothSimulator::drawContents() {
 
 	shader.setUniform("u_model", model);
 	shader.setUniform("u_view_projection", viewProjection);
+	Vector3D cam_pos; 
 
 	switch (active_shader.type_hint) {
 	case WIREFRAME:
+		color[0] = 0.;
+		cam_pos = camera.position();
+		shader.setUniform("u_cam_pos", Vector3f(cam_pos.x, cam_pos.y, cam_pos.z), false);
+		shader.setUniform("u_light_pos", Vector3f(0.5, 2, 2), false);
+		shader.setUniform("u_light_intensity", Vector3f(10, 10, 10), false);
+
 		shader.setUniform("u_color", color, false);
 		drawWireframe(shader);
 		break;
@@ -285,7 +292,7 @@ void ClothSimulator::drawContents() {
 	case PHONG:
 
 		// Others
-		Vector3D cam_pos = camera.position();
+		cam_pos = camera.position();
 		shader.setUniform("u_color", color, false);
 		shader.setUniform("u_cam_pos", Vector3f(cam_pos.x, cam_pos.y, cam_pos.z), false);
 		shader.setUniform("u_light_pos", Vector3f(0.5, 2, 2), false);
@@ -317,10 +324,18 @@ void ClothSimulator::drawWireframe(GLShader& shader) {
 	int numlinks = bmesh->getNumLinks();
 
 	MatrixXf positions(4, numlinks * 2);
+	MatrixXf normals(4, numlinks * 2);
+
+	for (int i = 0; i < numlinks; i++) {
+		normals.col(i * 2) << 0., 0., 0., 0.0;
+		normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
+	}
 
 	bmesh->fillPositions(positions);
 
 	shader.uploadAttrib("in_position", positions, false);
+	shader.uploadAttrib("in_normal", normals, false);
+
 	shader.drawArray(GL_LINES, 0, numlinks * 2);
 
 	bmesh->drawSpheres(shader);
@@ -483,7 +498,16 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 		// Nothing was clicked
 		// check and perform grabbing if needed
 		if (gui_state == GUI_STATES::SCALING) {
-			selected->radius = sqrt(pow(scale_mouse_x - mouse_x, 2) + pow(scale_mouse_y - mouse_y, 2)) * 0.001;
+
+			double scaleval = sqrt(pow(scale_mouse_x - mouse_x, 2) + pow(scale_mouse_y - mouse_y, 2)) * 0.0015;
+
+
+			if (mouse_x > scale_mouse_x) { // Scale up
+				selected->radius = original_rad + scaleval;
+			}
+			else {
+				selected->radius = abs(original_rad - scaleval);
+			}
 		}
 	}
 
@@ -605,6 +629,7 @@ void ClothSimulator::scale_node() {
 		gui_state = GUI_STATES::SCALING;
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
+		original_rad = selected->radius;
 		cout << "Scaling" << endl;
 	}
 }

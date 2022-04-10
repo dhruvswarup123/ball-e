@@ -141,12 +141,16 @@ void SphereMesh::build_data() {
   }
 }
 
-void SphereMesh::draw_sphere(GLShader &shader, const Vector3D &p, double r) {
+void SphereMesh::draw_sphere(GLShader &shader, const Vector3D &p, double r, nanogui::Color color) {
 
   Matrix4f model;
   model << r, 0, 0, p.x, 0, r, 0, p.y, 0, 0, r, p.z, 0, 0, 0, 1;
 
   shader.setUniform("u_model", model);
+  shader.setUniform("u_color", color);
+  
+
+  //shader.setUniform("u_color", model);
 
 
   shader.uploadAttrib("in_position", positions);
