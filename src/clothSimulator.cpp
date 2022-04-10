@@ -499,15 +499,45 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 		// check and perform grabbing if needed
 		if (gui_state == GUI_STATES::SCALING) {
 
-			double scaleval = sqrt(pow(scale_mouse_x - mouse_x, 2) + pow(scale_mouse_y - mouse_y, 2)) * 0.0015;
-
+			double scaleval = sqrt(pow(scale_mouse_x - x, 2) + pow(scale_mouse_y - y, 2)) * 0.002;
 
 			if (mouse_x > scale_mouse_x) { // Scale up
 				selected->radius = original_rad + scaleval;
 			}
 			else {
-				selected->radius = abs(original_rad - scaleval);
+				if (original_rad - scaleval > 0.01) {
+					selected->radius = original_rad - scaleval;
+				}
+				else {
+					selected->radius = 0.01;
+				}
+				//selected->radius = abs(original_rad - scaleval);
 			}
+		}
+		else if (gui_state == GUI_STATES::GRABBING) {
+			// First change the point to camera coordanates
+			Vector3D campos_vec3d = camera.position();
+
+			Vector4f sphere_pos_world(selected->pos.x, selected->pos.y, selected->pos.z, 1.);
+			Vector4f originalpos_world( original_pos.x, original_pos.y, original_pos.z, 1. );
+			Vector4f campos( campos_vec3d.x, campos_vec3d.y, campos_vec3d.z, 1. );
+			Vector4f movebyvec( (mouse_x - grab_mouse_x)* 0.001, -(mouse_y - grab_mouse_y) * 0.001, 0, 0 );
+
+
+			Matrix4f c2w = getViewMatrix();
+
+			// campoint = w2c * (worldpoint - campos)
+			Vector4f campoint = c2w.inverse() * (sphere_pos_world - campos);
+
+			// Add the xy to the xy
+			campoint = originalpos_world + movebyvec;
+
+			// Cam to World
+			//worldpoint = c2w * campoint + campos
+			Vector4f new_sphere_pos_world = c2w * campoint + campos;
+			Vector3D sphere_pos_world_v3d( new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2] );
+			selected->pos = sphere_pos_world_v3d;
+
 		}
 	}
 
@@ -554,7 +584,10 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 	return false;
 }
 
-void ClothSimulator::mouseMoved(double x, double y) { y = screen_h - y; }
+void ClothSimulator::mouseMoved(double x, double y) { 
+	y = screen_h - y; 
+
+}
 
 void ClothSimulator::mouseLeftDragged(double x, double y) {
 	float dx = x - mouse_x;
@@ -677,10 +710,11 @@ void ClothSimulator::scale_node() {
 		return;
 	}
 	else if (gui_state == GUI_STATES::IDLE) {
-		gui_state = GUI_STATES::SCALING;
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
 		original_rad = selected->radius;
+		gui_state = GUI_STATES::SCALING;
+
 		cout << "Scaling" << endl;
 	}
 }
@@ -720,6 +754,10 @@ void ClothSimulator::grab_node() {
 	}
 	else {
 		cout << "Grabbed. Move it around" << endl;
+		grab_mouse_x = mouse_x;
+		grab_mouse_y = mouse_y;
+		original_pos = selected->pos;
+
 		gui_state = GUI_STATES::GRABBING;
 
 		// do grab stuff
@@ -740,8 +778,8 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	// Go over each sphere, and check if it intersects
 	bool found = false;
 
-	/*for (SkeletalNode * i : *(bmesh->all_nodes_vector)) {
-
+	/*for (SkeletalNode * node : *(bmesh->all_nodes_vector)) {
+		found = 
 	}*/
 
 	// If we found an intersecting sphere
@@ -783,7 +821,7 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 }
 
 
-bool ClothSimulator::sphereSelectionTest(double x, double y, Vector4f center, double radius, float & w) {
+bool ClothSimulator::sphereSelectionTest(double x, double y, Vector3D center, double radius, float & w) {
 	/*
 	* Algorithm for computing from model space coordinates X to
 	* screen space with a depth value using opengl.
@@ -825,7 +863,7 @@ bool ClothSimulator::sphereSelectionTest(double x, double y, Vector4f center, do
 
 	Matrix4f viewProjection = projection * view;
 
-	center = projection * model * center;
+	//center = projection * model * center;
 	
 	double sx = screen_w * (center[0] + 1) / 2;
 	double sy = screen_h * (center[1] + 1) / 2;

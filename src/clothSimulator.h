@@ -115,7 +115,7 @@ private:
   void mouseRightDragged(double x, double y);
   void mouseMoved(double x, double y);
   void sceneIntersect(double x, double y);
-  bool sphereSelectionTest(double x, double y, Vector4f center, double radius, float& w);
+  bool sphereSelectionTest(double x, double y, Vector3D center, double radius, float& w);
 
   // Mouse flags
 
@@ -133,8 +133,8 @@ private:
 
   // Screen attributes
 
-  int mouse_x;
-  int mouse_y;
+  double mouse_x;
+  double mouse_y;
 
   int screen_w;
   int screen_h;
@@ -151,9 +151,16 @@ private:
   void select_parent();
   void select_child();
 
-  int scale_mouse_x = 0;
-  int scale_mouse_y = 0;
+	// Store scaling stuff
+  double scale_mouse_x = 0;
+  double scale_mouse_y = 0;
   double original_rad = 0;
+
+  // Stopre grabbing stuff
+  double grab_mouse_x = 0;
+  double grab_mouse_y = 0;
+  Vector3D original_pos;
+
 
   Vector2i default_window_size = Vector2i(1024, 800);
 };
