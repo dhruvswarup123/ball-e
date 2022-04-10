@@ -667,8 +667,6 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			select_child();
 			break;
 		}
-
-
 	}
 
 	return true;
