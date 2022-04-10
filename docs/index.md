@@ -16,7 +16,7 @@ Here are all the keybinds:
 | `e` |  Extrude the current node |
 | `g` |  (grab) Move the selected node |
 | `n` |  Go to a sibling node |
-| `p` |  Go to a prent node |
+| `p` |  Go to a parent node |
 | `s` |  Scale the selected sphere |
 | `x` | Delete the selected sphere |
 
