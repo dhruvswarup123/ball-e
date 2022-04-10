@@ -13,12 +13,13 @@ using namespace CGL;
 // The struct for the tree itself
 struct SkeletalNode {
 public:
-	SkeletalNode(Vector3D pos, float radius) : pos(pos), radius(radius) {
+	SkeletalNode(Vector3D pos, float radius, SkeletalNode * parent) : pos(pos), radius(radius), parent(parent){
 		children = new vector<SkeletalNode*>;
 	};
 	~SkeletalNode() {
 
 	}
+	SkeletalNode* parent;
 
 	// Radius of the ball
 	float radius;
@@ -41,14 +42,14 @@ public:
 struct BMesh {
 public:
 	BMesh() {
-		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05);
+		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
 
-		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.05);
-		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.05);
-		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0), 0.05);
-		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0), 0.05);
-		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0), 0.05);
-		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.05);
+		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.05, root);
+		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.05, chest);
+		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0), 0.05, chest);
+		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0), 0.05, chest);
+		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0), 0.05, root);
+		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.05, root);
 
 		root->children->push_back(chest);
 		root->children->push_back(footL);
@@ -80,6 +81,7 @@ public:
 	// Draw the spheres using the shader
 	void drawSpheres(GLShader& shader);
 	vector<SkeletalNode *> * all_nodes_vector;
+	bool deleteNode(SkeletalNode* node);
 
 	SkeletalNode* root;
 private:

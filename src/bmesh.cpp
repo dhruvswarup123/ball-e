@@ -73,3 +73,53 @@ void BMesh::drawSpheres(GLShader& shader) {
 	Misc::SphereMesh msm;
 	dsHelper(shader, msm, root);
 }
+
+bool BMesh::deleteNode(SkeletalNode* node) {
+	if (node == root) {
+		cout << "WARNING: Cant delete root!" << endl;
+		return false;
+	}
+
+	// First remove the node from the master list
+	int i = 0;
+	for (SkeletalNode* temp : *all_nodes_vector) {
+		if (temp == node) {
+			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE 
+			all_nodes_vector->erase(all_nodes_vector->begin() + i);
+			break;
+		}
+		i += 1;
+	}
+
+	cout << "removed from master" << endl;
+
+	// First remove the node from the master list
+	SkeletalNode* parent = node->parent;
+
+	i = 0;
+	for (SkeletalNode* temp : *(parent->children) ) {
+		if (temp == node) {
+			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE 
+			parent->children->erase(parent->children->begin() + i);
+			break;
+		}
+		i += 1;
+	}
+
+	cout << "removed from parent's children" << endl;
+
+	for (SkeletalNode* temp : *(node->children)) {
+		parent->children->push_back(temp);
+		temp->parent = parent;
+	}
+
+	cout << "transferred children" << endl;
+
+
+	delete node;
+
+	cout << "deleted node" << endl;
+
+
+	return true;
+}

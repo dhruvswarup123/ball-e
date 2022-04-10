@@ -641,9 +641,9 @@ void ClothSimulator::delete_node() {
 	else {
 		//delete it  and set selected to NULL
 		cout << "Deleting" << endl;
-		selected = NULL;
-		bmesh->root->selected = false;
-
+		if (bmesh->deleteNode(selected)) {
+			selected = NULL;
+		}
 	}
 }
 
@@ -697,16 +697,32 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	if (x < 50 && y < 50) {
 		if (gui_state == GUI_STATES::IDLE) {
 			// select the curr one
+			if (selected != NULL) {
+				selected->selected = false;
+			}
+
 			cout << "selecting" << endl;
 			selected = bmesh->root; // remove this
-			bmesh->root->selected = true;
+			selected->selected = true;
+		}
+	}
+	else if (x < 100 && y < 100) {
+		if (gui_state == GUI_STATES::IDLE) {
+			if (bmesh->root->children->size() == 0) return;
+			// select the curr one
+			if (selected != NULL) {
+				selected->selected = false;
+			}
+			cout << "selecting" << endl;
+			selected = (*bmesh->root->children)[0]; // remove this
+			selected->selected = true;
 		}
 	}
 	else {
 		if ((gui_state == GUI_STATES::IDLE) && (selected != NULL)) {
 			// deselect the curr one
+			selected->selected = false;
 			selected = NULL; // remove this
-			bmesh->root->selected = false;
 
 			cout << "deselecting" << endl;
 
