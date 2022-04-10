@@ -583,10 +583,25 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			// Extrude the currently sel sphere
 			grab_node();
 			break;
+		case 's':
+		case 'S':
+			// Extrude the currently sel sphere
+			scale_node();
+			break;
 		}
 	}
 
 	return true;
+}
+
+void ClothSimulator::scale_node() {
+	if (selected == NULL) {
+		return;
+	}
+	else {
+		gui_state = GUI_STATES::SCALING;
+		cout << "Scaling" << endl;
+	}
 }
 
 void ClothSimulator::delete_node() {
@@ -634,7 +649,7 @@ void ClothSimulator::grab_node() {
 
 void ClothSimulator::sceneIntersect(double x, double y) {
 	// If grabbing, but click again
-	if (gui_state == GUI_STATES::GRABBING) {
+	if (gui_state == GUI_STATES::GRABBING || gui_state == GUI_STATES::SCALING) {
 		gui_state = GUI_STATES::IDLE;
 		cout << "Done grabbing. Cant move it anymore" << endl;
 

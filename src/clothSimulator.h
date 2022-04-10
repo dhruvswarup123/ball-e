@@ -15,7 +15,7 @@ struct UserShader;
 enum ShaderTypeHint { WIREFRAME = 0, NORMALS = 1, PHONG = 2 };
 
 
-enum GUI_STATES { IDLE, GRABBING };
+enum GUI_STATES { IDLE, GRABBING, SCALING };
 
 class ClothSimulator {
 public:
@@ -146,6 +146,10 @@ private:
   void delete_node();
   void extrude_node();
   void grab_node();
+  void scale_node();
+
+  int scale_mouse_x = 0;
+  int scale_mouse_y = 0;
 
   Vector2i default_window_size = Vector2i(1024, 800);
 };
