@@ -792,7 +792,7 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 		screenCoords.x = (node_clippos[0] + 1.) * screen_w * 0.5;
 		screenCoords.y = (1. - node_clippos[1]) * screen_h * 0.5;
 
-		if (pow(screenCoords.x - x, 2) + pow(screenCoords.y - y, 2) <= 100) {
+		if (pow(screenCoords.x - x, 2) + pow(screenCoords.y - y, 2) <= 400) {
 			if (selected != NULL) {
 				selected->selected = false;
 			}
