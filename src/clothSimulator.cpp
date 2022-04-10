@@ -519,9 +519,6 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y) {
 			Matrix4f projection = getProjectionMatrix();
 			Matrix4f viewProjection = projection * view; // World to screen
 
-			/*Vector4f sphere_worldpos(selected->pos.x, selected->pos.y, selected->pos.z, 1.);
-			Vector4f sphere_screenpos = viewProjection * sphere_worldpos;*/
-
 			// Get the original position of the sphere
 			Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
 
@@ -732,14 +729,19 @@ void ClothSimulator::extrude_node() {
 		return;
 	}
 	else if (gui_state == GUI_STATES::IDLE){
+		SkeletalNode* temp = new SkeletalNode(selected->pos, selected->radius, selected);
+		selected->children->push_back(temp);
+		bmesh->all_nodes_vector->push_back(temp);
+
 		cout << "Created a new node" << endl;
 
+		selected->selected = false;
+		selected = temp;
+		selected->selected = true;
+
+		grab_node();
 		gui_state = GUI_STATES::GRABBING;
 		cout << "Move it around" << endl;
-
-		// Create a new node
-		// set new node as selected
-		// set state to grab 
 	}
 }
 
