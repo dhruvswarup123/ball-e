@@ -33,7 +33,7 @@ void main() {
   float max_temp = max(0, dot(normalize(v_normal), light_vector));
 
   out_color = u_color * (vec4(u_light_intensity, 0) / r2) * max_temp;
-  
+   
   // (Placeholder code. You will want to replace it.)
   out_color.a = 1;
 }
