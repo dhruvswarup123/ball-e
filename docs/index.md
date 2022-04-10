@@ -1,37 +1,26 @@
 ## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/dhruvswarup123/ball-e/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+### Other links
+[Project Proposal](proposal.md)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-Find the project proposal [here](proposal.md)
-### Markdown
+### Using the GUI
+Here are all the keybinds:
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+| Key | Usage  |
+| --- | ---- | 
+| `c` |  Go to a child node |
+| `e` |  Extrude the current node |
+| `g` |  (grab) Move the selected node |
+| `n` |  Go to a sibling node |
+| `p` |  Go to a prent node |
+| `s` |  Scale the selected sphere |
+| `SPACE` | Reset the camera view  |
+| `x` | Delete the selected sphere |
 
-```markdown
-Syntax highlighted code block
+Additionally, 
 
-# Header 1
-## Header 2
-### Header 3
+Left click and drag to rotate camera
 
-- Bulleted
-- List
+Right click and drag to translate camera
 
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/dhruvswarup123/ball-e/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+Left click to apply changes (extrude, scale, grab)

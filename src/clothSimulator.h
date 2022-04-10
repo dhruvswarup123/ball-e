@@ -143,6 +143,8 @@ private:
 
   SkeletalNode * selected = NULL;
   GUI_STATES gui_state = GUI_STATES::IDLE;
+
+  void reset_grab_scale();
   void delete_node();
   void extrude_node();
   void grab_node();

@@ -553,6 +553,7 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 			middle_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
+			reset_grab_scale();
 			right_down = true;
 			break;
 		}
@@ -576,9 +577,21 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 	return false;
 }
 
+void ClothSimulator::reset_grab_scale(){
+	if (gui_state == GUI_STATES::GRABBING) {
+		selected->pos = original_pos;
+		cout << "Reset. Cant move it anymore" << endl;
+		gui_state = GUI_STATES::IDLE;	
+	}
+	else if (gui_state == GUI_STATES::SCALING) {
+		selected->radius = original_rad;
+		cout << "Reset. Cant scale it anymore" << endl;
+		gui_state = GUI_STATES::IDLE;
+	}
+}
+
 void ClothSimulator::mouseMoved(double x, double y) { 
 	y = screen_h - y; 
-
 }
 
 void ClothSimulator::mouseLeftDragged(double x, double y) {
@@ -768,7 +781,6 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	if (gui_state == GUI_STATES::GRABBING || gui_state == GUI_STATES::SCALING) {
 		gui_state = GUI_STATES::IDLE;
 		cout << "Done grabbing. Cant move it anymore" << endl;
-
 		return;
 	}
 
@@ -800,47 +812,15 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 			cout << "selecting" << endl;
 			selected = node; // remove this
 			selected->selected = true;
+			found = true;
+			break;
 		}
 	}
 
-	return;
-
-	// If we found an intersecting sphere
-	if (x < 50 && y < 50) {
-		if (gui_state == GUI_STATES::IDLE) {
-			// select the curr one
-			if (selected != NULL) {
-				selected->selected = false;
-			}
-
-			cout << "selecting" << endl;
-			selected = bmesh->root; // remove this
-			selected->selected = true;
-		}
+	if ((found == false) && (selected != NULL)) {
+		selected->selected = false;
+		selected = NULL;
 	}
-	else if (x < 100 && y < 100) {
-		if (gui_state == GUI_STATES::IDLE) {
-			if (bmesh->root->children->size() == 0) return;
-			// select the curr one
-			if (selected != NULL) {
-				selected->selected = false;
-			}
-			cout << "selecting" << endl;
-			selected = (*bmesh->root->children)[0]; // remove this
-			selected->selected = true;
-		}
-	}
-	else {
-		if ((gui_state == GUI_STATES::IDLE) && (selected != NULL)) {
-			// deselect the curr one
-			selected->selected = false;
-			selected = NULL; // remove this
-
-			cout << "deselecting" << endl;
-
-		}
-	}
-	
 }
 
 
