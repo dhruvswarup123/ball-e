@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages
+## Usage guide for ball-e
 
 ### Other links
 [Project Proposal](proposal.md)
