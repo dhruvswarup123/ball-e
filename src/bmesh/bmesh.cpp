@@ -99,7 +99,7 @@ bool BMesh::deleteNode(SkeletalNode* node) {
 	i = 0;
 	for (SkeletalNode* temp : *(parent->children) ) {
 		if (temp == node) {
-			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE 
+			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE . it removes the node entirely?
 			parent->children->erase(parent->children->begin() + i);
 			break;
 		}
@@ -122,4 +122,64 @@ bool BMesh::deleteNode(SkeletalNode* node) {
 
 
 	return true;
+}
+
+void BMesh::interpolate_spheres() {
+	interpspheres_helper(root, 6);
+}
+
+void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
+	if (root == NULL) {
+		return;
+	}
+
+	// Iterate through each child node
+	vector<SkeletalNode*> * original_children = new vector<SkeletalNode*>();
+	for (SkeletalNode* child : *(root->children)) {
+		original_children->push_back(child);
+	}
+
+	for (SkeletalNode* child : *(original_children)) {
+		// Remove the child from the current parents list of children
+		int i = 0;
+		for (SkeletalNode* temp : *(root->children)) {
+			if (temp == child) {
+				root->children->erase(root->children->begin() + i);
+				break;
+			}
+			i += 1;
+		}
+
+		// Between the parent and each child, create new spheres
+		SkeletalNode * prev = root;
+
+		// Distance or radius step size between the interpolated spheres
+		Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
+		float rad_step = (child->radius - root->radius) / (divs + 1.);
+
+		// For each sphere to be created
+		for (int i = 0; i < divs; i++) {
+			// Final pos, rad of the interp sphere
+			Vector3D new_position = root->pos + (i+1) * pos_step;
+			float new_radius = root->radius + (i+1) * rad_step;
+
+			// Create the interp sphere
+			SkeletalNode* interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+
+			// Add the interp sphere to the struct
+			prev->children->push_back(interp_sphere);
+			all_nodes_vector->push_back(interp_sphere);
+
+			// Update prev
+			prev = interp_sphere;
+		}
+
+		// New re add the child node back to the end of the joint
+		prev->children->push_back(child);
+		child->parent = prev;
+
+		// Now do the recursive call
+		interpspheres_helper(child, divs);
+	}
+
 }

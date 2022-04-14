@@ -45,12 +45,12 @@ public:
 	BMesh() {
 		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
 
-		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0), 0.05, root);
-		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0), 0.05, chest);
-		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0), 0.05, chest);
-		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0), 0.05, chest);
-		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0), 0.05, root);
-		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0), 0.05, root);
+		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0)/3., 0.02, root);
+		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.02, chest);
+		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.02, chest);
+		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.02, chest);
+		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.02, root);
+		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.02, root);
 
 		root->children->push_back(chest);
 		root->children->push_back(footL);
@@ -83,11 +83,17 @@ public:
 
 	// Draw the spheres using the shader
 	void drawSpheres(GLShader& shader);
-	vector<SkeletalNode *> * all_nodes_vector;
+
 	bool deleteNode(SkeletalNode* node);
 
 	SkeletalNode* root;
 	HalfedgeMesh* mesh;
+	vector<SkeletalNode*>* all_nodes_vector;
+
+	// Function for the main bmesh algorithm
+	// Interpolate the sphere
+	void interpolate_spheres();
+	void interpspheres_helper(SkeletalNode* root, int divs);
 
 private:
 
