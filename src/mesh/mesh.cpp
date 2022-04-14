@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "CGL/vector3D.h"
 
 using namespace std;
 
