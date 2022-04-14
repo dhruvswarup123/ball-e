@@ -125,7 +125,7 @@ bool BMesh::deleteNode(SkeletalNode* node) {
 }
 
 void BMesh::interpolate_spheres() {
-	interpspheres_helper(root, 2);
+	interpspheres_helper(root, 6);
 }
 
 void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
