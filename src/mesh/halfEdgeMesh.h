@@ -147,6 +147,7 @@
 #include <iostream>
 
 #include "CGL/CGL.h" // Standard 462 Vectors, etc.
+#include "CGL/Matrix4x4.h"
 
 #include "mesh.h"
 
