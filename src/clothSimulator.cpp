@@ -16,7 +16,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "misc/stb_image.h"
 
-#include "bmesh.h"
+#include "bmesh/bmesh.h"
 using namespace nanogui;
 using namespace std;
 

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <nanogui/nanogui.h>
-#include "misc/sphere_drawing.h"
+#include "../misc/sphere_drawing.h"
 #include "CGL/CGL.h"
 
 using namespace std;

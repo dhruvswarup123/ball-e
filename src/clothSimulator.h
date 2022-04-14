@@ -7,7 +7,7 @@
 #include "camera.h"
 #include "cloth.h"
 #include "collision/collisionObject.h"
-#include "bmesh.h"
+#include "bmesh/bmesh.h"
 
 using namespace nanogui;
 
