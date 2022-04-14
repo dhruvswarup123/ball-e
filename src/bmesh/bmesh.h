@@ -43,14 +43,14 @@ public:
 struct BMesh {
 public:
 	BMesh() {
-		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
+		root = new SkeletalNode(Vector3D(0, 0, 0), 0.01, NULL); // root has no parent
 
 		SkeletalNode* chest = new SkeletalNode(Vector3D(0, 1, 0)/3., 0.02, root);
-		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.02, chest);
-		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.02, chest);
-		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.02, chest);
-		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.02, root);
-		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.02, root);
+		SkeletalNode* arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
+		SkeletalNode* armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
+		SkeletalNode* head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
+		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
+		SkeletalNode* footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
 
 		root->children->push_back(chest);
 		root->children->push_back(footL);
@@ -95,6 +95,10 @@ public:
 	void interpolate_spheres();
 	void interpspheres_helper(SkeletalNode* root, int divs);
 
+	// Returns a vector (size variable) of arrays (size 2). 
+	// The arrays are of the form (start, end) and do not contain any joints including the ends
+	vector<array<SkeletalNode, 2>> * get_limbs();
+
 private:
 
 	// Temp counter used for the helpers
@@ -103,6 +107,7 @@ private:
 	void fpHelper(MatrixXf& positions, SkeletalNode* root);
 	void dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root);
 	int gnlHelper(SkeletalNode* root);
+	void get_limbs_helper(SkeletalNode* root, vector<array<SkeletalNode, 2>>* limbs);
 
 };
 #endif

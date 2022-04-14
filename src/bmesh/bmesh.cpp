@@ -181,5 +181,26 @@ void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
 		// Now do the recursive call
 		interpspheres_helper(child, divs);
 	}
+}
+
+vector<array<SkeletalNode, 2>>* BMesh::get_limbs() {
+	vector<array<SkeletalNode, 2>> * limbs = new vector<array<SkeletalNode, 2>>;
+
+	get_limbs_helper(root, limbs);
+
+	// Print out the limbs to check
+	cout << "Start limbs" << endl;
+	for (auto i : *limbs){
+		cout << "(" << i[0].radius << "->" << i[1].radius << ")" << endl;
+	}
+	cout << "End limbs" << endl;
+}
+
+void BMesh::get_limbs_helper(SkeletalNode * root, vector<array<SkeletalNode, 2>>* limbs) {
+	if (root == NULL) {
+		return;
+	}
+
+
 
 }
