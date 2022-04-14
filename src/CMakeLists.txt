@@ -68,7 +68,7 @@ link_directories(
 #-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
-add_executable(clothsim ${CLOTHSIM_VIEWER_SOURCE} "bmesh/bmesh.h" "bmesh/bmesh.cpp")
+add_executable(clothsim ${CLOTHSIM_VIEWER_SOURCE} "bmesh/bmesh.h" "bmesh/bmesh.cpp" "mesh/mesh.h" "mesh/scene.h" "mesh/scene.cpp" "mesh/mesh.cpp"    )
 
 target_link_libraries(clothsim
     CGL ${CGL_LIBRARIES}
