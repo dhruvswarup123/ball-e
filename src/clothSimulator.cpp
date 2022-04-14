@@ -910,6 +910,8 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height) {
 }
 
 void ClothSimulator::initGUI(Screen* screen) {
+
+	/*
 	Window* window;
 
 	window = new Window(screen, "Simulation");
@@ -1144,4 +1146,6 @@ void ClothSimulator::initGUI(Screen* screen) {
 		fb->setSpinnable(true);
 		fb->setCallback([this](float value) { this->m_height_scaling = value; });
 	}
+
+	*/
 }
