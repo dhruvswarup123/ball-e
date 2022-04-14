@@ -155,6 +155,7 @@ private:
   void select_next();
   void select_parent();
   void select_child();
+  void interpolate_spheres();
 
 	// Store scaling stuff
   float scale_mouse_x = 0;

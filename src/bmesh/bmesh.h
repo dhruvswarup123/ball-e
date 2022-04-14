@@ -83,11 +83,17 @@ public:
 
 	// Draw the spheres using the shader
 	void drawSpheres(GLShader& shader);
-	vector<SkeletalNode *> * all_nodes_vector;
+
 	bool deleteNode(SkeletalNode* node);
 
 	SkeletalNode* root;
 	HalfedgeMesh* mesh;
+	vector<SkeletalNode*>* all_nodes_vector;
+
+	// Function for the main bmesh algorithm
+	// Interpolate the sphere
+	void interpolate_spheres();
+	void interpspheres_helper(SkeletalNode* root, int divs);
 
 private:
 
