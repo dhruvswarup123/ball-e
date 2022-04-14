@@ -3,8 +3,9 @@
 
 #include <vector>
 #include <nanogui/nanogui.h>
-#include "misc/sphere_drawing.h"
+#include "../misc/sphere_drawing.h"
 #include "CGL/CGL.h"
+#include "../mesh/halfEdgeMesh.h"
 
 using namespace std;
 using namespace nanogui;
@@ -68,6 +69,8 @@ public:
 		all_nodes_vector->push_back(head);
 		all_nodes_vector->push_back(footL);
 		all_nodes_vector->push_back(footR);
+
+		mesh = new HalfedgeMesh();
 	};
 
 	~BMesh() {};
@@ -84,6 +87,8 @@ public:
 	bool deleteNode(SkeletalNode* node);
 
 	SkeletalNode* root;
+	HalfedgeMesh* mesh;
+
 private:
 
 	// Temp counter used for the helpers

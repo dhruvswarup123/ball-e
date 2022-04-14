@@ -16,7 +16,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "misc/stb_image.h"
 
-#include "bmesh.h"
+#include "bmesh/bmesh.h"
 using namespace nanogui;
 using namespace std;
 
@@ -347,6 +347,32 @@ void ClothSimulator::drawWireframe(GLShader& shader) {
 	shader.drawArray(GL_LINES, 0, numlinks * 2);
 
 	bmesh->drawSpheres(shader);
+
+	// Draw the mesh
+	MatrixXf mesh_positions(4, bmesh->mesh->nVertices());
+	MatrixXf mesh_normals(4, bmesh->mesh->nVertices());
+
+	int ind = 0;
+	for (HalfedgeIter i = bmesh->mesh->halfedgesBegin(); i != bmesh->mesh->halfedgesEnd(); i++) {
+		// TODO: Fix this for faces
+		Vector3D vertex1 = i->vertex()->position;
+		Vector3D vertex2 = i->next()->vertex()->position;
+
+		// Vector3D normal = i->face()->normal();
+
+		mesh_positions.col(ind * 2) << vertex1.x, vertex1.y, vertex1.z, 0.0;
+		mesh_positions.col(ind * 2 + 1) << vertex2.x, vertex2.y, vertex2.z, 0.0;
+
+		mesh_normals.col(ind * 2) << 0., 0., 0., 0.0;
+		mesh_normals.col(ind * 2 + 1) << 0., 0., 0., 0.0;
+
+		ind += 2;
+	}
+
+	shader.uploadAttrib("in_position", mesh_positions, false);
+	shader.uploadAttrib("in_normal", mesh_normals, false);
+
+	shader.drawArray(GL_LINES, 0, bmesh->mesh->nVertices());
 }
 
 void ClothSimulator::drawNormals(GLShader& shader) {
