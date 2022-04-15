@@ -94,10 +94,12 @@ public:
 	// Interpolate the sphere
 	void interpolate_spheres();
 	void interpspheres_helper(SkeletalNode* root, int divs);
+	void print_skeleton(); 
+	void _print_skeleton(SkeletalNode * root);
 
 	// Returns a vector (size variable) of arrays (size 2). 
 	// The arrays are of the form (start, end) and do not contain any joints including the ends
-	vector<array<SkeletalNode, 2>> * get_limbs();
+	void generate_bmesh();
 
 private:
 
@@ -107,7 +109,7 @@ private:
 	void fpHelper(MatrixXf& positions, SkeletalNode* root);
 	void dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root);
 	int gnlHelper(SkeletalNode* root);
-	void get_limbs_helper(SkeletalNode* root, vector<array<SkeletalNode, 2>>* limbs);
+	void _joint_iterate(SkeletalNode* root);
 
 };
 #endif

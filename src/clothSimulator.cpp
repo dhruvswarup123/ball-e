@@ -696,7 +696,12 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'i':
 			interpolate_spheres();
 			break;
+		case 'J':
+		case 'j':
+			bmesh->get_limbs();
+			break;
 		}
+
 	}
 
 	return true;

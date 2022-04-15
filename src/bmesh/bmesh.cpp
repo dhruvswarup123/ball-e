@@ -125,7 +125,7 @@ bool BMesh::deleteNode(SkeletalNode* node) {
 }
 
 void BMesh::interpolate_spheres() {
-	interpspheres_helper(root, 6);
+	interpspheres_helper(root, 2);
 }
 
 void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
@@ -183,24 +183,73 @@ void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
 	}
 }
 
-vector<array<SkeletalNode, 2>>* BMesh::get_limbs() {
-	vector<array<SkeletalNode, 2>> * limbs = new vector<array<SkeletalNode, 2>>;
+void BMesh::generate_bmesh() {
+	_joint_iterate(root);
 
-	get_limbs_helper(root, limbs);
+	//vector<array<SkeletalNode, 2>> * limbs = new vector<array<SkeletalNode, 2>>;
 
-	// Print out the limbs to check
-	cout << "Start limbs" << endl;
-	for (auto i : *limbs){
-		cout << "(" << i[0].radius << "->" << i[1].radius << ")" << endl;
-	}
-	cout << "End limbs" << endl;
+	//get_limbs_helper(root, limbs);
+
+	//// Print out the limbs to check
+	//cout << "Start limbs" << endl;
+	//for (auto i : *limbs){
+	//	cout << "(" << i[0].radius << "->" << i[1].radius << ")" << endl;
+	//}
+	//cout << "End limbs" << endl;
 }
 
-void BMesh::get_limbs_helper(SkeletalNode * root, vector<array<SkeletalNode, 2>>* limbs) {
+// Joint node helper
+// TODO: For the root, if the thing has 2 children, then it is not a joint
+void BMesh::_joint_iterate(SkeletalNode * root) {
 	if (root == NULL) {
-		return;
+		cout << "ERROR: joint node is null" << endl;
+		return; // This should not be possible cause im calling this func only on joint nodes
 	}
 
+	// Because this is a joint node, iterate through all children
+	for (SkeletalNode* child : *(root->children)) {
+		cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
+		cout << "Joint node: " << root->radius << endl;
 
+		if (child->children->size() == 0) { // Leaf node
+			// That child should only have one rectangle mesh (essentially 2D)
+			cout << "ERROR: joint->child->children->size() = 0" << endl;
+		}
+		else if (child->children->size() == 1) { // limb node
+			SkeletalNode* temp = child;
+			while (temp->children->size() == 1) {
+				// Slide
+				cout << "sliding: " << temp->radius << endl;
+				temp = (*temp->children)[0];
+			}
+
+			if (temp->children->size() == 0) { // reached the end
+				cout << "Reached the leaf " << temp->radius << endl;
+				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+			}
+			else { // The only other possible case is that we have reached a joint node
+				cout << "Reached a joint " << temp->radius << endl;
+				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+				_joint_iterate(temp);
+			}
+
+		}
+		else { // Joint node
+			cout << "ERROR: joint->child->children->size() > 1" << endl;
+			_joint_iterate(child);
+		}
+	}
+}
+
+void  BMesh::print_skeleton() {
+	_print_skeleton(root);
+}
+void  BMesh::_print_skeleton(SkeletalNode* root) {
+	if (!root) return;
+	cout << "At root: " << root->radius << endl;
+	for (SkeletalNode* child : *(root->children)) {
+		//cout << root->radius << "->" << child->radius << endl;
+		_print_skeleton(child);
+	}
 
 }
