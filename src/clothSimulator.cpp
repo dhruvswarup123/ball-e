@@ -650,7 +650,6 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case GLFW_KEY_ESCAPE:
 			is_alive = false;
 			break;
-		case ' ':
 		case '1': // Front view
 			resetCamera();
 			break;
@@ -696,9 +695,8 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'i':
 			interpolate_spheres();
 			break;
-		case 'J':
-		case 'j':
-			bmesh->get_limbs();
+		case ' ':
+			bmesh->generate_bmesh();
 			break;
 		}
 
