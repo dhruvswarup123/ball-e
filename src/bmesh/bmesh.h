@@ -3,41 +3,15 @@
 
 #include <vector>
 #include <nanogui/nanogui.h>
+
 #include "../misc/sphere_drawing.h"
 #include "CGL/CGL.h"
 #include "../mesh/halfEdgeMesh.h"
+#include "skeletalNode.h"
 
 using namespace std;
 using namespace nanogui;
 using namespace CGL;
-
-// The struct for the tree itself
-struct SkeletalNode {
-public:
-	SkeletalNode(Vector3D pos, float radius, SkeletalNode * parent) : pos(pos), radius(radius), parent(parent){
-		children = new vector<SkeletalNode*>;
-	};
-	~SkeletalNode() {
-
-	}
-	SkeletalNode* parent;
-
-	// Radius of the ball
-	float radius;
-
-	// w coordiante
-	float w = 0; // TODO HOW TO INIT
-
-	// World Coordinate position of the ball
-	Vector3D pos;
-	bool selected = false;
-
-	// The children of the ball
-	// Leaf node == end node -> connects to only one bone
-	// connection node if it connects to two bones
-	// joint node -> more than 2 bones
-	vector<SkeletalNode*>* children;
-};
 
 // Contains the tree and other functions that access the tree
 struct BMesh {
@@ -99,7 +73,6 @@ public:
 	void interpolate_spheres();
 	void interpspheres_helper(SkeletalNode* root, int divs);
 	void print_skeleton(); 
-	void _print_skeleton(SkeletalNode * root);
 
 	// Returns a vector (size variable) of arrays (size 2). 
 	// The arrays are of the form (start, end) and do not contain any joints including the ends
@@ -114,6 +87,8 @@ private:
 	void dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root);
 	int gnlHelper(SkeletalNode* root);
 	void _joint_iterate(SkeletalNode* root);
+	void _stitch_joint_node(SkeletalNode* root);
+	void _print_skeleton(SkeletalNode * root);
 
 };
 #endif

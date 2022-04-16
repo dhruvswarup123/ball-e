@@ -1,9 +1,3 @@
-#include <vector>
-#include <nanogui/nanogui.h>
-
-#include "CGL/misc.h"
-#include "CGL/vector3D.h"
-#include "../misc/sphere_drawing.h"
 #include "bmesh.h"
 
 using namespace std;
@@ -222,6 +216,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
 			while (temp->children->size() == 1) {
+				temp->mesh = limbmesh;
 				if (first) {
 					first = false;
 
@@ -265,6 +260,12 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			_joint_iterate(child);
 		}
 	}
+
+	_stitch_joint_node(root);
+}
+
+void BMesh::_stitch_joint_node(SkeletalNode* root) {
+
 }
 
 void  BMesh::print_skeleton() {
