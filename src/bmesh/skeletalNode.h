@@ -37,5 +37,5 @@ public:
 	vector<SkeletalNode*>* children;
 
     // HalfedgeMesh that surrounds this skeletal node
-    HalfedgeMesh mesh;
+    HalfedgeMesh* mesh;
 };

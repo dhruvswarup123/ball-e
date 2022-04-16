@@ -87,7 +87,7 @@ private:
 	void dsHelper(GLShader& shader, Misc::SphereMesh msm, SkeletalNode* root);
 	int gnlHelper(SkeletalNode* root);
 	void _joint_iterate(SkeletalNode* root);
-
+	void _stitch_joint_node(SkeletalNode* root);
 	void _print_skeleton(SkeletalNode * root);
 
 };
