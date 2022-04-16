@@ -1,9 +1,3 @@
-#include <vector>
-#include <nanogui/nanogui.h>
-
-#include "CGL/misc.h"
-#include "CGL/vector3D.h"
-#include "../misc/sphere_drawing.h"
 #include "bmesh.h"
 
 using namespace std;
