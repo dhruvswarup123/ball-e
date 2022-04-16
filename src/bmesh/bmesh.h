@@ -71,6 +71,7 @@ public:
 		all_nodes_vector->push_back(footR);
 
 		mesh = new HalfedgeMesh();
+		seperate_limb_meshes = new vector<HalfedgeMesh*>;
 	};
 
 	~BMesh() {};
@@ -87,8 +88,11 @@ public:
 	bool deleteNode(SkeletalNode* node);
 
 	SkeletalNode* root;
-	HalfedgeMesh* mesh;
 	vector<SkeletalNode*>* all_nodes_vector;
+
+	HalfedgeMesh* mesh;
+	vector<HalfedgeMesh*>* seperate_limb_meshes;
+
 
 	// Function for the main bmesh algorithm
 	// Interpolate the sphere

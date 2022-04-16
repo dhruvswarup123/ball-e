@@ -211,6 +211,10 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
 		cout << "Joint node: " << root->radius << endl;
 
+		// Create a new mesh for this child
+		HalfedgeMesh* limbmesh = new HalfedgeMesh; // Add the sweeping stuff here
+		bool first = true;
+
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
 			cout << "ERROR: joint->child->children->size() = 0" << endl;
@@ -218,18 +222,40 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
 			while (temp->children->size() == 1) {
+				if (first) {
+					first = false;
+
+					// Create the first local coordinate system
+
+					// Create the first rectangle
+				}
+				else {
+					// Create the next rectangle, and stitch to prev rectangle
+				}
+
 				// Slide
 				cout << "sliding: " << temp->radius << endl;
 				temp = (*temp->children)[0];
+
 			}
 
 			if (temp->children->size() == 0) { // reached the end
 				cout << "Reached the leaf " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+				// Add the last rectangle
+
+				// Push it into the main limb list
+				seperate_limb_meshes->push_back(limbmesh);
 			}
 			else { // The only other possible case is that we have reached a joint node
 				cout << "Reached a joint " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
+
+				// Add the last rectangle
+
+				// Push it into the main limb list
+				seperate_limb_meshes->push_back(limbmesh);
+
 				_joint_iterate(temp);
 			}
 
