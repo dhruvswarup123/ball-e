@@ -61,11 +61,17 @@ namespace Balle
 
         vector<Vector3D> get_last_four_points()
         {
+            if (n_layer == 0) {
+                throw runtime_error("Trying to get points in a Limb with zero layer.");
+            }
             return {points[(n_layer - 1) * 4], points[(n_layer - 1) * 4 + 1], points[(n_layer - 1) * 4 + 2], points[(n_layer - 1) * 4 + 3]};
         }
 
         vector<Vector3D> get_first_four_points()
         {
+            if (n_layer == 0) {
+                throw runtime_error("Trying to get points in a Limb with zero layer.");
+            }
             return {points[0], points[1], points[2], points[3]};
         }
     };
