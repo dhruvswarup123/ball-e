@@ -4,6 +4,7 @@
 # Visual Studio
 Win32/*
 .vs
+.vscode
 CMakeSettings.json
 
 # Prerequisites
