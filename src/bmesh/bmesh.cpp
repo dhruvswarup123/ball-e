@@ -186,7 +186,33 @@ void BMesh::generate_bmesh() {
 	//_joint_iterate_limbs(root);
 	_stitch_faces();
 }
+void BMesh::_add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, bool eface, Limb* limbmesh){
+	Vector3D root_center = root->pos;
+	double root_radius = root->radius;
+	Vector3D child_center = child->pos;
+	double child_radius = child->radius;
+	Vector3D localx = (child_center - root_center).unit();
+	//y = Z x x;
+	Vector3D localy = cross({0,0,1}, localx).unit();
+	Vector3D localz = cross(localx, localy).unit();
+	Vector3D root_rtup = root_center + root_radius*localy + root_radius*localz;
+	Vector3D root_rtdn =  root_center + root_radius*localy - root_radius*localz;
+	Vector3D root_lfup =  root_center - root_radius*localy + root_radius*localz;
+	Vector3D root_lfdn =  root_center - root_radius*localy - root_radius*localz;
 
+	Vector3D child_rtup = child_center + child_radius*localy + child_radius*localz;
+	Vector3D child_rtdn =  child_center + child_radius*localy - child_radius*localz;
+	Vector3D child_lfup =  child_center - child_radius*localy + child_radius*localz;
+	Vector3D child_lfdn =  child_center - child_radius*localy - child_radius*localz;
+	if (sface) {
+		limbmesh->add_layer(root_lfup, root_rtup, root_lfdn, root_rtdn);
+	}
+	if(eface){
+		limbmesh->add_layer(child_lfup, child_rtup, child_lfdn, child_rtdn);
+	}
+
+
+}
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
 void BMesh::_joint_iterate(SkeletalNode * root) {
@@ -195,53 +221,43 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		cout << "ERROR: joint node is null" << endl;
 		return; // This should not be possible cause im calling this func only on joint nodes
 	}
-
+	Vector3D root_center = root->pos;
+	double root_radius = root->radius;
 	// Because this is a joint node, iterate through all children
 	for (SkeletalNode* child : *(root->children)) {
 		cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
 		cout << "Joint node: " << root->radius << endl;
-
 		// Create a new limb for this child
-		Limb* limb = new Limb(); // Add the sweeping stuff here
+		Limb* childlimb = new Limb(); // Add the sweeping stuff here
 		bool first = true;
 
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
-			cout << "ERROR: joint->child->children->size() = 0" << endl;
+			_add_mesh(root, child, false, true, childlimb);
+			cout << "Error: joint->child->children->size() = 0" << endl;
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
+			SkeletalNode* last ;
 			while (temp->children->size() == 1) {
-				temp->limb = limb;
-				if (first) {
+				//temp->limb = childlimb;
+				_add_mesh(temp, (*temp->children)[0], first, true, childlimb);
+				if(first){
 					first = false;
-
-					// Create the first local coordinate system
-
-					// Create the first rectangle
 				}
-				else {
-					// Create the next rectangle, and stitch to prev rectangle
-				}
-
-				// Slide
 				cout << "sliding: " << temp->radius << endl;
+				last = temp;
 				temp = (*temp->children)[0];
-
 			}
-
+			_add_mesh(last, temp, false, true, childlimb);
+			temp->limb = childlimb;
 			if (temp->children->size() == 0) { // reached the end
 				cout << "Reached the leaf " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-				// Add the last rectangle
-
 			}
 			else { // The only other possible case is that we have reached a joint node
 				cout << "Reached a joint " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-
-				// Add the last rectangle
-
 				_joint_iterate(temp);
 			}
 
