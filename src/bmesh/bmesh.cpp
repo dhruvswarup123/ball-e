@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include "bmesh.h"
 #define QUICKHULL_IMPLEMENTATION 1
 #include "quickhull.h"
@@ -311,9 +312,55 @@ void BMesh::_add_faces(SkeletalNode* root) {
 
 void BMesh::_stitch_faces() {
 	// label vertices in triangles and quadrangles
-	// TODO
+	unordered_map<Vector3D, size_t> ids;
+	vector<vector<size_t>> polygons;
+	vector<Vector3D> vertices;
+	// label quadrangle vertices
+	for (const Quadrangle& quadrangle : quadrangles) {
+		if (ids.count(quadrangle.a) == 0) {
+			ids[quadrangle.a] = ids.size();
+			vertices.push_back(quadrangle.a);
+		}
+		if (ids.count(quadrangle.b) == 0) {
+			ids[quadrangle.b] = ids.size();
+			vertices.push_back(quadrangle.b);
+		}
+		if (ids.count(quadrangle.c) == 0) {
+			ids[quadrangle.c] = ids.size();
+			vertices.push_back(quadrangle.c);
+		}
+		if (ids.count(quadrangle.d) == 0) {
+			ids[quadrangle.d] = ids.size();
+			vertices.push_back(quadrangle.d);
+		}
+		polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
+	}
+	// label triangle vertices
+	for (const Triangle& triangle : triangles) {
+		if (ids.count(triangle.a) == 0) {
+			ids[triangle.a] = ids.size();
+			vertices.push_back(triangle.a);
+		}
+		if (ids.count(triangle.b) == 0) {
+			ids[triangle.b] = ids.size();
+			vertices.push_back(triangle.b);
+		}
+		if (ids.count(triangle.c) == 0) {
+			ids[triangle.c] = ids.size();
+			vertices.push_back(triangle.c);
+		}
+		// Quickhull will generate faces cover the limb fringe vertices
+		// dont want those to be added to mesh
+		size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+		size_t maxid = max(max(ida, idb), idc);
+		size_t minid = min(min(ida, idb), idc);
+		if (maxid - minid > 3) {
+			polygons.push_back({ida, idb, idc});
+		}
+	}
+	
 	// build halfedgeMesh
-	mesh->newFace(); // Placeholder
+	mesh->build(polygons, vertices);
 
 	triangles.clear();
 	quadrangles.clear();

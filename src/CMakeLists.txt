@@ -10,6 +10,11 @@ set(CLOTHSIM_VIEWER_SOURCE
     collision/sphere.cpp
     collision/plane.cpp
 
+    # Halfedge Mesh
+    mesh/halfedgeMesh.cpp
+    mesh/mesh.cpp
+    mesh/scene.cpp
+    
     # Application
     main.cpp
     clothSimulator.cpp
@@ -21,8 +26,6 @@ set(CLOTHSIM_VIEWER_SOURCE
 
     # Camera
     camera.cpp
-
-    
 )
 
 # Windows-only sources
