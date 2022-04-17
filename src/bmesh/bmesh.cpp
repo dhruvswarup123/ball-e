@@ -1,8 +1,11 @@
 #include "bmesh.h"
+#define QUICKHULL_IMPLEMENTATION 1
+#include "quickhull.h"
 
 using namespace std;
 using namespace nanogui;
 using namespace CGL;
+using namespace Balle;
 
 void BMesh::fpHelper(MatrixXf& positions, SkeletalNode* root) {
 	if (root == NULL) return;
@@ -179,7 +182,7 @@ void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
 
 void BMesh::generate_bmesh() {
 	_joint_iterate(root);
-
+	_stitch_faces();
 	//vector<array<SkeletalNode, 2>> * limbs = new vector<array<SkeletalNode, 2>>;
 
 	//get_limbs_helper(root, limbs);
@@ -190,6 +193,7 @@ void BMesh::generate_bmesh() {
 	//	cout << "(" << i[0].radius << "->" << i[1].radius << ")" << endl;
 	//}
 	//cout << "End limbs" << endl;
+
 }
 
 // Joint node helper
@@ -205,8 +209,8 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
 		cout << "Joint node: " << root->radius << endl;
 
-		// Create a new mesh for this child
-		HalfedgeMesh* limbmesh = new HalfedgeMesh; // Add the sweeping stuff here
+		// Create a new limb for this child
+		Limb* limb = new Limb(); // Add the sweeping stuff here
 		bool first = true;
 
 		if (child->children->size() == 0) { // Leaf node
@@ -216,7 +220,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
 			while (temp->children->size() == 1) {
-				temp->mesh = limbmesh;
+				temp->limb = limb;
 				if (first) {
 					first = false;
 
@@ -239,17 +243,12 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
 				// Add the last rectangle
 
-				// Push it into the main limb list
-				seperate_limb_meshes->push_back(limbmesh);
 			}
 			else { // The only other possible case is that we have reached a joint node
 				cout << "Reached a joint " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
 
 				// Add the last rectangle
-
-				// Push it into the main limb list
-				seperate_limb_meshes->push_back(limbmesh);
 
 				_joint_iterate(temp);
 			}
@@ -261,11 +260,63 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		}
 	}
 
-	_stitch_joint_node(root);
+	_add_faces(root);
 }
 
-void BMesh::_stitch_joint_node(SkeletalNode* root) {
+void BMesh::_add_faces(SkeletalNode* root) {
+	if (root == nullptr) {
+		throw runtime_error("Stitching a null joint node.");
+	}
+	if (root->children->size() <= 1) {
+		throw runtime_error("Stitching a limb node.");
+	}
+	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
+	vector<Vector3D> points;
+	if (root->parent) {
+		for (const Vector3D& point : root->parent->limb->get_last_four_points()) {
+			points.push_back(point);
+		}
+	}
+	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+	for (SkeletalNode* child : *(root->children)) {
+		for (const Vector3D& point : child->limb->get_first_four_points()) {
+			points.push_back(point);
+		}
+	}
+	size_t n = points.size();
+	qh_vertex_t vertices[n];
+	for (size_t i=0; i<n; i++) {
+		vertices[i].x = points[i].x;
+		vertices[i].y = points[i].y;
+		vertices[i].z = points[i].z;
+	}
+	// Build a convex hull using quickhull algorithm and add the hull triangles
+	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+	for (size_t i = 0; i < mesh.nindices; i += 3) {
+    	Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+		Vector3D b(mesh.vertices[i+1].x, mesh.vertices[i+1].y, mesh.vertices[i+1].z);
+		Vector3D c(mesh.vertices[i+2].x, mesh.vertices[i+2].y, mesh.vertices[i+2].z);
+		triangles.push_back({a, b, c});
+	}
+	qh_free_mesh(mesh);
 
+	// Add child Limb quadrangles 
+	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+	for (SkeletalNode* child : *(root->children)) {
+		for (const Quadrangle& quadrangle : child->limb->quadrangles) {
+			quadrangles.push_back(quadrangle);
+		}
+	}
+}
+
+void BMesh::_stitch_faces() {
+	// label vertices in triangles and quadrangles
+	// TODO
+	// build halfedgeMesh
+	mesh->newFace(); // Placeholder
+
+	triangles.clear();
+	quadrangles.clear();
 }
 
 void  BMesh::print_skeleton() {

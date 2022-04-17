@@ -71,7 +71,7 @@ private:
   ClothParameters *cp;
   vector<CollisionObject *> *collision_objects;
 
-  BMesh* bmesh;
+  Balle::BMesh* bmesh;
 
   // OpenGL attributes
 
@@ -144,7 +144,7 @@ private:
 
   bool is_alive = true;
 
-  SkeletalNode * selected = NULL;
+  Balle::SkeletalNode * selected = NULL;
   GUI_STATES gui_state = GUI_STATES::IDLE;
 
   void reset_grab_scale();
