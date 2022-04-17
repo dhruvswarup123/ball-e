@@ -194,7 +194,7 @@ void ClothSimulator::loadCollisionObjects(vector<CollisionObject*>* objects) { t
  * rendering from simulation.
  */
 void ClothSimulator::init() {
-	bmesh = new BMesh();
+	bmesh = new Balle::BMesh();
 
 	// Initialize GUI
 	screen->setSize(default_window_size);
@@ -350,33 +350,33 @@ void ClothSimulator::drawWireframe(GLShader& shader) {
 
 	// Draw the mesh for eeach limb
 	// Draw the mesh
-	for (auto limbmesh: *bmesh->seperate_limb_meshes)
-	{
-		MatrixXf mesh_positions(4, limbmesh->nVertices());
-		MatrixXf mesh_normals(4, limbmesh->nVertices());
+	// for (auto limbmesh: *bmesh->seperate_limb_meshes)
+	// {
+	// 	MatrixXf mesh_positions(4, limbmesh->nVertices());
+	// 	MatrixXf mesh_normals(4, limbmesh->nVertices());
 
-		int ind = 0;
-		for (HalfedgeIter i = limbmesh->halfedgesBegin(); i != limbmesh->halfedgesEnd(); i++) {
-			// TODO: Fix this for faces
-			Vector3D vertex1 = i->vertex()->position;
-			Vector3D vertex2 = i->next()->vertex()->position;
+	// 	int ind = 0;
+	// 	for (HalfedgeIter i = limbmesh->halfedgesBegin(); i != limbmesh->halfedgesEnd(); i++) {
+	// 		// TODO: Fix this for faces
+	// 		Vector3D vertex1 = i->vertex()->position;
+	// 		Vector3D vertex2 = i->next()->vertex()->position;
 
-			// Vector3D normal = i->face()->normal();
+	// 		// Vector3D normal = i->face()->normal();
 
-			mesh_positions.col(ind * 2) << vertex1.x, vertex1.y, vertex1.z, 0.0;
-			mesh_positions.col(ind * 2 + 1) << vertex2.x, vertex2.y, vertex2.z, 0.0;
+	// 		mesh_positions.col(ind * 2) << vertex1.x, vertex1.y, vertex1.z, 0.0;
+	// 		mesh_positions.col(ind * 2 + 1) << vertex2.x, vertex2.y, vertex2.z, 0.0;
 
-			mesh_normals.col(ind * 2) << 0., 0., 0., 0.0;
-			mesh_normals.col(ind * 2 + 1) << 0., 0., 0., 0.0;
+	// 		mesh_normals.col(ind * 2) << 0., 0., 0., 0.0;
+	// 		mesh_normals.col(ind * 2 + 1) << 0., 0., 0., 0.0;
 
-			ind += 2;
-		}
+	// 		ind += 2;
+	// 	}
 
-		shader.uploadAttrib("in_position", mesh_positions, false);
-		shader.uploadAttrib("in_normal", mesh_normals, false);
+	// 	shader.uploadAttrib("in_position", mesh_positions, false);
+	// 	shader.uploadAttrib("in_normal", mesh_normals, false);
 
-		shader.drawArray(GL_LINES, 0, limbmesh->nVertices());
-	}
+	// 	shader.drawArray(GL_LINES, 0, limbmesh->nVertices());
+	// }
 
 	//// Draw the mesh
 	//MatrixXf mesh_positions(4, bmesh->mesh->nVertices());
@@ -820,7 +820,7 @@ void ClothSimulator::extrude_node() {
 		return;
 	}
 	else if (gui_state == GUI_STATES::IDLE){
-		SkeletalNode* temp = new SkeletalNode(selected->pos, selected->radius, selected);
+		Balle::SkeletalNode* temp = new Balle::SkeletalNode(selected->pos, selected->radius, selected);
 		selected->children->push_back(temp);
 		bmesh->all_nodes_vector->push_back(temp);
 
@@ -872,7 +872,7 @@ void ClothSimulator::sceneIntersect(double x, double y) {
 	// TODO: NO support for layered spheres, NO support for random radius
 	bool found = false;
 
-	for (SkeletalNode * node : *(bmesh->all_nodes_vector)) {
+	for (Balle::SkeletalNode * node : *(bmesh->all_nodes_vector)) {
 		Matrix4f view = getViewMatrix();
 		Matrix4f projection = getProjectionMatrix();
 		Matrix4f viewProjection = projection * view; // World to screen
