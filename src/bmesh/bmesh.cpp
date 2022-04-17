@@ -234,7 +234,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
 			_add_mesh(root, child, false, true, childlimb);
-			cout << "Error: joint->child->children->size() = 0" << endl;
+			// cout << "Error: joint->child->children->size() = 0" << endl;
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
