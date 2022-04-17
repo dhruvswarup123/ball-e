@@ -183,18 +183,8 @@ void BMesh::interpspheres_helper(SkeletalNode* root, int divs) {
 
 void BMesh::generate_bmesh() {
 	_joint_iterate(root);
+	//_joint_iterate_limbs(root);
 	_stitch_faces();
-	//vector<array<SkeletalNode, 2>> * limbs = new vector<array<SkeletalNode, 2>>;
-
-	//get_limbs_helper(root, limbs);
-
-	//// Print out the limbs to check
-	//cout << "Start limbs" << endl;
-	//for (auto i : *limbs){
-	//	cout << "(" << i[0].radius << "->" << i[1].radius << ")" << endl;
-	//}
-	//cout << "End limbs" << endl;
-
 }
 void BMesh::_add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, bool eface, Limb* limbmesh){
 	Vector3D root_center = root->pos;
@@ -226,7 +216,8 @@ void BMesh::_add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, boo
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
 void BMesh::_joint_iterate(SkeletalNode * root) {
-	if (root == NULL) {
+	cout << root << endl;
+	if (root == nullptr) {
 		cout << "ERROR: joint node is null" << endl;
 		return; // This should not be possible cause im calling this func only on joint nodes
 	}
@@ -243,7 +234,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
 			_add_mesh(root, child, false, true, childlimb);
-			cout << "Error: joint->child->children->size() = 0" << endl;
+			// cout << "Error: joint->child->children->size() = 0" << endl;
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
@@ -276,20 +267,19 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			_joint_iterate(child);
 		}
 	}
-
 	_add_faces(root);
 }
 
 void BMesh::_add_faces(SkeletalNode* root) {
 	if (root == nullptr) {
-		throw runtime_error("Stitching a null joint node.");
+		throw runtime_error("Adding faces from a null joint node.");
 	}
 	if (root->children->size() <= 1) {
-		throw runtime_error("Stitching a limb node.");
+		throw runtime_error("Adding faces from a limb node.");
 	}
 	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
 	vector<Vector3D> points;
-	if (root->parent) {
+	if (root->parent && root->parent->limb) {
 		for (const Vector3D& point : root->parent->limb->get_last_four_points()) {
 			points.push_back(point);
 		}
