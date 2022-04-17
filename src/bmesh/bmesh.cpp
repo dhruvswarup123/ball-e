@@ -217,16 +217,34 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			SkeletalNode* temp = child;
 			while (temp->children->size() == 1) {
 				temp->mesh = limbmesh;
+				// Create the first local coordinate system
+				Vector3D child_center = temp->pos;
+				double child_radius = temp->radius;
+				Vector3D children_center = (*temp->children)[0]->pos;
+				double children_radius = (*temp->children)[0]->radius;
+				Vector3D localx = (children_center - child_center).unit();
+				//y = Z x x;
+				Vector3D localy = cross({0,0,1}, localx).unit();
+				Vector3D localz = cross(localx, localy).unit();
+				Vector3D child_rtup = child_center + child_radius*localy + child_radius*localz;
+				Vector3D child_rtdn =  child_center + child_radius*localy - child_radius*localz;
+				Vector3D child_lfup =  child_center - child_radius*localy + child_radius*localz;
+				Vector3D child_lfdn =  child_center - child_radius*localy - child_radius*localz;
+
+				Vector3D children_rtup = children_center + children_radius*localy + children_radius*localz;
+				Vector3D children_rtdn =  children_center + children_radius*localy - children_radius*localz;
+				Vector3D children_lfup =  children_center - children_radius*localy + children_radius*localz;
+				Vector3D children_lfdn =  children_center - children_radius*localy - children_radius*localz;
+
 				if (first) {
 					first = false;
-
-					// Create the first local coordinate system
-
+					HalfedgeMesh* limbmesh = new HalfedgeMesh;
+					FaceIter startface = limbmesh->newFace();
+					//TODO: CREAT NEW FACE USING EXISTING POINTS
 					// Create the first rectangle
 				}
-				else {
-					// Create the next rectangle, and stitch to prev rectangle
-				}
+				//ADD FOUR FACE
+
 
 				// Slide
 				cout << "sliding: " << temp->radius << endl;
@@ -240,7 +258,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 				// Add the last rectangle
 
 				// Push it into the main limb list
-				seperate_limb_meshes->push_back(limbmesh);
+			//	seperate_limb_meshes->push_back(limbmesh);
 			}
 			else { // The only other possible case is that we have reached a joint node
 				cout << "Reached a joint " << temp->radius << endl;
@@ -249,7 +267,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 				// Add the last rectangle
 
 				// Push it into the main limb list
-				seperate_limb_meshes->push_back(limbmesh);
+			//	seperate_limb_meshes->push_back(limbmesh);
 
 				_joint_iterate(temp);
 			}
