@@ -216,9 +216,20 @@ void BMesh::_add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, boo
 	Vector3D child_lfdn =  child_center - child_radius*localy - child_radius*localz;
 	if (sface) {
 		limbmesh->add_layer(root_lfup, root_rtup, root_lfdn, root_rtdn);
+		// if(!root->visited){
+		// 	root->visited = true;
+		// }else{
+		// 	cout << "node has been visited!" << endl;
+		// }
+
 	}
 	if(eface){
 		limbmesh->add_layer(child_lfup, child_rtup, child_lfdn, child_rtdn);
+		// if(!root->visited){
+		// 	root->visited = true;
+		// }else{
+		// 	cout << "node has been visited!" << endl;
+		// }
 	}
 
 
@@ -232,6 +243,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 	}
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
+
 	// Because this is a joint node, iterate through all children
 	for (SkeletalNode* child : *(root->children)) {
 		cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
@@ -239,17 +251,18 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		// Create a new limb for this child
 		Limb* childlimb = new Limb(); // Add the sweeping stuff here
 		bool first = true;
-
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
 			_add_mesh(root, child, false, true, childlimb);
+			child->limb = childlimb;
 			cout << "Error: joint->child->children->size() = 0" << endl;
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
-			SkeletalNode* last ;
+			SkeletalNode* last;
+
 			while (temp->children->size() == 1) {
-				//temp->limb = childlimb;
+				temp->limb = childlimb;
 				_add_mesh(temp, (*temp->children)[0], first, true, childlimb);
 				if(first){
 					first = false;
@@ -258,7 +271,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 				last = temp;
 				temp = (*temp->children)[0];
 			}
-			_add_mesh(last, temp, false, true, childlimb);
+			//_add_mesh(last, temp, false, true, childlimb);
 			temp->limb = childlimb;
 			if (temp->children->size() == 0) { // reached the end
 				cout << "Reached the leaf " << temp->radius << endl;
@@ -376,7 +389,7 @@ void BMesh::_stitch_faces() {
 	}
 	
 	// build halfedgeMesh
-	mesh->build(polygons, vertices);
+	//mesh->build(polygons, vertices);
 
 	triangles.clear();
 	quadrangles.clear();
