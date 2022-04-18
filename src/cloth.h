@@ -42,7 +42,7 @@ struct ClothParameters {
 };
 
 struct Cloth {
-  Cloth() {}
+  Cloth() : clothMesh(nullptr) {}
   Cloth(double width, double height, int num_width_points,
         int num_height_points, float thickness);
   ~Cloth();
