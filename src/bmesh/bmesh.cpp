@@ -241,7 +241,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			SkeletalNode* last ;
 			while (temp->children->size() == 1) {
 				temp->limb = childlimb;
-				_add_mesh(temp, (*temp->children)[0], first, true, childlimb);
+				_add_mesh(temp, (*temp->children)[0], first, false, childlimb);
 				if(first){
 					first = false;
 				}
@@ -364,7 +364,7 @@ void BMesh::_stitch_faces() {
 	}
 	
 	// build halfedgeMesh
-	mesh->build(polygons, vertices);
+	// mesh->build(polygons, vertices);
 	mesh_ready = true;
 	// triangles.clear();
 	// quadrangles.clear();
