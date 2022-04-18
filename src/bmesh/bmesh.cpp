@@ -372,9 +372,11 @@ void BMesh::_stitch_faces() {
 	// quadrangles.clear();
 }
 
+
 void  BMesh::print_skeleton() {
 	_print_skeleton(root);
 }
+
 void  BMesh::_print_skeleton(SkeletalNode* root) {
 	if (!root) return;
 	cout << "At root: " << root->radius << endl;
@@ -382,5 +384,59 @@ void  BMesh::_print_skeleton(SkeletalNode* root) {
 		//cout << root->radius << "->" << child->radius << endl;
 		_print_skeleton(child);
 	}
+}
+
+// ======================== for subdivision =====================
+Vector3D get_face_point(const FaceIter f){
+
 
 }
+
+Vector3D get_edge_point(const EdgeIter e){
+
+
+}
+
+void connect_face(const FaceIter f){
+
+}
+
+
+void  BMesh::_catmull_clark(HalfedgeMesh& mesh) {
+
+// 1. Add new face point
+for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
+	f->isNew = true;
+	f->newPosition = get_face_point(f);
+}
+
+// 2. Add new edge point
+for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+	e->isNew = true;
+	e->newPosition = get_edge_point(e);
+}
+
+// 3. Calculate new vertex
+for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+	Vector3D pt;
+	// iterate connected edges
+
+	// iterate connected faces
+
+	v->isNew = false;
+	v->newPosition = pt;
+}
+
+
+// 4.update the position of vertex
+for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+	v->position = v->newPosition;
+}
+
+// 5. iterate faces, connect the face point and edge points
+for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
+	connect_face(f);
+}
+
+
+}	
