@@ -25,27 +25,27 @@ namespace Balle
 		{
 			root = new SkeletalNode(Vector3D(0, 0, 0), 0.01, NULL); // root has no parent
 
-			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.02, root);
-			SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
-			SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
-			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
+			// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.02, root);
+			// SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
+			// SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
+			// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
 			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
 			SkeletalNode *footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
 
-			root->children->push_back(chest);
+			// root->children->push_back(chest);
 			root->children->push_back(footL);
 			root->children->push_back(footR);
 
-			chest->children->push_back(arml);
-			chest->children->push_back(armr);
-			chest->children->push_back(head);
+			// chest->children->push_back(arml);
+			// chest->children->push_back(armr);
+			// chest->children->push_back(head);
 
 			all_nodes_vector = new vector<SkeletalNode *>;
 			all_nodes_vector->push_back(root);
-			all_nodes_vector->push_back(chest);
-			all_nodes_vector->push_back(arml);
-			all_nodes_vector->push_back(armr);
-			all_nodes_vector->push_back(head);
+			// all_nodes_vector->push_back(chest);
+			// all_nodes_vector->push_back(arml);
+			// all_nodes_vector->push_back(armr);
+			// all_nodes_vector->push_back(head);
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
@@ -69,6 +69,11 @@ namespace Balle
 		vector<SkeletalNode *> *all_nodes_vector;
 
 		HalfedgeMesh *mesh;
+		vector<Triangle> triangles;
+		vector<Quadrangle> quadrangles;
+		vector<vector<size_t>> polygons;
+		vector<Vector3D> vertices;
+		bool mesh_ready = false;
 
 		// Function for the main bmesh algorithm
 		// Interpolate the sphere
@@ -83,8 +88,6 @@ namespace Balle
 	private:
 		// Temp counter used for the helpers
 		int si = 0;
-		vector<Triangle> triangles;
-		vector<Quadrangle> quadrangles;
 
 		void fpHelper(MatrixXf &positions, SkeletalNode *root);
 		void dsHelper(GLShader &shader, Misc::SphereMesh msm, SkeletalNode *root);
@@ -94,7 +97,7 @@ namespace Balle
 		void _add_faces(SkeletalNode *root);
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
-		void _add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, bool eface, Limb* limbmesh);
+		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool sface, bool eface, Limb *limbmesh);
 	};
 };
 #endif
