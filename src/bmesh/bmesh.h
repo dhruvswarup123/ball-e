@@ -23,14 +23,14 @@ namespace Balle
 	public:
 		BMesh()
 		{
-			root = new SkeletalNode(Vector3D(0, 0, 0), 0.1, NULL); // root has no parent
+			root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
 
-			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.12, root);
-			SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
-			SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
-			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.08, chest);
-			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
-			SkeletalNode *footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
+			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
+			SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
+			SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
+			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
+			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
+			SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
 
 			root->children->push_back(chest);
 			root->children->push_back(footL);
@@ -72,6 +72,7 @@ namespace Balle
 		vector<Triangle> triangles;
 		vector<Quadrangle> quadrangles;
 		vector<vector<size_t>> polygons;
+		vector<Vector3D> fringe_points;
 		vector<Vector3D> vertices;
 		bool mesh_ready = false;
 
@@ -97,7 +98,7 @@ namespace Balle
 		void _add_faces(SkeletalNode *root);
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
-		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool sface, bool eface, Limb *limbmesh);
+		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh);
 		void _catmull_clark(HalfedgeMesh& mesh);
 	};
 };
