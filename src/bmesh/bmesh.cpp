@@ -211,7 +211,6 @@ void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 void BMesh::generate_bmesh()
 {
 	_joint_iterate(root);
-	//_joint_iterate_limbs(root);
 	_stitch_faces();
 }
 void BMesh::_add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh)
@@ -459,58 +458,61 @@ void BMesh::_print_skeleton(SkeletalNode *root)
 		// cout << root->radius << "->" << child->radius << endl;
 		_print_skeleton(child);
 	}
+}
 
 // ======================== for subdivision =====================
-Vector3D get_face_point(const FaceIter f){
-
-
+Vector3D get_face_point(const FaceIter f)
+{
+	return {0, 0, 0};
 }
 
-Vector3D get_edge_point(const EdgeIter e){
-
-
+Vector3D get_edge_point(const EdgeIter e)
+{
+	return {0, 0, 0};
 }
 
-void connect_face(const FaceIter f){
-
+void connect_face(const FaceIter f)
+{
 }
 
+void BMesh::_catmull_clark(HalfedgeMesh &mesh)
+{
 
-void  BMesh::_catmull_clark(HalfedgeMesh& mesh) {
+	// 1. Add new face point
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		f->isNew = true;
+		f->newPosition = get_face_point(f);
+	}
 
-// 1. Add new face point
-for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
-	f->isNew = true;
-	f->newPosition = get_face_point(f);
+	// 2. Add new edge point
+	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+	{
+		e->isNew = true;
+		e->newPosition = get_edge_point(e);
+	}
+
+	// 3. Calculate new vertex
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+	{
+		Vector3D pt;
+		// iterate connected edges
+
+		// iterate connected faces
+
+		v->isNew = false;
+		v->newPosition = pt;
+	}
+
+	// 4.update the position of vertex
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+	{
+		v->position = v->newPosition;
+	}
+
+	// 5. iterate faces, connect the face point and edge points
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		connect_face(f);
+	}
 }
-
-// 2. Add new edge point
-for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
-	e->isNew = true;
-	e->newPosition = get_edge_point(e);
-}
-
-// 3. Calculate new vertex
-for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
-	Vector3D pt;
-	// iterate connected edges
-
-	// iterate connected faces
-
-	v->isNew = false;
-	v->newPosition = pt;
-}
-
-
-// 4.update the position of vertex
-for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
-	v->position = v->newPosition;
-}
-
-// 5. iterate faces, connect the face point and edge points
-for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++) {
-	connect_face(f);
-}
-
-
-}	
