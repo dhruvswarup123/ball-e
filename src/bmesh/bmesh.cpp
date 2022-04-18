@@ -213,7 +213,7 @@ void BMesh::generate_bmesh()
 	_joint_iterate(root);
 	_stitch_faces();
 }
-void BMesh::_add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh)
+void BMesh::_update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh)
 {
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
@@ -265,7 +265,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 		if (child->children->size() == 0)
 		{ // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
-			_add_mesh(root, child, false, childlimb);
+			_update_limb(root, child, false, childlimb);
 			child->limb = childlimb;
 			childlimb->seal();
 		}
@@ -276,7 +276,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 			while (temp->children->size() == 1)
 			{
 				temp->limb = childlimb;
-				_add_mesh(temp, (*temp->children)[0], true, childlimb);
+				_update_limb(temp, (*temp->children)[0], true, childlimb);
 				if (first)
 				{
 					first = false;
@@ -287,7 +287,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 			}
 			if (temp->children->size() == 0)
 			{ // reached the end
-				_add_mesh(last, temp, false, childlimb);
+				_update_limb(last, temp, false, childlimb);
 				temp->limb = childlimb;
 				childlimb->seal();
 				// cout << "Reached the leaf " << temp->radius << endl;
@@ -334,8 +334,9 @@ void BMesh::_add_faces(SkeletalNode *root)
 			fringe_points.push_back(point);
 		}
 	}
+	// QuickHull algorithm
 	size_t n = fringe_points.size();
-	qh_vertex_t vertices[n];
+	qh_vertex_t* vertices = (qh_vertex_t*) malloc(sizeof(qh_vertex_t) * n);
 	for (size_t i = 0; i < n; i++)
 	{
 		vertices[i].x = fringe_points[i].x;
@@ -349,7 +350,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		triangles.push_back({a, b, c});
+		//triangles.push_back({a, b, c});
 	}
 	qh_free_mesh(mesh);
 
@@ -367,8 +368,10 @@ void BMesh::_add_faces(SkeletalNode *root)
 void BMesh::_stitch_faces()
 {
 	// label vertices in triangles and quadrangles
+	// id starts from 0
 	unordered_map<Vector3D, size_t> ids;
-	// label fringe points first
+	// label fringe points first in groups of 4
+	// (0, 1, 2, 3), (4, 5, 6, 7), etc.
 	for (const Vector3D &fringe_point : fringe_points)
 	{
 		if (ids.count(fringe_point) == 0)
@@ -432,6 +435,9 @@ void BMesh::_stitch_faces()
 		unordered_set<size_t> distinct_ids = {ida, idb, idc};
 		if (distinct_ids.size() == 3)
 		{
+			// any_fringe_vertex_id divided by 4 is the group number
+			// if the triangle's 3 vertices are in the same group,
+			// then we don't want to add this to mesh cuz it's covering the fringe
 			if (maxid / 4 != minid / 4 || maxid >= fringe_points.size())
 			{
 				polygons.push_back({ida, idb, idc});
@@ -440,7 +446,7 @@ void BMesh::_stitch_faces()
 	}
 
 	// build halfedgeMesh
-	// mesh->build(polygons, vertices);
+	mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
 	mesh_ready = true;
 }
 
