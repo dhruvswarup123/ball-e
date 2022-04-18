@@ -446,7 +446,7 @@ void BMesh::_stitch_faces()
 	}
 
 	// build halfedgeMesh
-	mesh->build(polygons, vertices);
+	mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
 	mesh_ready = true;
 }
 
