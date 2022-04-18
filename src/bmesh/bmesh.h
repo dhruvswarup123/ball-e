@@ -23,12 +23,12 @@ namespace Balle
 	public:
 		BMesh()
 		{
-			root = new SkeletalNode(Vector3D(0, 0, 0), 0.01, NULL); // root has no parent
+			root = new SkeletalNode(Vector3D(0, 0, 0), 0.1, NULL); // root has no parent
 
-			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.02, root);
+			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.12, root);
 			SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
 			SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
-			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
+			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.08, chest);
 			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
 			SkeletalNode *footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
 

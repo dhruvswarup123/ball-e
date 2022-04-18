@@ -235,6 +235,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			// That child should only have one rectangle mesh (essentially 2D)
 			_add_mesh(root, child, false, true, childlimb);
 			child->limb = childlimb;
+			childlimb->seal();
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
@@ -252,6 +253,7 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 			_add_mesh(last, temp, false, true, childlimb);
 			temp->limb = childlimb;
 			if (temp->children->size() == 0) { // reached the end
+				childlimb->seal();
 				cout << "Reached the leaf " << temp->radius << endl;
 				cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
 			}
