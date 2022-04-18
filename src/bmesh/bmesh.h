@@ -25,27 +25,27 @@ namespace Balle
 		{
 			root = new SkeletalNode(Vector3D(0, 0, 0), 0.1, NULL); // root has no parent
 
-			// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.02, root);
-			// SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
-			// SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
-			// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
+			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.12, root);
+			SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
+			SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
+			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.08, chest);
 			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
 			SkeletalNode *footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
 
-			// root->children->push_back(chest);
+			root->children->push_back(chest);
 			root->children->push_back(footL);
 			root->children->push_back(footR);
 
-			// chest->children->push_back(arml);
-			// chest->children->push_back(armr);
-			// chest->children->push_back(head);
+			chest->children->push_back(arml);
+			chest->children->push_back(armr);
+			chest->children->push_back(head);
 
 			all_nodes_vector = new vector<SkeletalNode *>;
 			all_nodes_vector->push_back(root);
-			// all_nodes_vector->push_back(chest);
-			// all_nodes_vector->push_back(arml);
-			// all_nodes_vector->push_back(armr);
-			// all_nodes_vector->push_back(head);
+			all_nodes_vector->push_back(chest);
+			all_nodes_vector->push_back(arml);
+			all_nodes_vector->push_back(armr);
+			all_nodes_vector->push_back(head);
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
