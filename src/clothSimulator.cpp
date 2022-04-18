@@ -358,6 +358,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	bool mesh_ready = bmesh->mesh_ready;
 	if (!mesh_ready)
 	{
+		// enable sphere rendering
 		int numlinks = bmesh->getNumLinks();
 
 		MatrixXf positions(4, numlinks * 2);
@@ -380,7 +381,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	}
 	else
 	{
-		// Draw the mesh for eeach limb
+		// Disable sphere rendering
 		// Draw the mesh
 		HalfedgeMesh *mesh = bmesh->mesh;
 		MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);

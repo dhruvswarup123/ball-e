@@ -25,27 +25,27 @@ namespace Balle
 		{
 			root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
 
-			SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
-			SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
-			SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
-			SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
+			// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
+			// SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
+			// SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
+			// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
 			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
 			SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
 
-			root->children->push_back(chest);
+			// root->children->push_back(chest);
 			root->children->push_back(footL);
 			root->children->push_back(footR);
 
-			chest->children->push_back(arml);
-			chest->children->push_back(armr);
-			chest->children->push_back(head);
+			// chest->children->push_back(arml);
+			// chest->children->push_back(armr);
+			// chest->children->push_back(head);
 
 			all_nodes_vector = new vector<SkeletalNode *>;
 			all_nodes_vector->push_back(root);
-			all_nodes_vector->push_back(chest);
-			all_nodes_vector->push_back(arml);
-			all_nodes_vector->push_back(armr);
-			all_nodes_vector->push_back(head);
+			// all_nodes_vector->push_back(chest);
+			// all_nodes_vector->push_back(arml);
+			// all_nodes_vector->push_back(armr);
+			// all_nodes_vector->push_back(head);
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
@@ -98,7 +98,7 @@ namespace Balle
 		void _add_faces(SkeletalNode *root);
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
-		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh);
+		void _update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh);
 		void _catmull_clark(HalfedgeMesh& mesh);
 	};
 };
