@@ -69,6 +69,11 @@ namespace Balle
 		vector<SkeletalNode *> *all_nodes_vector;
 
 		HalfedgeMesh *mesh;
+		vector<Triangle> triangles;
+		vector<Quadrangle> quadrangles;
+		vector<vector<size_t>> polygons;
+		vector<Vector3D> vertices;
+		bool mesh_ready = false;
 
 		// Function for the main bmesh algorithm
 		// Interpolate the sphere
@@ -83,8 +88,6 @@ namespace Balle
 	private:
 		// Temp counter used for the helpers
 		int si = 0;
-		vector<Triangle> triangles;
-		vector<Quadrangle> quadrangles;
 
 		void fpHelper(MatrixXf &positions, SkeletalNode *root);
 		void dsHelper(GLShader &shader, Misc::SphereMesh msm, SkeletalNode *root);
@@ -94,7 +97,7 @@ namespace Balle
 		void _add_faces(SkeletalNode *root);
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
-		void _add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, bool eface, Limb* limbmesh);
+		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool sface, bool eface, Limb *limbmesh);
 	};
 };
 #endif

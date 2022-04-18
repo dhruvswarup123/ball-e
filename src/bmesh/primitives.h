@@ -50,6 +50,9 @@ namespace Balle
                 quadrangles.push_back({pc, pa, c, a});
                 quadrangles.push_back({pd, pc, d, c});
                 quadrangles.push_back({pb, pd, b, d});
+                if (pa == a) {
+                    throw runtime_error("Same vertex for a quadrangle");
+                }
             }
             points.emplace_back(a);
             points.emplace_back(b);

@@ -216,11 +216,11 @@ void BMesh::_add_mesh(SkeletalNode * root, SkeletalNode * child, bool sface, boo
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
 void BMesh::_joint_iterate(SkeletalNode * root) {
-	cout << root << endl;
 	if (root == nullptr) {
 		cout << "ERROR: joint node is null" << endl;
 		return; // This should not be possible cause im calling this func only on joint nodes
 	}
+	cout << "current root address = " << root << endl;
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
 	// Because this is a joint node, iterate through all children
@@ -234,14 +234,14 @@ void BMesh::_joint_iterate(SkeletalNode * root) {
 		if (child->children->size() == 0) { // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
 			_add_mesh(root, child, false, true, childlimb);
-			// cout << "Error: joint->child->children->size() = 0" << endl;
+			child->limb = childlimb;
 		}
 		else if (child->children->size() == 1) { // limb node
 			SkeletalNode* temp = child;
 			SkeletalNode* last ;
 			while (temp->children->size() == 1) {
-				//temp->limb = childlimb;
-				_add_mesh(temp, (*temp->children)[0], first, true, childlimb);
+				temp->limb = childlimb;
+				_add_mesh(temp, (*temp->children)[0], first, false, childlimb);
 				if(first){
 					first = false;
 				}
@@ -319,8 +319,6 @@ void BMesh::_add_faces(SkeletalNode* root) {
 void BMesh::_stitch_faces() {
 	// label vertices in triangles and quadrangles
 	unordered_map<Vector3D, size_t> ids;
-	vector<vector<size_t>> polygons;
-	vector<Vector3D> vertices;
 	// label quadrangle vertices
 	for (const Quadrangle& quadrangle : quadrangles) {
 		if (ids.count(quadrangle.a) == 0) {
@@ -360,16 +358,16 @@ void BMesh::_stitch_faces() {
 		size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
 		size_t maxid = max(max(ida, idb), idc);
 		size_t minid = min(min(ida, idb), idc);
-		if (maxid - minid > 3) {
+		if (true) {//(maxid - minid > 3) {
 			polygons.push_back({ida, idb, idc});
 		}
 	}
 	
 	// build halfedgeMesh
-	mesh->build(polygons, vertices);
-
-	triangles.clear();
-	quadrangles.clear();
+	// mesh->build(polygons, vertices);
+	mesh_ready = true;
+	// triangles.clear();
+	// quadrangles.clear();
 }
 
 void  BMesh::print_skeleton() {
