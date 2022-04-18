@@ -11,7 +11,7 @@ set(CLOTHSIM_VIEWER_SOURCE
     collision/plane.cpp
 
     # Halfedge Mesh
-    mesh/halfedgeMesh.cpp
+    mesh/halfEdgeMesh.cpp
     mesh/mesh.cpp
     mesh/scene.cpp
     

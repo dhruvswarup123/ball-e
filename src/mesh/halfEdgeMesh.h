@@ -369,6 +369,9 @@ namespace CGL
          */
         HalfedgeCIter halfedge(void) const { return _halfedge; }
 
+        Vector3D newPosition;
+        bool isNew;
+
         /**
          * returns the number of edges (or equivalently, vertices) of this face
          */
