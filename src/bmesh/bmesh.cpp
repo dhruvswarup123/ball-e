@@ -364,40 +364,8 @@ void BMesh::_add_faces(SkeletalNode *root)
 		vertices[i].z = fringe_points[i].z;
 	}
 
-	unordered_set<Vector3D> verts_hull_check;
-	for (Quadrangle q : quadrangles) {
-		verts_hull_check.insert(q.a);
-		verts_hull_check.insert(q.b);
-		verts_hull_check.insert(q.c);
-		verts_hull_check.insert(q.d);
-	}
-	/*for (Vector3D v : verts_hull_check) {
-		cout << v.x << " " << v.y << " " << v.z << endl;
-	}*/
-
-	cout << "sv" << verts_hull_check.size() << endl;
-	
 	// Build a convex hull using quickhull algorithm and add the hull triangles
 	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
-	cout << "sm" << mesh.nvertices << endl;
-
-	/*for (int i = 0; i < mesh.nvertices; i++) {
-		const qh_vertex &qh_vert = mesh.vertices[i];
-		Vector3D qh_v_v3{ qh_vert.x, qh_vert.y , qh_vert.z };
-
-		Vector3D closest;
-		float closest_dist = 100;
-
-		for (const Vector3D &vert : verts_hull_check) {
-			if ((vert - qh_v_v3).norm() < closest_dist) {
-				closest_dist = (vert - qh_v_v3).norm();
-				closest = vert;
-			}
-		}
-		mesh.vertices[i].x = closest.x;
-		mesh.vertices[i].y = closest.y;
-		mesh.vertices[i].z = closest.z;
-	}*/
 
 	for (size_t i = 0; i < mesh.nindices; i += 3)
 	{
@@ -525,12 +493,6 @@ void BMesh::_stitch_faces()
 				cout << ida << " " << idb << " " << idc << endl;
 
 			}
-			else {
-				//cout << ida << " " << idb << " " << idc << endl;
-
-			}
-			//cout << ida << " " << idb << " " << idc << endl;
-
 		}
 	}
 
@@ -541,17 +503,6 @@ void BMesh::_stitch_faces()
 	cout << mesh->nEdges() << endl;
 
 	cout << mesh->nVertices() << endl;
-
-
-	//for (HalfedgeIter i = mesh->halfedgesBegin(); i != mesh->halfedgesEnd(); i++) {
-	//	// TODO: Fix this for faces
-	//	Vector3D vertex1 = i->vertex()->position;
-	//	Vector3D vertex2 = i->next()->vertex()->position;
-	//	cout << vertex1.x << " " << vertex1.y << " " << vertex1.z;
-	//	cout << " -> ";
-	//	cout << vertex2.x << " " << vertex2.y << " " << vertex2.z;
-	//	cout << endl;
-	//}
 }
 
 
