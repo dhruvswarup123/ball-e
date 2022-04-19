@@ -49,7 +49,6 @@ namespace Balle
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
-			mesh = new HalfedgeMesh();
 		};
 
 		~BMesh() = default;

@@ -520,6 +520,7 @@ void BMesh::_stitch_faces()
 	}
 
 	// build halfedgeMesh
+	mesh = new HalfedgeMesh(); 
 	mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
 	mesh_ready = true;
 	cout << mesh->nEdges() << endl;

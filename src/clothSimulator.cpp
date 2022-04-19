@@ -811,7 +811,18 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			interpolate_spheres();
 			break;
 		case ' ':
-			bmesh->generate_bmesh();
+			if (!bmesh->mesh_ready) {
+				bmesh->generate_bmesh();
+			}
+			else {
+				delete bmesh->mesh;
+				bmesh->triangles.clear();
+				bmesh->quadrangles.clear();
+				bmesh->polygons.clear();
+				bmesh->fringe_points.clear();
+				bmesh->vertices.clear();
+				bmesh->mesh_ready = false;
+			}
 			break;
 		}
 	}
