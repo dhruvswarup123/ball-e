@@ -419,7 +419,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 				ind += 2;
 			}
 		}
-
+		size_t actual_triangles_to_draw = ind;
 		ind = 0;
 		for (const Vector3D& vertex : bmesh->vertices)
 		{
@@ -427,12 +427,11 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 
 			ind += 1;
 		}
-
 		shader.bind();
 		shader.uploadIndices(mesh_indices);
 		shader.uploadAttrib("in_normal", mesh_normals);
 		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_TRIANGLES, 0, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+		shader.drawIndexed(GL_TRIANGLES, 0, actual_triangles_to_draw);
 
 		//// Draw the mesh
 		//MatrixXf mesh_positions(3, bmesh->mesh->nEdges()*2);
