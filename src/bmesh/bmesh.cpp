@@ -487,12 +487,12 @@ void BMesh::_stitch_faces()
 			// any_fringe_vertex_id divided by 4 is the group number
 			// if the triangle's 3 vertices are in the same group,
 			// then we don't want to add this to mesh cuz it's covering the fringe
+
 			if ((maxid / 4) != (minid / 4) ) // || maxid >= fringe_points.size() TODO
 			{
 				polygons.push_back({ida, idb, idc});
-				cout << ida << " " << idb << " " << idc << endl;
-
 			}
+			
 		}
 	}
 
