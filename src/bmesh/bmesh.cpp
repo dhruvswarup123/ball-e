@@ -469,16 +469,96 @@ void BMesh::_print_skeleton(SkeletalNode *root)
 // ======================== for subdivision =====================
 Vector3D get_face_point(const FaceIter f)
 {
-	return {0, 0, 0};
+	Vector3D fp{Vector3D(0,0,0)};
+	int num_vertices{0};
+
+	HalfedgeCIter h_start = f->halfedge();
+	HalfedgeCIter h = f->halfedge();
+
+	do{
+		num_vertices ++;
+		fp += h->vertex()->position;
+		h = h->next();
+	} while(h != h_start);
+	fp = fp / num_vertices;
+	return fp;
 }
 
 Vector3D get_edge_point(const EdgeIter e)
 {
-	return {0, 0, 0};
+	Vector3D ep{Vector3D(0,0,0)};
+
+	HalfedgeCIter h0 = e->halfedge();
+	HalfedgeCIter h1 = h0->twin();
+
+	// face points
+	ep += h0->face()->newPosition + h1->face()->newPosition;
+	// vertices
+	ep += h0->vertex()->position + h1->vertex()->position;
+	ep = ep/4.0;
+
+	return ep;
 }
 
-void connect_face(const FaceIter f)
+Vector3D get_new_vertex(const VertexIter v)
 {
+	Vector3D vp{Vector3D(0,0,0)};
+	int num_edges{0};
+	HalfedgeCIter h_start = v->halfedge();
+	HalfedgeCIter h = v->halfedge();
+
+	do{
+		num_edges ++;
+		vp += 1.0 * h->face()->newPosition;
+		vp += 2.0 * h->edge()->newPosition;
+		h = h->twin()->next();
+	} while(h != h_start);
+
+	vp += num_edges * v->position;
+	vp = vp / (4 * num_edges);
+
+	return vp;
+}
+
+// void connect_face(FaceIter f, HalfedgeMesh &mesh)
+// {
+
+
+// 	// create 1 face mid vertex
+// 	VertexIter v_face_mid = mesh.newVertex();
+// 	// create 4 edge mid points
+// 	VertexIter v_edge_mid[] = {mesh.newVertex(), mesh.newVertex(), mesh.newVertex(), mesh.newVertex()};
+// 	// create 4 new faces
+// 	FaceIter f[] = {mesh.newFace(), mesh.newFace(), mesh.newFace(), mesh.newFace()};
+
+// 	// HE from face mid to edge mid
+// 	HalfedgeIter h0[] = {mesh.newHalfedge(), mesh.newHalfedge(), mesh.newHalfedge(), mesh.newHalfedge()};
+// 	HalfedgeIter h1[] = {mesh.newHalfedge(), mesh.newHalfedge(), mesh.newHalfedge(), mesh.newHalfedge()};
+// 	EdgeIter e_01[] = {mesh.newEdge(), mesh.newEdge(), mesh.newEdge(), mesh.newEdge()};
+
+	
+
+// }
+
+void HalfedgeMesh::connect_new_mesh(FaceIter f)
+{
+	HalfedgeCIter h_start = f->halfedge();
+	HalfedgeCIter h = f->halfedge();
+
+	VertexIter face_point = newVertex();
+	face_point->position = f->newPosition;
+
+	do{
+		std::vector<VertexIter> v;
+		VertexIter edge_point0 = newVertex();
+		VertexIter edge_point1 = newVertex();
+		edge_point0->position = h->edge()->newPosition;
+		edge_point1->position = h->next()->edge()->newPosition;
+
+
+		h = h->next();
+	} while(h != h_start);
+
 }
 
 void BMesh::_catmull_clark(HalfedgeMesh &mesh)
@@ -489,6 +569,9 @@ void BMesh::_catmull_clark(HalfedgeMesh &mesh)
 	{
 		f->isNew = true;
 		f->newPosition = get_face_point(f);
+		VertexIter fp = mesh.newVertex();
+		fp->position = f->newPosition;
+		f->newVertex = fp;
 	}
 
 	// 2. Add new edge point
@@ -496,18 +579,19 @@ void BMesh::_catmull_clark(HalfedgeMesh &mesh)
 	{
 		e->isNew = true;
 		e->newPosition = get_edge_point(e);
+		VertexIter ep = mesh.newVertex();
+		ep->position = e->newPosition;
+		e->newVertex = ep;
 	}
 
 	// 3. Calculate new vertex
 	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
 	{
-		Vector3D pt;
-		// iterate connected edges
-
-		// iterate connected faces
-
 		v->isNew = false;
-		v->newPosition = pt;
+		v->newPosition = get_new_vertex(v);
+		VertexIter vp = mesh.newVertex();
+		vp->position = v->newPosition;
+		v->newVertex = vp;
 	}
 
 	// 4.update the position of vertex
@@ -519,6 +603,7 @@ void BMesh::_catmull_clark(HalfedgeMesh &mesh)
 	// 5. iterate faces, connect the face point and edge points
 	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
 	{
-		connect_face(f);
+		// connect_new_mesh(f);
+
 	}
 }

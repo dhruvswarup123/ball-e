@@ -370,6 +370,7 @@ namespace CGL
         HalfedgeCIter halfedge(void) const { return _halfedge; }
 
         Vector3D newPosition;
+        VertexIter newVertex;
         bool isNew;
 
         /**
@@ -432,6 +433,7 @@ namespace CGL
         Vector3D position; ///< location in 3-space
 
         Vector3D newPosition; ///< For Loop subdivision, this will be the updated position of the vertex
+        VertexIter newVertex;
         bool isNew; ///< For Loop subdivision, this flag should be true if and only if this vertex is a new vertex created by subdivision (i.e., if it corresponds to a vertex of the original mesh)
 
         /**
@@ -522,6 +524,7 @@ namespace CGL
         }
 
         Vector3D newPosition; ///< For Loop subdivision, this will be the position for the edge midpoint
+        VertexIter newVertex;
         bool isNew; ///< For Loop subdivision, this flag should be true if and only if this edge is a new edge created by subdivision (i.e., if it cuts across a triangle in the original mesh)
 
         EdgeRecord record;
@@ -629,7 +632,7 @@ namespace CGL
          */
         EdgeIter       flipEdge(EdgeIter e); ///< flip an edge, returning a pointer to the flipped edge
         VertexIter      splitEdge(EdgeIter e); ///< split an edge, returning a pointer to the inserted midpoint vertex; the halfedge of this vertex should refer to one of the edges in the original mesh
-
+        void connect_new_mesh(FaceIter f);
 
         void check_for(HalfedgeIter h) {
             for (HalfedgeIter he = halfedgesBegin(); he != halfedgesEnd(); he++) {
