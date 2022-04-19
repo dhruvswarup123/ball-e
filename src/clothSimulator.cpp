@@ -383,50 +383,47 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	{
 		// Disable sphere rendering
 		// Draw the mesh
+		int num_edges = bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 4;
 		HalfedgeMesh *mesh = bmesh->mesh;
-		MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+		MatrixXu mesh_indices(2, num_edges * 2);
 		MatrixXf mesh_positions(3, bmesh->vertices.size());
-		MatrixXf mesh_normals(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+		MatrixXf mesh_normals(3, num_edges * 2);
 
 		int ind = 0;
 		for (const vector<size_t> &polygon : bmesh->polygons)
 		{
 			if (polygon.size() == 3)
 			{
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+				mesh_indices.col(ind + 0) << polygon[0], polygon[1];
+				mesh_indices.col(ind + 2) << polygon[1], polygon[2];
+				mesh_indices.col(ind + 4) << polygon[2], polygon[0];
 
-				Vector3D vertex1 = bmesh->vertices[polygon[0]];
-				Vector3D vertex2 = bmesh->vertices[polygon[1]];
-				Vector3D vertex3 = bmesh->vertices[polygon[2]];
+				mesh_normals.col(ind + 0) << 0.0, 0.0, 0.0;
+				mesh_normals.col(ind + 2) << 0.0, 0.0, 0.0;
+				mesh_normals.col(ind + 4) << 0.0, 0.0, 0.0;
 
-				Vector3D normal = cross(vertex1 - vertex2, vertex1 - vertex3).unit();
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-				ind += 1;
+				ind += 6;
+
+
 			} else if (polygon.size() == 4) {
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+				mesh_indices.col(ind + 0) << polygon[0], polygon[1];
+				mesh_indices.col(ind + 2) << polygon[1], polygon[2];
+				mesh_indices.col(ind + 4) << polygon[2], polygon[3];
+				mesh_indices.col(ind + 6) << polygon[3], polygon[0];
 
-				Vector3D vertex1 = bmesh->vertices[polygon[0]];
-				Vector3D vertex2 = bmesh->vertices[polygon[1]];
-				Vector3D vertex3 = bmesh->vertices[polygon[2]];
-				Vector3D vertex4 = bmesh->vertices[polygon[3]];
+				mesh_normals.col(ind + 0) << 0.0, 0.0, 0.0;
+				mesh_normals.col(ind + 2) << 0.0, 0.0, 0.0;
+				mesh_normals.col(ind + 4) << 0.0, 0.0, 0.0;
+				mesh_normals.col(ind + 6) << 0.0, 0.0, 0.0;
 
-				Vector3D normal = cross(vertex1 - vertex2, vertex1 - vertex3).unit();
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-
-				mesh_indices.col(ind+1) << polygon[1], polygon[2], polygon[3];
-				normal = cross(vertex2 - vertex3, vertex2 - vertex4).unit();
-				mesh_normals.col(ind+1) << normal.x, normal.y, normal.z;
-				ind += 2;
+				ind += 8;
 			}
-
-			
 		}
 
 		ind = 0;
 		for (const Vector3D &vertex : bmesh->vertices)
 		{
 			mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
-
 			ind += 1;
 		}
 
@@ -434,7 +431,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 		shader.uploadIndices(mesh_indices);
 		shader.uploadAttrib("in_normal", mesh_normals);
 		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_TRIANGLES, 0, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+		shader.drawIndexed(GL_LINES, 0, num_edges * 2);
 	}
 }
 

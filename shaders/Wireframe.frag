@@ -36,4 +36,5 @@ void main() {
    
   // (Placeholder code. You will want to replace it.)
   out_color.a = 1;
+
 }

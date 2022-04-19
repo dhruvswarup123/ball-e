@@ -232,13 +232,14 @@ void BMesh::_update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root,
 	Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
 	Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
 	Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
+
 	if (add_root)
 	{
-		limbmesh->add_layer(root_lfup, root_rtup, root_lfdn, root_rtdn);
+		limbmesh->add_layer(root_lfup, root_rtup, root_rtdn, root_lfdn);
 	}
 	else
 	{
-		limbmesh->add_layer(child_lfup, child_rtup, child_lfdn, child_rtdn);
+		limbmesh->add_layer(child_lfup, child_rtup, child_rtdn, child_lfdn);
 	}
 }
 // Joint node helper
@@ -350,7 +351,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		//triangles.push_back({a, b, c});
+		triangles.push_back({a, b, c});
 	}
 	qh_free_mesh(mesh);
 

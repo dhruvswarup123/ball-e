@@ -46,10 +46,16 @@ namespace Balle
                 Vector3D pb = points[(n_layer - 1) * 4 + 1];
                 Vector3D pc = points[(n_layer - 1) * 4 + 2];
                 Vector3D pd = points[(n_layer - 1) * 4 + 3];
-                quadrangles.push_back({pa, pb, a, b});
+
+                /*quadrangles.push_back({pa, pb, a, b});
                 quadrangles.push_back({pc, pa, c, a});
                 quadrangles.push_back({pd, pc, d, c});
-                quadrangles.push_back({pb, pd, b, d});
+                quadrangles.push_back({pb, pd, b, d});*/
+
+                quadrangles.push_back({ pa, pb, b, a });
+                quadrangles.push_back({ pb, pc, c, b });
+                quadrangles.push_back({ pc, pd, d, c });
+                quadrangles.push_back({ pd, pa, a, d });
             }
             points.emplace_back(a);
             points.emplace_back(b);
