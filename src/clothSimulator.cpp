@@ -381,9 +381,35 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	}
 	else
 	{
+		// Draw the mesh
+		MatrixXf mesh_positions(3, bmesh->mesh->nHalfedges()*2);
+		MatrixXf mesh_normals(3, bmesh->mesh->nHalfedges()*2);
+
+		int ind = 0;
+		for (HalfedgeIter i = bmesh->mesh->halfedgesBegin(); i != bmesh->mesh->halfedgesEnd(); i++) {
+			// TODO: Fix this for faces
+			Vector3D vertex1 = i->vertex()->position;
+			Vector3D vertex2 = i->next()->vertex()->position;
+
+			// Vector3D normal = i->face()->normal();
+
+			mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+			mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+
+			mesh_normals.col(ind) << 0., 0., 0.;
+			mesh_normals.col(ind + 1) << 0., 0., 0.;
+
+			ind += 2;
+		}
+
+		shader.uploadAttrib("in_position", mesh_positions, false);
+		shader.uploadAttrib("in_normal", mesh_normals, false);
+
+		shader.drawArray(GL_LINES, 0, bmesh->mesh->nHalfedges()*2);
+
 		// Disable sphere rendering
 		// Draw the mesh
-		int num_edges = bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 4;
+		/*int num_edges = bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 4;
 		HalfedgeMesh *mesh = bmesh->mesh;
 		MatrixXu mesh_indices(2, num_edges * 2);
 		MatrixXf mesh_positions(3, bmesh->vertices.size());
@@ -431,7 +457,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 		shader.uploadIndices(mesh_indices);
 		shader.uploadAttrib("in_normal", mesh_normals);
 		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_LINES, 0, num_edges * 2);
+		shader.drawIndexed(GL_LINES, 0, num_edges * 2);*/
 	}
 }
 

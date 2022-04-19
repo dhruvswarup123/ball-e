@@ -319,6 +319,17 @@ void BMesh::_add_faces(SkeletalNode *root)
 	{
 		throw runtime_error("Adding faces from a limb node.");
 	}
+
+	// Add child Limb quadrangles
+	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+	for (SkeletalNode* child : *(root->children))
+	{
+		for (const Quadrangle& quadrangle : child->limb->quadrangles)
+		{
+			quadrangles.push_back(quadrangle);
+		}
+	}
+
 	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
 	if (root->parent && root->parent->limb)
 	{
@@ -335,6 +346,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 			fringe_points.push_back(point);
 		}
 	}
+	
 	// QuickHull algorithm
 	size_t n = fringe_points.size();
 	qh_vertex_t* vertices = (qh_vertex_t*) malloc(sizeof(qh_vertex_t) * n);
@@ -344,26 +356,53 @@ void BMesh::_add_faces(SkeletalNode *root)
 		vertices[i].y = fringe_points[i].y;
 		vertices[i].z = fringe_points[i].z;
 	}
+
+	unordered_set<Vector3D> verts_hull_check;
+	for (Quadrangle q : quadrangles) {
+		verts_hull_check.insert(q.a);
+		verts_hull_check.insert(q.b);
+		verts_hull_check.insert(q.c);
+		verts_hull_check.insert(q.d);
+	}
+	/*for (Vector3D v : verts_hull_check) {
+		cout << v.x << " " << v.y << " " << v.z << endl;
+	}*/
+
+	cout << "sv" << verts_hull_check.size() << endl;
+	
 	// Build a convex hull using quickhull algorithm and add the hull triangles
 	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+	cout << "sm" << mesh.nvertices << endl;
+
+	/*for (int i = 0; i < mesh.nvertices; i++) {
+		const qh_vertex &qh_vert = mesh.vertices[i];
+		Vector3D qh_v_v3{ qh_vert.x, qh_vert.y , qh_vert.z };
+
+		Vector3D closest;
+		float closest_dist = 100;
+
+		for (const Vector3D &vert : verts_hull_check) {
+			if ((vert - qh_v_v3).norm() < closest_dist) {
+				closest_dist = (vert - qh_v_v3).norm();
+				closest = vert;
+			}
+		}
+		mesh.vertices[i].x = closest.x;
+		mesh.vertices[i].y = closest.y;
+		mesh.vertices[i].z = closest.z;
+	}*/
+
 	for (size_t i = 0; i < mesh.nindices; i += 3)
 	{
 		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		triangles.push_back({a, b, c});
+
+		triangles.push_back({ a, b, c });
 	}
 	qh_free_mesh(mesh);
 
-	// Add child Limb quadrangles
-	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-	for (SkeletalNode *child : *(root->children))
-	{
-		for (const Quadrangle &quadrangle : child->limb->quadrangles)
-		{
-			quadrangles.push_back(quadrangle);
-		}
-	}
+	
 }
 
 void BMesh::_stitch_faces()
@@ -441,6 +480,40 @@ void BMesh::_stitch_faces()
 			// then we don't want to add this to mesh cuz it's covering the fringe
 			if (maxid / 4 != minid / 4 || maxid >= fringe_points.size())
 			{
+				/*{
+					Vector3D closest;
+					float closest_dist = 100;
+					for (const Vector3D& vert : vertices) {
+						if ((vert - triangle.a).norm() < closest_dist) {
+							closest_dist = (vert - triangle.a).norm();
+							closest = vert;
+						}
+					}
+					triangle.a = closest;
+				}
+				{
+					Vector3D closest;
+					float closest_dist = 100;
+					for (const Vector3D& vert : vertices) {
+						if ((vert - triangle.b).norm() < closest_dist) {
+							closest_dist = (vert - triangle.b).norm();
+							closest = vert;
+						}
+					}
+					triangle.b = closest;
+				}
+				{
+					Vector3D closest;
+					float closest_dist = 100;
+					for (const Vector3D& vert : vertices) {
+						if ((vert - triangle.c).norm() < closest_dist) {
+							closest_dist = (vert - triangle.c).norm();
+							closest = vert;
+						}
+					}
+					triangle.c = closest;
+				}*/
+
 				polygons.push_back({ida, idb, idc});
 			}
 		}
@@ -449,7 +522,23 @@ void BMesh::_stitch_faces()
 	// build halfedgeMesh
 	mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
 	mesh_ready = true;
+	cout << mesh->nEdges() << endl;
+
+	cout << mesh->nVertices() << endl;
+
+
+	//for (HalfedgeIter i = mesh->halfedgesBegin(); i != mesh->halfedgesEnd(); i++) {
+	//	// TODO: Fix this for faces
+	//	Vector3D vertex1 = i->vertex()->position;
+	//	Vector3D vertex2 = i->next()->vertex()->position;
+	//	cout << vertex1.x << " " << vertex1.y << " " << vertex1.z;
+	//	cout << " -> ";
+	//	cout << vertex2.x << " " << vertex2.y << " " << vertex2.z;
+	//	cout << endl;
+	//}
 }
+
+
 
 void BMesh::print_skeleton()
 {
