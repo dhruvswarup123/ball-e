@@ -190,9 +190,12 @@ namespace std
     inline size_t operator()(const CGL::Vector3D &key) const
     {
       using std::hash;
-      return ((hash<double>()(key.x) ^ (hash<double>()(key.y) << 1)) >> 1) ^ (hash<double>()(key.z) << 1);
+      return ((hash<double>()(roundf(key.x)) ^ (hash<double>()(roundf(key.y)) << 1)) >> 1) ^ (hash<double>()(roundf(key.z)) << 1);
     }
   };
 }
 
+inline double roundf(double x) {
+    return x;// round(x * 100);
+}
 #endif // CGL_VECTOR3D_H

@@ -407,57 +407,26 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 
 		shader.drawArray(GL_LINES, 0, bmesh->mesh->nHalfedges()*2);
 
-		// Disable sphere rendering
-		// Draw the mesh
-		/*int num_edges = bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 4;
-		HalfedgeMesh *mesh = bmesh->mesh;
-		MatrixXu mesh_indices(2, num_edges * 2);
-		MatrixXf mesh_positions(3, bmesh->vertices.size());
-		MatrixXf mesh_normals(3, num_edges * 2);
+		// enable sphere rendering
+		int numlinks = bmesh->getNumLinks();
 
-		int ind = 0;
-		for (const vector<size_t> &polygon : bmesh->polygons)
+		MatrixXf positions(4, numlinks * 2);
+		MatrixXf normals(4, numlinks * 2);
+
+		for (int i = 0; i < numlinks; i++)
 		{
-			if (polygon.size() == 3)
-			{
-				mesh_indices.col(ind + 0) << polygon[0], polygon[1];
-				mesh_indices.col(ind + 2) << polygon[1], polygon[2];
-				mesh_indices.col(ind + 4) << polygon[2], polygon[0];
-
-				mesh_normals.col(ind + 0) << 0.0, 0.0, 0.0;
-				mesh_normals.col(ind + 2) << 0.0, 0.0, 0.0;
-				mesh_normals.col(ind + 4) << 0.0, 0.0, 0.0;
-
-				ind += 6;
-
-
-			} else if (polygon.size() == 4) {
-				mesh_indices.col(ind + 0) << polygon[0], polygon[1];
-				mesh_indices.col(ind + 2) << polygon[1], polygon[2];
-				mesh_indices.col(ind + 4) << polygon[2], polygon[3];
-				mesh_indices.col(ind + 6) << polygon[3], polygon[0];
-
-				mesh_normals.col(ind + 0) << 0.0, 0.0, 0.0;
-				mesh_normals.col(ind + 2) << 0.0, 0.0, 0.0;
-				mesh_normals.col(ind + 4) << 0.0, 0.0, 0.0;
-				mesh_normals.col(ind + 6) << 0.0, 0.0, 0.0;
-
-				ind += 8;
-			}
+			normals.col(i * 2) << 0., 0., 0., 0.0;
+			normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
 		}
 
-		ind = 0;
-		for (const Vector3D &vertex : bmesh->vertices)
-		{
-			mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
-			ind += 1;
-		}
+		bmesh->fillPositions(positions);
 
-		shader.bind();
-		shader.uploadIndices(mesh_indices);
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_LINES, 0, num_edges * 2);*/
+		shader.uploadAttrib("in_position", positions, false);
+		shader.uploadAttrib("in_normal", normals, false);
+
+		shader.drawArray(GL_LINES, 0, numlinks * 2);
+
+		bmesh->drawSpheres(shader);
 	}
 }
 

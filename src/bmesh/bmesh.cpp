@@ -219,7 +219,14 @@ void BMesh::_update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root,
 	double root_radius = root->radius;
 	Vector3D child_center = child->pos;
 	double child_radius = child->radius;
-	Vector3D localx = (child_center - root_center).unit();
+	Vector3D localx;
+
+	if ((root->children->size() == 1) && (root->parent != NULL)) {
+		localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+	}
+	else {
+		localx = (child_center - root_center).unit();
+	}
 	// y = Z x x;
 	Vector3D localy = cross({0, 0, 1}, localx).unit();
 	Vector3D localz = cross(localx, localy).unit();
@@ -235,11 +242,11 @@ void BMesh::_update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root,
 
 	if (add_root)
 	{
-		limbmesh->add_layer(root_lfup, root_rtup, root_rtdn, root_lfdn);
+		limbmesh->add_layer(root_lfdn, root_rtdn, root_rtup, root_lfup);
 	}
 	else
 	{
-		limbmesh->add_layer(child_lfup, child_rtup, child_rtdn, child_lfdn);
+		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
 	}
 }
 // Joint node helper
@@ -450,8 +457,42 @@ void BMesh::_stitch_faces()
 		}
 	}
 	// label triangle vertices
-	for (const Triangle &triangle : triangles)
+	for (Triangle &triangle : triangles)
 	{
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D& vert : fringe_points) {
+				if ((vert - triangle.a).norm() < closest_dist) {
+					closest_dist = (vert - triangle.a).norm();
+					closest = vert;
+				}
+			}
+			triangle.a = closest;
+		}
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D& vert : fringe_points) {
+				if ((vert - triangle.b).norm() < closest_dist) {
+					closest_dist = (vert - triangle.b).norm();
+					closest = vert;
+				}
+			}
+			triangle.b = closest;
+		}
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D& vert : fringe_points) {
+				if ((vert - triangle.c).norm() < closest_dist) {
+					closest_dist = (vert - triangle.c).norm();
+					closest = vert;
+				}
+			}
+			triangle.c = closest;
+		}
+
 		if (ids.count(triangle.a) == 0)
 		{
 			ids[triangle.a] = ids.size();
@@ -478,44 +519,18 @@ void BMesh::_stitch_faces()
 			// any_fringe_vertex_id divided by 4 is the group number
 			// if the triangle's 3 vertices are in the same group,
 			// then we don't want to add this to mesh cuz it's covering the fringe
-			if (maxid / 4 != minid / 4 || maxid >= fringe_points.size())
+			if ((maxid / 4) != (minid / 4) ) // || maxid >= fringe_points.size() TODO
 			{
-				/*{
-					Vector3D closest;
-					float closest_dist = 100;
-					for (const Vector3D& vert : vertices) {
-						if ((vert - triangle.a).norm() < closest_dist) {
-							closest_dist = (vert - triangle.a).norm();
-							closest = vert;
-						}
-					}
-					triangle.a = closest;
-				}
-				{
-					Vector3D closest;
-					float closest_dist = 100;
-					for (const Vector3D& vert : vertices) {
-						if ((vert - triangle.b).norm() < closest_dist) {
-							closest_dist = (vert - triangle.b).norm();
-							closest = vert;
-						}
-					}
-					triangle.b = closest;
-				}
-				{
-					Vector3D closest;
-					float closest_dist = 100;
-					for (const Vector3D& vert : vertices) {
-						if ((vert - triangle.c).norm() < closest_dist) {
-							closest_dist = (vert - triangle.c).norm();
-							closest = vert;
-						}
-					}
-					triangle.c = closest;
-				}*/
-
 				polygons.push_back({ida, idb, idc});
+				cout << ida << " " << idb << " " << idc << endl;
+
 			}
+			else {
+				//cout << ida << " " << idb << " " << idc << endl;
+
+			}
+			//cout << ida << " " << idb << " " << idc << endl;
+
 		}
 	}
 
