@@ -81,6 +81,7 @@ void createGLContexts() {
   glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+
   // Create a nanogui screen and pass the glfw pointer to initialize
   screen = new Screen();
   screen->initialize(window, true);
@@ -88,6 +89,7 @@ void createGLContexts() {
   int width, height;
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
+
   glfwSwapInterval(1);
   glfwSwapBuffers(window);
 }
