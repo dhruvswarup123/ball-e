@@ -49,7 +49,6 @@ namespace Balle
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
-			mesh = new HalfedgeMesh();
 		};
 
 		~BMesh() = default;
@@ -85,6 +84,7 @@ namespace Balle
 		// Returns a vector (size variable) of arrays (size 2).
 		// The arrays are of the form (start, end) and do not contain any joints including the ends
 		void generate_bmesh();
+		void subdivision();
 
 	private:
 		// Temp counter used for the helpers

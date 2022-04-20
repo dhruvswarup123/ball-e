@@ -391,7 +391,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 		{
 			if (polygon.size() == 3)
 			{
-				//continue;
+				continue;
 				Vector3D vertex0 = bmesh->vertices[polygon[0]];
 				Vector3D vertex1 = bmesh->vertices[polygon[1]];
 				Vector3D vertex2 = bmesh->vertices[polygon[2]];
@@ -976,13 +976,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 				bmesh->mesh_ready = false;
 			}
 			break;
-		
-		case 'D': // subdivision
-		case 'd':
-			bmesh->subdivision();
-			break;
 		}
-		
 	}
 
 	return true;

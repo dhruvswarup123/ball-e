@@ -632,7 +632,6 @@ namespace CGL
          */
         EdgeIter       flipEdge(EdgeIter e); ///< flip an edge, returning a pointer to the flipped edge
         VertexIter      splitEdge(EdgeIter e); ///< split an edge, returning a pointer to the inserted midpoint vertex; the halfedge of this vertex should refer to one of the edges in the original mesh
-        void connect_new_mesh(FaceIter f);
 
         void check_for(HalfedgeIter h) {
             for (HalfedgeIter he = halfedgesBegin(); he != halfedgesEnd(); he++) {
