@@ -213,7 +213,7 @@ void BMesh::generate_bmesh()
 	_joint_iterate(root);
 	_stitch_faces();
 }
-void BMesh::_update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root, Limb* limbmesh)
+void BMesh::_update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root, Limb* limbmesh, bool isleaf)
 {
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
@@ -248,6 +248,15 @@ void BMesh::_update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root,
 	{
 		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
 	}
+
+	if (isleaf) {
+		Vector3D child_rtup = child_center + child_radius * localx + child_radius / 3 * localy + child_radius / 3. * localz;
+		Vector3D child_rtdn = child_center + child_radius * localx + child_radius / 3. * localy - child_radius / 3. * localz;
+		Vector3D child_lfup = child_center + child_radius * localx - child_radius / 3. * localy + child_radius / 3. * localz;
+		Vector3D child_lfdn = child_center + child_radius * localx - child_radius / 3. * localy - child_radius / 3. * localz;
+		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
+
+	}
 }
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
@@ -273,7 +282,7 @@ void BMesh::_joint_iterate(SkeletalNode* root)
 		if (child->children->size() == 0)
 		{ // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
-			_update_limb(root, child, false, childlimb);
+			_update_limb(root, child, false, childlimb, true);
 			child->limb = childlimb;
 			childlimb->seal();
 		}
@@ -284,7 +293,7 @@ void BMesh::_joint_iterate(SkeletalNode* root)
 			while (temp->children->size() == 1)
 			{
 				temp->limb = childlimb;
-				_update_limb(temp, (*temp->children)[0], true, childlimb);
+				_update_limb(temp, (*temp->children)[0], true, childlimb, false);
 				if (first)
 				{
 					first = false;
@@ -295,7 +304,7 @@ void BMesh::_joint_iterate(SkeletalNode* root)
 			}
 			if (temp->children->size() == 0)
 			{ // reached the end
-				_update_limb(last, temp, false, childlimb);
+				_update_limb(last, temp, false, childlimb, true);
 				temp->limb = childlimb;
 				childlimb->seal();
 				// cout << "Reached the leaf " << temp->radius << endl;
