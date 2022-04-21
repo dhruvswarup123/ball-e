@@ -217,35 +217,36 @@ void BMesh::_update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root,
 {
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
+
 	Vector3D child_center = child->pos;
 	double child_radius = child->radius;
-	Vector3D localx;
 
+	Vector3D localx;
 	if ((root->children->size() == 1) && (root->parent != NULL)) {
 		localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
 	}
 	else {
 		localx = (child_center - root_center).unit();
 	}
+
 	// y = Z x x;
 	Vector3D localy = cross({ 0, 0, 1 }, localx).unit();
 	Vector3D localz = cross(localx, localy).unit();
-	Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
-	Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
-	Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
-	Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
-
-	Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
-	Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
-	Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
-	Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
-
+	
 	if (add_root)
 	{
+		Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
+		Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
+		Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
+		Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
 		limbmesh->add_layer(root_lfdn, root_rtdn, root_rtup, root_lfup);
 	}
 	else
 	{
+		Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
+		Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
+		Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
+		Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
 		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
 	}
 
@@ -255,9 +256,9 @@ void BMesh::_update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root,
 		Vector3D child_lfup = child_center + child_radius * localx - child_radius / 3. * localy + child_radius / 3. * localz;
 		Vector3D child_lfdn = child_center + child_radius * localx - child_radius / 3. * localy - child_radius / 3. * localz;
 		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
-
 	}
 }
+
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
 void BMesh::_joint_iterate(SkeletalNode* root)
@@ -473,6 +474,11 @@ void BMesh::_stitch_faces()
 				}
 			}
 			triangle.c = closest;
+		}
+
+		// Check if the triangle is still valid
+		if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a)) {
+			continue;
 		}
 
 		if (ids.count(triangle.a) == 0)
