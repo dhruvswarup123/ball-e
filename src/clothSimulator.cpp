@@ -380,239 +380,235 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 		bmesh->drawSpheres(shader);
 	}
 	else
-	{
-		// METHOD 1: Draw the polygons not using indices (WORKING)
-		/*
-		HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXf mesh_positions(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
-		MatrixXf mesh_normals(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
+	{	
+		enum Method { polygons_no_indices, mesh_faces_no_indices, polygons_with_indices, mesh_wireframe_no_indices };
 
-		int ind = 0;
-		for (const vector<size_t>& polygon : bmesh->polygons)
-		{
-			if (polygon.size() == 3)
+		Method draw_method = mesh_faces_no_indices;
+
+		if (draw_method == polygons_no_indices) { // METHOD 1: Draw the polygons not using indices (WORKING)
+			
+			HalfedgeMesh* mesh = bmesh->mesh;
+			MatrixXf mesh_positions(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
+			MatrixXf mesh_normals(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
+
+			int ind = 0;
+			for (const vector<size_t>& polygon : bmesh->polygons)
 			{
-				//continue;
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
+				if (polygon.size() == 3)
+				{
+					//continue;
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
 
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
 
-				mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
-				mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
-				mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
+					mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
+					mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
+					mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
 
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
 
-				ind += 1;
+					ind += 1;
+				}
+				else if (polygon.size() == 4) {
+					//continue;
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
+					Vector3D vertex3 = bmesh->vertices[polygon[3]];
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+
+					mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
+					mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
+					mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+
+					mesh_positions.col(ind * 3) << vertex2.x, vertex2.y, vertex2.z;
+					mesh_positions.col(ind * 3 + 1) << vertex3.x, vertex3.y, vertex3.z;
+					mesh_positions.col(ind * 3 + 2) << vertex0.x, vertex0.y, vertex0.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
 			}
-			else if (polygon.size() == 4) {
-				//continue;
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
-				Vector3D vertex3 = bmesh->vertices[polygon[3]];
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
-
-				mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
-				mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
-				mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-
-				mesh_positions.col(ind * 3) << vertex2.x, vertex2.y, vertex2.z;
-				mesh_positions.col(ind * 3 + 1) << vertex3.x, vertex3.y, vertex3.z;
-				mesh_positions.col(ind * 3 + 2) << vertex0.x, vertex0.y, vertex0.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-			}
+			size_t actual_triangles_to_draw = ind * 3;
+			ind = 0;
+			shader.uploadAttrib("in_normal", mesh_normals);
+			shader.uploadAttrib("in_position", mesh_positions);
+			shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
 		}
-		size_t actual_triangles_to_draw = ind*3;
-		ind = 0;
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
-		*/
+		else if (draw_method == mesh_faces_no_indices) { // METHOD 2: Draw the mesh faces not using indices (WORKING)
+			
+			HalfedgeMesh* mesh = bmesh->mesh;
+			MatrixXf mesh_positions(3, mesh->nFaces() * 6);
+			MatrixXf mesh_normals(3, mesh->nFaces() * 6);
 
-		// METHOD 2: Draw the mesh faces not using indices (WORKING)
-		HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXf mesh_positions(3, mesh->nFaces() * 6);
-		MatrixXf mesh_normals(3, mesh->nFaces() * 6);
-
-		int ind = 0;
-		for (auto face = mesh->facesBegin(); face != mesh->facesEnd(); face++)
-		{	
-			Vector3D normal = face->normal();
-
-			int deg = face->degree();
-			if (deg == 3)
+			int ind = 0;
+			for (auto face = mesh->facesBegin(); face != mesh->facesEnd(); face++)
 			{
-				Vector3D v0 = face->halfedge()->vertex()->position;
-				Vector3D v1 = face->halfedge()->next()->vertex()->position;
-				Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
+				Vector3D normal = face->normal();
 
-				mesh_positions.col(ind*3) << v0.x, v0.y, v0.z;
-				mesh_positions.col(ind*3+1) << v1.x, v1.y, v1.z;
-				mesh_positions.col(ind*3+2) << v2.x, v2.y, v2.z;
+				int deg = face->degree();
+				if (deg == 3)
+				{
+					Vector3D v0 = face->halfedge()->vertex()->position;
+					Vector3D v1 = face->halfedge()->next()->vertex()->position;
+					Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
 
-				mesh_normals.col(ind*3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind*3+1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind*3+2) << normal.x, normal.y, normal.z;
+					mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
+					mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
+					mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
 
-				ind += 1;
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
+				else if (deg == 4) {
+					Vector3D v0 = face->halfedge()->vertex()->position;
+					Vector3D v1 = face->halfedge()->next()->vertex()->position;
+					Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
+					Vector3D v3 = face->halfedge()->next()->next()->next()->vertex()->position;
+
+					mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
+					mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
+					mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+
+					mesh_positions.col(ind * 3) << v2.x, v2.y, v2.z;
+					mesh_positions.col(ind * 3 + 1) << v3.x, v3.y, v3.z;
+					mesh_positions.col(ind * 3 + 2) << v0.x, v0.y, v0.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
 			}
-			else if (deg == 4) {
-				Vector3D v0 = face->halfedge()->vertex()->position;
-				Vector3D v1 = face->halfedge()->next()->vertex()->position;
-				Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
-				Vector3D v3 = face->halfedge()->next()->next()->next()->vertex()->position;
 
-				mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
-				mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
-				mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-
-				mesh_positions.col(ind * 3) << v2.x, v2.y, v2.z;
-				mesh_positions.col(ind * 3 + 1) << v3.x, v3.y, v3.z;
-				mesh_positions.col(ind * 3 + 2) << v0.x, v0.y, v0.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-			}
+			shader.uploadAttrib("in_normal", mesh_normals);
+			shader.uploadAttrib("in_position", mesh_positions);
+			shader.drawArray(GL_TRIANGLES, 0, ind * 3);
 		}
+		else if (draw_method == polygons_with_indices) { // METHOD 3: Draw the polygons using indices (NOT WORKING)
+			HalfedgeMesh* mesh = bmesh->mesh;
+			MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+			MatrixXf mesh_positions(3, bmesh->vertices.size());
+			MatrixXf mesh_normals(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
 
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawArray(GL_TRIANGLES, 0, ind*3);
-		
-
-
-		// METHOD 3: Draw the polygons using indices (NOT WORKING)
-		/*
-		HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
-		MatrixXf mesh_positions(3, bmesh->vertices.size());
-		MatrixXf mesh_normals(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
-
-		int ind = 0;
-		for (const vector<size_t>& polygon : bmesh->polygons)
-		{
-			if (polygon.size() == 3)
+			int ind = 0;
+			for (const vector<size_t>& polygon : bmesh->polygons)
 			{
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+				if (polygon.size() == 3)
+				{
+					mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
 
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
 
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
 
-				//Vector3D normal = cross(vertex0 - vertex1, vertex0 - vertex2).unit();
-				////////////////// HERE THE NORMALS DO NOT CORRESPOND TO EACH VERTEX
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
+					//Vector3D normal = cross(vertex0 - vertex1, vertex0 - vertex2).unit();
+					////////////////// HERE THE NORMALS DO NOT CORRESPOND TO EACH VERTEX
+					mesh_normals.col(ind) << normal.x, normal.y, normal.z;
+					ind += 1;
+				}
+				else if (polygon.size() == 4) {
+					mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+					mesh_indices.col(ind + 1) << polygon[2], polygon[3], polygon[0];
+
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
+					Vector3D vertex3 = bmesh->vertices[polygon[3]];
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+
+					//Vector3D normal = cross(vertex3 - vertex2, vertex1 - vertex2).unit();
+
+					mesh_normals.col(ind) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind + 1) << normal.x, normal.y, normal.z;
+					ind += 2;
+				}
+			}
+			size_t actual_triangles_to_draw = ind;
+			ind = 0;
+			for (const Vector3D& vertex : bmesh->vertices)
+			{
+				mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
+
 				ind += 1;
 			}
-			else if (polygon.size() == 4) {
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
-				mesh_indices.col(ind + 1) << polygon[2], polygon[3], polygon[0];
+			shader.bind();
+			shader.uploadIndices(mesh_indices);
+			shader.uploadAttrib("in_normal", mesh_normals);
+			shader.uploadAttrib("in_position", mesh_positions);
+			shader.drawIndexed(GL_TRIANGLES, 0, actual_triangles_to_draw);
+		}
+		else if (draw_method == mesh_wireframe_no_indices) { // METHOD 4: Draw the Wireframe not using indices (WORKING)
+			MatrixXf mesh_positions(3, bmesh->mesh->nEdges() * 2);
+			MatrixXf mesh_normals(3, bmesh->mesh->nEdges() * 2);
 
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
-				Vector3D vertex3 = bmesh->vertices[polygon[3]];
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+			int ind = 0;
+			for (EdgeIter i = bmesh->mesh->edgesBegin(); i != bmesh->mesh->edgesEnd(); i++) {
+				// TODO: Fix this for faces
+				Vector3D vertex1 = i->halfedge()->vertex()->position;
+				Vector3D vertex2 = i->halfedge()->next()->vertex()->position;
 
-				//Vector3D normal = cross(vertex3 - vertex2, vertex1 - vertex2).unit();
+				// Vector3D normal = i->face()->normal();
 
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind + 1) << normal.x, normal.y, normal.z;
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+
 				ind += 2;
 			}
+
+			shader.uploadAttrib("in_position", mesh_positions, false);
+			shader.uploadAttrib("in_normal", mesh_normals, false);
+
+			shader.drawArray(GL_LINES, 0, bmesh->mesh->nEdges() * 2);
+
+			int numlinks = bmesh->getNumLinks();
+
+			MatrixXf positions(4, numlinks * 2);
+			MatrixXf normals(4, numlinks * 2);
+
+			for (int i = 0; i < numlinks; i++)
+			{
+				normals.col(i * 2) << 0., 0., 0., 0.0;
+				normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
+			}
+
+			bmesh->fillPositions(positions);
+
+			shader.uploadAttrib("in_position", positions, false);
+			shader.uploadAttrib("in_normal", normals, false);
+
+			shader.drawArray(GL_LINES, 0, numlinks * 2);
+
+			bmesh->drawSpheres(shader);
 		}
-		size_t actual_triangles_to_draw = ind;
-		ind = 0;
-		for (const Vector3D& vertex : bmesh->vertices)
-		{
-			mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
-
-			ind += 1;
-		}
-		shader.bind();
-		shader.uploadIndices(mesh_indices);
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_TRIANGLES, 0, actual_triangles_to_draw);
-		*/
-
-		// METHOD 4: Draw the Wireframe not using indices (WORKING)
-		/*
-		MatrixXf mesh_positions(3, bmesh->mesh->nEdges()*2);
-		MatrixXf mesh_normals(3, bmesh->mesh->nEdges()*2);
-
-		int ind = 0;
-		for (EdgeIter i = bmesh->mesh->edgesBegin(); i != bmesh->mesh->edgesEnd(); i++) {
-			// TODO: Fix this for faces
-			Vector3D vertex1 = i->halfedge()->vertex()->position;
-			Vector3D vertex2 = i->halfedge()->next()->vertex()->position;
-
-			// Vector3D normal = i->face()->normal();
-
-			mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
-			mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
-
-			mesh_normals.col(ind) << 0., 0., 0.;
-			mesh_normals.col(ind + 1) << 0., 0., 0.;
-
-			ind += 2;
-		}
-
-		shader.uploadAttrib("in_position", mesh_positions, false);
-		shader.uploadAttrib("in_normal", mesh_normals, false);
-
-		shader.drawArray(GL_LINES, 0, bmesh->mesh->nEdges()*2);
-		*/
-		
-		// METHOD 5: Draw the spheres too (WORKING)
-		/*
-		int numlinks = bmesh->getNumLinks();
-
-		MatrixXf positions(4, numlinks * 2);
-		MatrixXf normals(4, numlinks * 2);
-
-		for (int i = 0; i < numlinks; i++)
-		{
-			normals.col(i * 2) << 0., 0., 0., 0.0;
-			normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
-		}
-
-		bmesh->fillPositions(positions);
-
-		shader.uploadAttrib("in_position", positions, false);
-		shader.uploadAttrib("in_normal", normals, false);
-
-		shader.drawArray(GL_LINES, 0, numlinks * 2);
-
-		bmesh->drawSpheres(shader);
-		*/
 	}
 }
 
