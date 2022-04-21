@@ -38,7 +38,7 @@ void main() {
   out_color.a = 1;
 
   if (gl_FrontFacing == false){
-	out_color = (vec4(1, 1, 1, 0) - v_normal) / 2 * 0.5;
+	out_color = (vec4(1, 1, 1, 0) - v_normal) / 2 * 0.3;
 	out_color.a = 1;
   }
   else{

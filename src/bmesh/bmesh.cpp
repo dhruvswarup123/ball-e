@@ -313,6 +313,7 @@ void BMesh::_joint_iterate(SkeletalNode* root)
 			_joint_iterate(child);
 		}
 	}
+
 	_add_faces(root);
 }
 
@@ -338,11 +339,14 @@ void BMesh::_add_faces(SkeletalNode* root)
 	}
 
 	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
+	vector<Vector3D> local_fringe_points;
+
 	if (root->parent && root->parent->limb)
 	{
 		for (const Vector3D& point : root->parent->limb->get_last_four_points())
 		{
 			fringe_points.push_back(point);
+			local_fringe_points.push_back(point);
 		}
 	}
 	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
@@ -351,17 +355,18 @@ void BMesh::_add_faces(SkeletalNode* root)
 		for (const Vector3D& point : child->limb->get_first_four_points())
 		{
 			fringe_points.push_back(point);
+			local_fringe_points.push_back(point);
 		}
 	}
 
 	// QuickHull algorithm
-	size_t n = fringe_points.size();
+	size_t n = local_fringe_points.size();
 	qh_vertex_t* vertices = (qh_vertex_t*)malloc(sizeof(qh_vertex_t) * n);
 	for (size_t i = 0; i < n; i++)
 	{
-		vertices[i].x = fringe_points[i].x;
-		vertices[i].y = fringe_points[i].y;
-		vertices[i].z = fringe_points[i].z;
+		vertices[i].x = local_fringe_points[i].x;
+		vertices[i].y = local_fringe_points[i].y;
+		vertices[i].z = local_fringe_points[i].z;
 	}
 
 	// Build a convex hull using quickhull algorithm and add the hull triangles
@@ -498,7 +503,7 @@ void BMesh::_stitch_faces()
 
 	// build halfedgeMesh
 	mesh = new HalfedgeMesh();
-	//mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
+	mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
 	mesh_ready = true;
 	cout << mesh->nEdges() << endl;
 

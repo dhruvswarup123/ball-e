@@ -382,6 +382,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 	else
 	{
 		// METHOD 1: Draw the polygons not using indices (WORKING)
+		/*
 		HalfedgeMesh* mesh = bmesh->mesh;
 		MatrixXf mesh_positions(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
 		MatrixXf mesh_normals(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
@@ -409,6 +410,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 				ind += 1;
 			}
 			else if (polygon.size() == 4) {
+				//continue;
 				Vector3D vertex0 = bmesh->vertices[polygon[0]];
 				Vector3D vertex1 = bmesh->vertices[polygon[1]];
 				Vector3D vertex2 = bmesh->vertices[polygon[2]];
@@ -441,9 +443,10 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 		shader.uploadAttrib("in_normal", mesh_normals);
 		shader.uploadAttrib("in_position", mesh_positions);
 		shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
+		*/
 
 		// METHOD 2: Draw the mesh faces not using indices (WORKING)
-		/*HalfedgeMesh* mesh = bmesh->mesh;
+		HalfedgeMesh* mesh = bmesh->mesh;
 		MatrixXf mesh_positions(3, mesh->nFaces() * 6);
 		MatrixXf mesh_normals(3, mesh->nFaces() * 6);
 
@@ -500,7 +503,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 		shader.uploadAttrib("in_normal", mesh_normals);
 		shader.uploadAttrib("in_position", mesh_positions);
 		shader.drawArray(GL_TRIANGLES, 0, ind*3);
-		*/
+		
 
 
 		// METHOD 3: Draw the polygons using indices (NOT WORKING)
