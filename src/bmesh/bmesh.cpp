@@ -351,6 +351,7 @@ void BMesh::_add_faces(SkeletalNode* root)
 	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
 	vector<Vector3D> local_fringe_points;
 
+
 	if (root->parent && root->parent->limb)
 	{
 		for (const Vector3D& point : root->parent->limb->get_last_four_points())
