@@ -358,6 +358,10 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 	bool mesh_ready = bmesh->mesh_ready;
 	if (!mesh_ready)
 	{
+
+		
+
+
 		// enable sphere rendering
 		int numlinks = bmesh->getNumLinks();
 
@@ -372,6 +376,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 
 		bmesh->fillPositions(positions);
 
+		shader.setUniform("u_balls", true, false);
 		shader.uploadAttrib("in_position", positions, false);
 		shader.uploadAttrib("in_normal", normals, false);
 
@@ -390,6 +395,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 			HalfedgeMesh* mesh = bmesh->mesh;
 			MatrixXf mesh_positions(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
 			MatrixXf mesh_normals(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
+			
 
 			int ind = 0;
 			for (const vector<size_t>& polygon : bmesh->polygons)
@@ -444,6 +450,8 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 			}
 			size_t actual_triangles_to_draw = ind * 3;
 			ind = 0;
+
+			shader.setUniform("u_balls", false, false);
 			shader.uploadAttrib("in_normal", mesh_normals);
 			shader.uploadAttrib("in_position", mesh_positions);
 			shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
@@ -504,6 +512,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 				}
 			}
 
+			shader.setUniform("u_balls", false, false);
 			shader.uploadAttrib("in_normal", mesh_normals);
 			shader.uploadAttrib("in_position", mesh_positions);
 			shader.drawArray(GL_TRIANGLES, 0, ind * 3);
@@ -558,6 +567,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 				ind += 1;
 			}
 			shader.bind();
+			shader.setUniform("u_balls", false, false);
 			shader.uploadIndices(mesh_indices);
 			shader.uploadAttrib("in_normal", mesh_normals);
 			shader.uploadAttrib("in_position", mesh_positions);
@@ -586,7 +596,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 
 			shader.uploadAttrib("in_position", mesh_positions, false);
 			shader.uploadAttrib("in_normal", mesh_normals, false);
-
+			shader.setUniform("u_balls", false, false);
 			shader.drawArray(GL_LINES, 0, bmesh->mesh->nEdges() * 2);
 
 			int numlinks = bmesh->getNumLinks();
