@@ -16,6 +16,7 @@ using namespace CGL;
 
 namespace Balle
 {
+	enum Method { polygons_no_indices, mesh_faces_no_indices, polygons_with_indices, mesh_wireframe_no_indices, not_ready };
 
 	// Contains the tree and other functions that access the tree
 	struct BMesh
@@ -66,14 +67,17 @@ namespace Balle
 
 		SkeletalNode *root;
 		vector<SkeletalNode *> *all_nodes_vector;
+		Method shader_method = not_ready;
 
-		HalfedgeMesh *mesh;
+		HalfedgeMesh *mesh = nullptr;
 		vector<Triangle> triangles;
 		vector<Quadrangle> quadrangles;
 		vector<vector<size_t>> polygons;
 		vector<Vector3D> fringe_points;
+		vector<Vector3D> all_points;
+		unordered_set<Vector3D> unique_extra_points;
 		vector<Vector3D> vertices;
-		bool mesh_ready = false;
+		
 
 		// Function for the main bmesh algorithm
 		// Interpolate the sphere
