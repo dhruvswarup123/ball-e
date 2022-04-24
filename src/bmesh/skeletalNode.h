@@ -42,6 +42,6 @@ namespace Balle
 		vector<SkeletalNode *> *children;
 
 		// Limb primitives that surrounds this skeletal node
-		Limb *limb;
+		Limb *limb = nullptr;
 	};
 };
