@@ -366,7 +366,6 @@ void BMesh::_add_faces(SkeletalNode *root)
 		for (const Vector3D &point : root->parent->limb->get_last_four_points())
 		{
 			fringe_points.push_back(point);
-			all_points.push_back(point);
 			local_hull_points.push_back(point);
 		}
 	}
@@ -378,7 +377,6 @@ void BMesh::_add_faces(SkeletalNode *root)
 			for (const Vector3D &point : child->limb->get_first_four_points())
 			{
 				fringe_points.push_back(point);
-				all_points.push_back(point);
 				local_hull_points.push_back(point);
 			}
 		}
@@ -388,9 +386,9 @@ void BMesh::_add_faces(SkeletalNode *root)
 	{
 		Vector3D extra_point = root->pos;
 		double phi = rand() * PI / RAND_MAX, theta = rand() * 2 * PI / RAND_MAX;
-		double x = (root->radius + 0.0001) * cos(phi) * sin(theta);
-		double y = (root->radius + 0.0001) * sin(phi) * sin(theta);
-		double z = (root->radius + 0.0001) * cos(theta);
+		double x = root->radius * cos(phi) * sin(theta);
+		double y = root->radius * sin(phi) * sin(theta);
+		double z = root->radius * cos(theta);
 		extra_point = extra_point + Vector3D(x, y, z);
 		local_hull_points.push_back(extra_point);
 	}
@@ -407,29 +405,21 @@ void BMesh::_add_faces(SkeletalNode *root)
 
 	// Build a convex hull using quickhull algorithm and add the hull triangles
 	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+	unordered_set<Vector3D> unique_extra_points;
 	for (size_t i = 0; i < mesh.nindices; i += 3)
 	{
 		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		// if ((a - root->pos).norm() < root->radius + 0.001)
-		// {
-		// 	unique_extra_points.insert(a);
-		// }
-		// if ((b - root->pos).norm() < root->radius + 0.001)
-		// {
-		// 	unique_extra_points.insert(b);
-		// }
-		// if ((c - root->pos).norm() < root->radius + 0.001)
-		// {
-		// 	unique_extra_points.insert(c);
-		// }
-		unique_extra_points.insert(a);
-		unique_extra_points.insert(b);
-		unique_extra_points.insert(c);
+		unique_extra_points.insert({a, b, c});
 		triangles.push_back({a, b, c});
 	}
 	qh_free_mesh(mesh);
+
+	for (const Vector3D &unique_extra_point : unique_extra_points)
+	{
+		fringe_points.push_back(unique_extra_point);
+	}
 }
 
 void BMesh::_stitch_faces()
@@ -446,10 +436,6 @@ void BMesh::_stitch_faces()
 			ids[fringe_point] = ids.size();
 			vertices.push_back(fringe_point);
 		}
-	}
-	for (const Vector3D &extra_point : unique_extra_points)
-	{
-		all_points.push_back(extra_point);
 	}
 	// label quadrangle vertices
 	for (const Quadrangle &quadrangle : quadrangles)
@@ -483,93 +469,84 @@ void BMesh::_stitch_faces()
 	// label triangle vertices
 	for (Triangle &triangle : triangles)
 	{
-		// {
-		// 	Vector3D closest;
-		// 	float closest_dist = 100;
-		// 	for (const Vector3D &vert : all_points)
-		// 	{
-		// 		if ((vert - triangle.a).norm() < closest_dist)
-		// 		{
-		// 			closest_dist = (vert - triangle.a).norm();
-		// 			closest = vert;
-		// 		}
-		// 	}
-		// 	triangle.a = closest;
-		// }
-		// {
-		// 	Vector3D closest;
-		// 	float closest_dist = 100;
-		// 	for (const Vector3D &vert : all_points)
-		// 	{
-		// 		if ((vert - triangle.b).norm() < closest_dist)
-		// 		{
-		// 			closest_dist = (vert - triangle.b).norm();
-		// 			closest = vert;
-		// 		}
-		// 	}
-		// 	triangle.b = closest;
-		// }
-		// {
-		// 	Vector3D closest;
-		// 	float closest_dist = 100;
-		// 	for (const Vector3D &vert : all_points)
-		// 	{
-		// 		if ((vert - triangle.c).norm() < closest_dist)
-		// 		{
-		// 			closest_dist = (vert - triangle.c).norm();
-		// 			closest = vert;
-		// 		}
-		// 	}
-		// 	triangle.c = closest;
-		// }
-
-		// Check if the triangle is still valid
-		if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
 		{
-			continue;
-		}
-
-		// Quickhull will generate faces cover the limb fringe vertices
-		// dont want those to be added to mesh
-		if (ids.count(triangle.a) != 0 && ids.count(triangle.b) != 0 && ids.count(triangle.b) != 0)
-		{
-			size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-			size_t maxid = max(max(ida, idb), idc);
-			size_t minid = min(min(ida, idb), idc);
-			unordered_set<size_t> distinct_ids = {ida, idb, idc};
-			if (distinct_ids.size() == 3)
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
 			{
-				// any_fringe_vertex_id divided by 4 is the group number
-				// if the triangle's 3 vertices are in the same group,
-				// then we don't want to add this to mesh cuz it's covering the fringe
-
-				if ((maxid / 4) != (minid / 4) || minid >= fringe_points.size())
+				if ((vert - triangle.a).norm() < closest_dist)
 				{
-					polygons.push_back({ida, idb, idc});
+					closest_dist = (vert - triangle.a).norm();
+					closest = vert;
 				}
 			}
+			triangle.a = closest;
 		}
-		else
 		{
-			if (ids.count(triangle.a) == 0)
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
 			{
-				ids[triangle.a] = ids.size();
-				vertices.push_back(triangle.a);
+				if ((vert - triangle.b).norm() < closest_dist)
+				{
+					closest_dist = (vert - triangle.b).norm();
+					closest = vert;
+				}
 			}
-			if (ids.count(triangle.b) == 0)
-			{
-				ids[triangle.b] = ids.size();
-				vertices.push_back(triangle.b);
-			}
-			if (ids.count(triangle.c) == 0)
-			{
-				ids[triangle.c] = ids.size();
-				vertices.push_back(triangle.c);
-			}
-			size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-			polygons.push_back({ida, idb, idc});
+			triangle.b = closest;
 		}
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
+			{
+				if ((vert - triangle.c).norm() < closest_dist)
+				{
+					closest_dist = (vert - triangle.c).norm();
+					closest = vert;
+				}
+			}
+			triangle.c = closest;
+		}
+
+		// Check if the triangle is still valid
+		// if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
+		// {
+		// 	continue;
+		// }
+
+		if (ids.count(triangle.a) == 0)
+		{
+			ids[triangle.a] = ids.size();
+			vertices.push_back(triangle.a);
+		}
+		if (ids.count(triangle.b) == 0)
+		{
+			ids[triangle.b] = ids.size();
+			vertices.push_back(triangle.b);
+		}
+		if (ids.count(triangle.c) == 0)
+		{
+			ids[triangle.c] = ids.size();
+			vertices.push_back(triangle.c);
+		}
+		// Quickhull will generate faces cover the limb fringe vertices
+		// dont want those to be added to mesh
 		size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+		size_t maxid = max(max(ida, idb), idc);
+		size_t minid = min(min(ida, idb), idc);
+		unordered_set<size_t> distinct_ids = {ida, idb, idc};
+		if (distinct_ids.size() == 3)
+		{
+			// any_fringe_vertex_id divided by 4 is the group number
+			// if the triangle's 3 vertices are in the same group,
+			// then we don't want to add this to mesh cuz it's covering the fringe
+
+			if ((maxid / 4) != (minid / 4)) // || maxid >= fringe_points.size() TODO
+			{
+				polygons.push_back({ida, idb, idc});
+			}
+		}
 	}
 
 	// build halfedgeMesh
