@@ -64,9 +64,15 @@ void BMesh::dsHelper(GLShader &shader, Misc::SphereMesh msm, SkeletalNode *root)
 
 	nanogui::Color color(0.0f, 1.0f, 1.0f, 1.0f);
 
-	if (root->selected)
+	if (root->selected && root->interpolated)
 	{
+		color = nanogui::Color(0.8f, 0.5f, 0.5f, 1.0f);
+	}
+	else if (root->selected) {
 		color = nanogui::Color(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	else if (root->interpolated) {
+		color = nanogui::Color(0.6f, 0.6f, 0.6f, 1.0f);
 	}
 
 	msm.draw_sphere(shader, root->pos, root->radius, color);
