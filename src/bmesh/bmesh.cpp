@@ -431,7 +431,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 		}
 	}
 	// Add something related to current joint node
-	for (int tmp = 0; tmp < 500; tmp++)
+	for (int tmp = 0; tmp < 10; tmp++)
 	{
 		Vector3D extra_point = root->pos;
 		double phi = rand() * PI / RAND_MAX, theta = rand() * 2 * PI / RAND_MAX;
