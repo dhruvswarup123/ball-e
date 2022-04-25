@@ -57,7 +57,7 @@ int BMesh::getNumLinks()
 	return gnlHelper(root);
 }
 
-void BMesh::dsHelper(GLShader &shader, Misc::SphereMesh msm, SkeletalNode *root)
+void BMesh::dsHelper(GLShader &shader, Misc::SphereMesh &msm, SkeletalNode *root)
 {
 	if (root == NULL)
 		return;
@@ -90,6 +90,21 @@ void BMesh::drawSpheres(GLShader &shader)
 {
 	Misc::SphereMesh msm;
 	dsHelper(shader, msm, root);
+}
+
+void BMesh::dvHelper(GLShader &shader, Misc::SphereMesh &msm)
+{
+	nanogui::Color color(0.0f, 1.0f, 1.0f, 1.0f);
+	for (const Vector3D &vertex : vertices)
+	{
+		msm.draw_sphere(shader, vertex, 0.0005, color);
+	}
+}
+
+void BMesh::drawVertices(GLShader &shader)
+{
+	Misc::SphereMesh msm;
+	dvHelper(shader, msm);
 }
 
 bool BMesh::deleteNode(SkeletalNode *node)

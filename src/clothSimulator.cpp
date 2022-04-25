@@ -306,6 +306,26 @@ void ClothSimulator::drawContents()
 	shader.setUniform("u_view_projection", viewProjection);
 	Vector3D cam_pos;
 
+	// Update shader method label
+	switch (bmesh->shader_method)
+	{
+	case Balle::Method::mesh_faces_no_indices:
+		shader_method_label->setCaption("HalfedgeMesh with faces");
+		break;
+	case Balle::Method::mesh_wireframe_no_indices:
+		shader_method_label->setCaption("HalfedgeMesh with wireframe");
+		break;
+	case Balle::Method::polygons_no_indices:
+		shader_method_label->setCaption("Polygon std::vector with faces");
+		break;
+	case Balle::Method::polygons_wirefame_no_indices:
+		shader_method_label->setCaption("Polygon std::vector with wireframe");
+		break;
+	case Balle::Method::not_ready:
+		shader_method_label->setCaption("Not Ready, draw plain spheres");
+		break;
+	}
+
 	switch (active_shader.type_hint)
 	{
 	case WIREFRAME:
@@ -511,63 +531,88 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 			shader.uploadAttrib("in_position", mesh_positions);
 			shader.drawArray(GL_TRIANGLES, 0, ind * 3);
 		}
-		else if (bmesh->shader_method == Balle::Method::polygons_with_indices)
-		{ // METHOD 3: Draw the polygons using indices (NOT WORKING)
-			HalfedgeMesh *mesh = bmesh->mesh;
-			MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
-			MatrixXf mesh_positions(3, bmesh->vertices.size());
-			MatrixXf mesh_normals(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
+		else if (bmesh->shader_method == Balle::Method::polygons_wirefame_no_indices)
+		{ // METHOD 3: Draw the polygons wireframe without indices (NOT WORKING)
+			MatrixXf mesh_positions(3, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
+			MatrixXf mesh_normals(3, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
 
 			int ind = 0;
-			for (const vector<size_t> &polygon : bmesh->polygons)
+			for (const Balle::Triangle &triangle : bmesh->triangles)
 			{
-				if (polygon.size() == 3)
-				{
-					mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+				Vector3D vertex1 = triangle.a;
+				Vector3D vertex2 = triangle.b;
+				Vector3D vertex3 = triangle.c;
 
-					Vector3D vertex0 = bmesh->vertices[polygon[0]];
-					Vector3D vertex1 = bmesh->vertices[polygon[1]];
-					Vector3D vertex2 = bmesh->vertices[polygon[2]];
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 2) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 3) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 4) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 5) << vertex1.x, vertex1.y, vertex1.z;
 
-					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+				mesh_normals.col(ind + 2) << 0., 0., 0.;
+				mesh_normals.col(ind + 3) << 0., 0., 0.;
+				mesh_normals.col(ind + 4) << 0., 0., 0.;
+				mesh_normals.col(ind + 5) << 0., 0., 0.;
 
-					// Vector3D normal = cross(vertex0 - vertex1, vertex0 - vertex2).unit();
-					////////////////// HERE THE NORMALS DO NOT CORRESPOND TO EACH VERTEX
-					mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-					ind += 1;
-				}
-				else if (polygon.size() == 4)
-				{
-					mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
-					mesh_indices.col(ind + 1) << polygon[2], polygon[3], polygon[0];
-
-					Vector3D vertex0 = bmesh->vertices[polygon[0]];
-					Vector3D vertex1 = bmesh->vertices[polygon[1]];
-					Vector3D vertex2 = bmesh->vertices[polygon[2]];
-					Vector3D vertex3 = bmesh->vertices[polygon[3]];
-					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
-
-					// Vector3D normal = cross(vertex3 - vertex2, vertex1 - vertex2).unit();
-
-					mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-					mesh_normals.col(ind + 1) << normal.x, normal.y, normal.z;
-					ind += 2;
-				}
+				ind += 6;
 			}
-			size_t actual_triangles_to_draw = ind;
-			ind = 0;
-			for (const Vector3D &vertex : bmesh->vertices)
+
+			for (const Balle::Quadrangle &quadrangle : bmesh->quadrangles)
 			{
-				mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
+				Vector3D vertex1 = quadrangle.a;
+				Vector3D vertex2 = quadrangle.b;
+				Vector3D vertex3 = quadrangle.c;
+				Vector3D vertex4 = quadrangle.d;
 
-				ind += 1;
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 2) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 3) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 4) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 5) << vertex4.x, vertex4.y, vertex4.z;
+				mesh_positions.col(ind + 6) << vertex4.x, vertex4.y, vertex4.z;
+				mesh_positions.col(ind + 7) << vertex1.x, vertex1.y, vertex1.z;
+
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+				mesh_normals.col(ind + 2) << 0., 0., 0.;
+				mesh_normals.col(ind + 3) << 0., 0., 0.;
+				mesh_normals.col(ind + 4) << 0., 0., 0.;
+				mesh_normals.col(ind + 5) << 0., 0., 0.;
+				mesh_normals.col(ind + 6) << 0., 0., 0.;
+				mesh_normals.col(ind + 7) << 0., 0., 0.;
+
+				ind += 8;
 			}
-			shader.bind();
+
+			shader.uploadAttrib("in_position", mesh_positions, false);
+			shader.uploadAttrib("in_normal", mesh_normals, false);
 			shader.setUniform("u_balls", false, false);
-			shader.uploadIndices(mesh_indices);
-			shader.uploadAttrib("in_normal", mesh_normals);
-			shader.uploadAttrib("in_position", mesh_positions);
-			shader.drawIndexed(GL_TRIANGLES, 0, actual_triangles_to_draw);
+			shader.drawArray(GL_LINES, 0, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
+
+			int numlinks = bmesh->getNumLinks();
+
+			MatrixXf positions(4, numlinks * 2);
+			MatrixXf normals(4, numlinks * 2);
+
+			for (int i = 0; i < numlinks; i++)
+			{
+				normals.col(i * 2) << 0., 0., 0., 0.0;
+				normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
+			}
+
+			bmesh->fillPositions(positions);
+
+			shader.uploadAttrib("in_position", positions, false);
+			shader.uploadAttrib("in_normal", normals, false);
+
+			shader.drawArray(GL_LINES, 0, numlinks * 2);
+
+			// bmesh->drawSpheres(shader);
+			bmesh->drawVertices(shader);
 		}
 		else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)
 		{ // METHOD 4: Draw the Wireframe not using indices (WORKING)
@@ -809,7 +854,6 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 					selected->radius = 0.01;
 				}
 			}
-
 		}
 		else if (gui_state == GUI_STATES::GRABBING)
 		{
@@ -828,7 +872,6 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 			Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
 			Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
 			selected->pos = sphere_pos_world_v3d;
-
 		}
 	}
 
@@ -993,10 +1036,21 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			break;
 		case 'W':
 		case 'w':
-			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices) {
+			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices)
+			{
 				bmesh->shader_method = Balle::Method::mesh_wireframe_no_indices;
-			} else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices) {
+			}
+			else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)
+			{
 				bmesh->shader_method = Balle::Method::mesh_faces_no_indices;
+			}
+			else if (bmesh->shader_method == Balle::Method::polygons_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
+			}
+			else if (bmesh->shader_method == Balle::Method::polygons_wirefame_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::polygons_no_indices;
 			}
 			break;
 		}
@@ -1079,7 +1133,8 @@ void ClothSimulator::scale_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
-		if (selected->interpolated) return;
+		if (selected->interpolated)
+			return;
 
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
@@ -1097,8 +1152,9 @@ void ClothSimulator::delete_node()
 		return;
 	}
 	else
-	{	
-		if (selected->interpolated) return;
+	{
+		if (selected->interpolated)
+			return;
 
 		// delete it  and set selected to NULL
 		cout << "Deleting" << endl;
@@ -1117,7 +1173,8 @@ void ClothSimulator::extrude_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
-		if (selected->interpolated) return;
+		if (selected->interpolated)
+			return;
 
 		Balle::SkeletalNode *temp = new Balle::SkeletalNode(selected->pos, selected->radius, selected);
 		selected->children->push_back(temp);
@@ -1143,7 +1200,8 @@ void ClothSimulator::grab_node()
 	}
 	else
 	{
-		if (selected->interpolated) return;
+		if (selected->interpolated)
+			return;
 
 		cout << "Grabbed" << endl;
 		grab_mouse_x = mouse_x;
@@ -1293,14 +1351,16 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 
 void ClothSimulator::initGUI(Screen *screen)
 {
+	Window *window;
 
-	/*
-	Window* window;
-
-	window = new Window(screen, "Simulation");
+	window = new Window(screen, "                Shader Method                ");
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	window->setLayout(new GroupLayout(15, 6, 14, 5));
 
+	shader_method_label = new Label(window, "Shader Method", "sans-bold");
+	//sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
+
+	/*
 	// Spring types
 
 	new Label(window, "Spring types", "sans-bold");
