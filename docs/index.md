@@ -2,7 +2,7 @@
 
 [Project Proposal](proposal.md)
 
-[Milestone Report](https://drive.google.com/file/d/1Q_YoM8MW1fJYFkMWP0TB4PBbvrPeEYvg/view?usp=sharing)
+[Milestone Report](report.md)
 
 ## Usage Guide
 (To be updated soon)
