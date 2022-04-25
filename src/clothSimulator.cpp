@@ -1053,7 +1053,13 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 				bmesh->shader_method = Balle::Method::polygons_no_indices;
 			}
 			break;
+		
+		case 'D': // subdivision
+		case 'd':
+			bmesh->subdivision();
+			break;
 		}
+		
 	}
 
 	return true;
