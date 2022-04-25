@@ -107,8 +107,6 @@ bool BMesh::deleteNode(SkeletalNode *node)
 		i += 1;
 	}
 
-	cout << "removed from master" << endl;
-
 	// First remove the node from the master list
 	SkeletalNode *parent = node->parent;
 
@@ -124,19 +122,13 @@ bool BMesh::deleteNode(SkeletalNode *node)
 		i += 1;
 	}
 
-	cout << "removed from parent's children" << endl;
-
 	for (SkeletalNode *temp : *(node->children))
 	{
 		parent->children->push_back(temp);
 		temp->parent = parent;
 	}
 
-	cout << "transferred children" << endl;
-
 	delete node;
-
-	cout << "deleted node" << endl;
 
 	return true;
 }
