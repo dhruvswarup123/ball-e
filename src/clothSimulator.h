@@ -72,6 +72,7 @@ private:
   vector<CollisionObject *> *collision_objects;
 
   Balle::BMesh* bmesh;
+  Label* shader_method_label;
 
   // OpenGL attributes
 

@@ -16,7 +16,14 @@ using namespace CGL;
 
 namespace Balle
 {
-	enum Method { polygons_no_indices, mesh_faces_no_indices, polygons_with_indices, mesh_wireframe_no_indices, not_ready };
+	enum Method
+	{
+		polygons_no_indices,
+		mesh_faces_no_indices,
+		polygons_wirefame_no_indices,
+		mesh_wireframe_no_indices,
+		not_ready
+	};
 
 	// Contains the tree and other functions that access the tree
 	struct BMesh
@@ -49,7 +56,6 @@ namespace Balle
 			// all_nodes_vector->push_back(head);
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
-
 		};
 
 		~BMesh() = default;
@@ -62,9 +68,10 @@ namespace Balle
 
 		// Draw the spheres using the shader
 		void drawSpheres(GLShader &shader);
+		void drawVertices(GLShader &shader);
 
 		bool deleteNode(SkeletalNode *node);
-		void delete_interp(SkeletalNode* root);
+		void delete_interp(SkeletalNode *root);
 
 		SkeletalNode *root;
 		vector<SkeletalNode *> *all_nodes_vector;
@@ -78,7 +85,6 @@ namespace Balle
 		vector<Vector3D> all_points;
 		unordered_set<Vector3D> unique_extra_points;
 		vector<Vector3D> vertices;
-		
 
 		// Function for the main bmesh algorithm
 		// Interpolate the sphere
@@ -95,7 +101,8 @@ namespace Balle
 		int si = 0;
 
 		void fpHelper(MatrixXf &positions, SkeletalNode *root);
-		void dsHelper(GLShader &shader, Misc::SphereMesh msm, SkeletalNode *root);
+		void dsHelper(GLShader &shader, Misc::SphereMesh &msm, SkeletalNode *root);
+		void dvHelper(GLShader &shader, Misc::SphereMesh &msm);
 		int gnlHelper(SkeletalNode *root);
 		void _joint_iterate(SkeletalNode *root);
 		void _joint_iterate_limbs(SkeletalNode *root);
@@ -103,7 +110,7 @@ namespace Balle
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
 		void _update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
-		void _catmull_clark(HalfedgeMesh& mesh);
+		void _catmull_clark(HalfedgeMesh &mesh);
 	};
 };
 #endif
