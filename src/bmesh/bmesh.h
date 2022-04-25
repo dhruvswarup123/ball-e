@@ -98,6 +98,7 @@ namespace Balle
 		 * Catmull-Clark              *
 		 ******************************/
 		void __catmull_clark(HalfedgeMesh &mesh);
+		void __remesh(HalfedgeMesh& mesh);
 
 		/******************************
 		 * Debugging                  *
