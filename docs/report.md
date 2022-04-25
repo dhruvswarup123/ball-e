@@ -2,7 +2,7 @@
 
 <head>
 <style>
-	.holds-the-iframe {
+	.iframe_div {
 		background:url(../images/loader.gif) center center no-repeat;
 	}
 </style>
