@@ -982,6 +982,9 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 				bmesh->quadrangles.clear();
 				bmesh->polygons.clear();
 				bmesh->fringe_points.clear();
+				bmesh->all_points.clear();
+				bmesh->unique_extra_points.clear();
+
 				bmesh->vertices.clear();
 				bmesh->shader_method = Balle::Method::not_ready;
 			}

@@ -368,6 +368,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 		{
 			fringe_points.push_back(point);
 			local_hull_points.push_back(point);
+			all_points.push_back(point);
 		}
 	}
 	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
@@ -379,6 +380,7 @@ void BMesh::_add_faces(SkeletalNode *root)
 			{
 				fringe_points.push_back(point);
 				local_hull_points.push_back(point);
+				all_points.push_back(point);
 			}
 		}
 	}
@@ -412,14 +414,26 @@ void BMesh::_add_faces(SkeletalNode *root)
 		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		unique_extra_points.insert({a, b, c});
 		triangles.push_back({a, b, c});
+
+		if ((a - root->pos).norm() < root->radius + 0.001)
+		{
+			unique_extra_points.insert(a);
+		}
+		if ((b - root->pos).norm() < root->radius + 0.001)
+		{
+			unique_extra_points.insert(b);
+		}
+		if ((c - root->pos).norm() < root->radius + 0.001)
+		{
+			unique_extra_points.insert(c);
+		}
 	}
 	qh_free_mesh(mesh);
 
 	for (const Vector3D &unique_extra_point : unique_extra_points)
 	{
-		fringe_points.push_back(unique_extra_point);
+		all_points.push_back(unique_extra_point);
 	}
 }
 
@@ -428,16 +442,28 @@ void BMesh::_stitch_faces()
 	// label vertices in triangles and quadrangles
 	// id starts from 0
 	unordered_map<Vector3D, size_t> ids;
+	unordered_map<Vector3D, size_t> fringe_ids;
 	// label fringe points first in groups of 4
 	// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
-	for (const Vector3D &fringe_point : fringe_points)
+
+	// This is just for checking fringe
+	for (const Vector3D& point : fringe_points)
 	{
-		if (ids.count(fringe_point) == 0)
+		if (fringe_ids.count(point) == 0)
 		{
-			ids[fringe_point] = ids.size();
-			vertices.push_back(fringe_point);
+			fringe_ids[point] = fringe_ids.size();
 		}
 	}
+
+	/*for (const Vector3D &point : all_points)
+	{
+		if (ids.count(point) == 0)
+		{
+			ids[point] = ids.size();
+			vertices.push_back(point);
+		}
+	}*/
+
 	// label quadrangle vertices
 	for (const Quadrangle &quadrangle : quadrangles)
 	{
@@ -473,7 +499,7 @@ void BMesh::_stitch_faces()
 		{
 			Vector3D closest;
 			float closest_dist = 100;
-			for (const Vector3D &vert : fringe_points)
+			for (const Vector3D &vert : all_points)
 			{
 				if ((vert - triangle.a).norm() < closest_dist)
 				{
@@ -486,7 +512,7 @@ void BMesh::_stitch_faces()
 		{
 			Vector3D closest;
 			float closest_dist = 100;
-			for (const Vector3D &vert : fringe_points)
+			for (const Vector3D &vert : all_points)
 			{
 				if ((vert - triangle.b).norm() < closest_dist)
 				{
@@ -499,7 +525,7 @@ void BMesh::_stitch_faces()
 		{
 			Vector3D closest;
 			float closest_dist = 100;
-			for (const Vector3D &vert : fringe_points)
+			for (const Vector3D &vert : all_points)
 			{
 				if ((vert - triangle.c).norm() < closest_dist)
 				{
@@ -511,43 +537,84 @@ void BMesh::_stitch_faces()
 		}
 
 		// Check if the triangle is still valid
-		// if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
-		// {
-		// 	continue;
-		// }
+		if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
+		{
+			continue;
+		}
 
-		if (ids.count(triangle.a) == 0)
-		{
-			ids[triangle.a] = ids.size();
-			vertices.push_back(triangle.a);
+		// Add triangle if either it has a point that is not in fringe
+		// or if all 3 points are not in the same face
+		if ((fringe_ids.count(triangle.a) == 0) ||
+			(fringe_ids.count(triangle.b) == 0) ||
+			(fringe_ids.count(triangle.c) == 0)) {
+
+			if (ids.count(triangle.a) == 0)
+			{
+				ids[triangle.a] = ids.size();
+				vertices.push_back(triangle.a);
+			}
+			if (ids.count(triangle.b) == 0)
+			{
+				ids[triangle.b] = ids.size();
+				vertices.push_back(triangle.b);
+			}
+			if (ids.count(triangle.c) == 0)
+			{
+				ids[triangle.c] = ids.size();
+				vertices.push_back(triangle.c);
+			}
+
+			size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+			polygons.push_back({ ida, idb, idc });
 		}
-		if (ids.count(triangle.b) == 0)
-		{
-			ids[triangle.b] = ids.size();
-			vertices.push_back(triangle.b);
+		else {
+			
+			size_t fringe_ida = fringe_ids[triangle.a];
+			size_t fringe_idb = fringe_ids[triangle.b];
+			size_t fringe_idc = fringe_ids[triangle.c];
+
+			size_t fringe_maxid = max(max(fringe_ida, fringe_idb), fringe_idc);
+			size_t fringe_minid = min(min(fringe_ida, fringe_idb), fringe_idc);
+
+			unordered_set<size_t> distinct_ids = { fringe_ida, fringe_idb, fringe_idc };
+
+			if (distinct_ids.size() == 3)
+			{
+				// any_fringe_vertex_id divided by 4 is the group number
+				// if the triangle's 3 vertices are in the same group,
+				// then we don't want to add this to mesh cuz it's covering the fringe
+
+				if ((fringe_maxid / 4) != (fringe_minid / 4)) // || maxid >= fringe_points.size() TODO
+				{
+					if (ids.count(triangle.a) == 0)
+					{
+						ids[triangle.a] = ids.size();
+						vertices.push_back(triangle.a);
+					}
+					if (ids.count(triangle.b) == 0)
+					{
+						ids[triangle.b] = ids.size();
+						vertices.push_back(triangle.b);
+					}
+					if (ids.count(triangle.c) == 0)
+					{
+						ids[triangle.c] = ids.size();
+						vertices.push_back(triangle.c);
+					}
+
+					size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+					polygons.push_back({ ida, idb, idc });
+				}
+			}
+
 		}
-		if (ids.count(triangle.c) == 0)
-		{
-			ids[triangle.c] = ids.size();
-			vertices.push_back(triangle.c);
-		}
+
+
+
+		
 		// Quickhull will generate faces cover the limb fringe vertices
 		// dont want those to be added to mesh
-		size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-		size_t maxid = max(max(ida, idb), idc);
-		size_t minid = min(min(ida, idb), idc);
-		unordered_set<size_t> distinct_ids = {ida, idb, idc};
-		if (distinct_ids.size() == 3)
-		{
-			// any_fringe_vertex_id divided by 4 is the group number
-			// if the triangle's 3 vertices are in the same group,
-			// then we don't want to add this to mesh cuz it's covering the fringe
-
-			if ((maxid / 4) != (minid / 4)) // || maxid >= fringe_points.size() TODO
-			{
-				polygons.push_back({ida, idb, idc});
-			}
-		}
+		
 	}
 
 	// build halfedgeMesh
