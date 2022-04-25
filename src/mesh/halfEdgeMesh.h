@@ -563,7 +563,7 @@ namespace CGL
          * The input must describe a manifold, oriented surface, where the orientation of
          * a polygon is determined by the order of vertices in the list.
          */
-        void build(const vector< vector<Index> >& polygons, const vector<Vector3D>& vertexPositions);
+        int build(const vector< vector<Index> >& polygons, const vector<Vector3D>& vertexPositions);
 
         // These methods return the total number of elements of each type.
         Size nHalfedges(void) const { return  halfedges.size(); } ///< get the number of halfedges

@@ -34,6 +34,7 @@ namespace Balle
 		// World Coordinate position of the ball
 		Vector3D pos;
 		bool selected = false;
+		bool interpolated = false;
 
 		// The children of the ball
 		// Leaf node == end node -> connects to only one bone
@@ -42,6 +43,6 @@ namespace Balle
 		vector<SkeletalNode *> *children;
 
 		// Limb primitives that surrounds this skeletal node
-		Limb *limb;
+		Limb *limb = nullptr;
 	};
 };

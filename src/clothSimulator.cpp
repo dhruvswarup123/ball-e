@@ -20,7 +20,7 @@
 using namespace nanogui;
 using namespace std;
 
-Vector3D load_texture(int frame_idx, GLuint handle, const char* where)
+Vector3D load_texture(int frame_idx, GLuint handle, const char *where)
 {
 	Vector3D size_retval;
 
@@ -31,7 +31,7 @@ Vector3D load_texture(int frame_idx, GLuint handle, const char* where)
 	glBindTexture(GL_TEXTURE_2D, handle);
 
 	int img_x, img_y, img_n;
-	unsigned char* img_data = stbi_load(where, &img_x, &img_y, &img_n, 3);
+	unsigned char *img_data = stbi_load(where, &img_x, &img_y, &img_n, 3);
 	size_retval.x = img_x;
 	size_retval.y = img_y;
 	size_retval.z = img_n;
@@ -46,7 +46,7 @@ Vector3D load_texture(int frame_idx, GLuint handle, const char* where)
 	return size_retval;
 }
 
-void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string>& file_locs)
+void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string> &file_locs)
 {
 	glActiveTexture(GL_TEXTURE0 + frame_idx);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, handle);
@@ -54,7 +54,7 @@ void load_cubemap(int frame_idx, GLuint handle, const std::vector<std::string>& 
 	{
 
 		int img_x, img_y, img_n;
-		unsigned char* img_data = stbi_load(file_locs[side_idx].c_str(), &img_x, &img_y, &img_n, 3);
+		unsigned char *img_data = stbi_load(file_locs[side_idx].c_str(), &img_x, &img_y, &img_n, 3);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side_idx, 0, GL_RGB, img_x, img_y, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
 		stbi_image_free(img_data);
 		std::cout << "Side " << side_idx << " has dimensions " << img_x << ", " << img_y << std::endl;
@@ -91,7 +91,7 @@ void ClothSimulator::load_textures()
 		m_project_root + "/textures/cube/posy.jpg",
 		m_project_root + "/textures/cube/negy.jpg",
 		m_project_root + "/textures/cube/posz.jpg",
-		m_project_root + "/textures/cube/negz.jpg" };
+		m_project_root + "/textures/cube/negz.jpg"};
 
 	load_cubemap(5, m_gl_cubemap_tex, cubemap_fnames);
 	std::cout << "Loaded cubemap texture" << std::endl;
@@ -108,7 +108,7 @@ void ClothSimulator::load_shaders()
 
 	std::string std_vert_shader = m_project_root + "/shaders/Default.vert";
 
-	for (const std::string& shader_fname : shader_folder_contents)
+	for (const std::string &shader_fname : shader_folder_contents)
 	{
 		std::string file_extension;
 		std::string shader_name;
@@ -133,7 +133,7 @@ void ClothSimulator::load_shaders()
 
 		std::shared_ptr<GLShader> nanogui_shader = make_shared<GLShader>();
 		nanogui_shader->initFromFiles(shader_name, vert_shader,
-			m_project_root + "/shaders/" + shader_fname);
+									  m_project_root + "/shaders/" + shader_fname);
 
 		// Special filenames are treated a bit differently
 		ShaderTypeHint hint;
@@ -170,7 +170,7 @@ void ClothSimulator::load_shaders()
 	}
 }
 
-ClothSimulator::ClothSimulator(std::string project_root, Screen* screen)
+ClothSimulator::ClothSimulator(std::string project_root, Screen *screen)
 	: m_project_root(project_root)
 {
 	this->screen = screen;
@@ -202,11 +202,11 @@ ClothSimulator::~ClothSimulator()
 		delete collision_objects;
 }
 
-void ClothSimulator::loadCloth(Cloth* cloth) { this->cloth = cloth; }
+void ClothSimulator::loadCloth(Cloth *cloth) { this->cloth = cloth; }
 
-void ClothSimulator::loadClothParameters(ClothParameters* cp) { this->cp = cp; }
+void ClothSimulator::loadClothParameters(ClothParameters *cp) { this->cp = cp; }
 
-void ClothSimulator::loadCollisionObjects(vector<CollisionObject*>* objects) { this->collision_objects = objects; }
+void ClothSimulator::loadCollisionObjects(vector<CollisionObject *> *objects) { this->collision_objects = objects; }
 
 /**
  * Initializes the cloth simulation and spawns a new thread to separate
@@ -232,13 +232,13 @@ void ClothSimulator::init()
 
 	Vector3D avg_pm_position(0, 0, 0);
 
-	for (auto& pm : cloth->point_masses)
+	for (auto &pm : cloth->point_masses)
 	{
 		avg_pm_position += pm.position / cloth->point_masses.size();
 	}
 
 	CGL::Vector3D target(avg_pm_position.x, avg_pm_position.y / 2,
-		avg_pm_position.z);
+						 avg_pm_position.z);
 	CGL::Vector3D c_dir(0., 0., 0.);
 	canonical_view_distance = max(cloth->width, cloth->height) * 0.9;
 	scroll_rate = canonical_view_distance / 10;
@@ -250,16 +250,16 @@ void ClothSimulator::init()
 	// canonicalCamera is a copy used for view resets
 
 	camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
-		min_view_distance, max_view_distance);
+				 min_view_distance, max_view_distance);
 	canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+						  view_distance, min_view_distance, max_view_distance);
 
 	canonicalCamera_xy.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+							 view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_xy.rotate_by(-PI / 2, 0);
 
 	canonicalCamera_yz.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+							 view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_yz.rotate_by(0, -PI / 2);
 
 	screen_w = default_window_size(0);
@@ -277,7 +277,7 @@ void ClothSimulator::drawContents()
 
 	if (!is_paused)
 	{
-		vector<Vector3D> external_accelerations = { gravity };
+		vector<Vector3D> external_accelerations = {gravity};
 
 		for (int i = 0; i < simulation_steps; i++)
 		{
@@ -287,9 +287,9 @@ void ClothSimulator::drawContents()
 
 	// Bind the active shader
 
-	const UserShader& active_shader = shaders[active_shader_idx];
+	const UserShader &active_shader = shaders[active_shader_idx];
 
-	GLShader& shader = *active_shader.nanogui_shader;
+	GLShader &shader = *active_shader.nanogui_shader;
 	shader.bind();
 
 	// Prepare the camera projection matrix
@@ -305,6 +305,26 @@ void ClothSimulator::drawContents()
 	shader.setUniform("u_model", model);
 	shader.setUniform("u_view_projection", viewProjection);
 	Vector3D cam_pos;
+
+	// Update shader method label
+	switch (bmesh->shader_method)
+	{
+	case Balle::Method::mesh_faces_no_indices:
+		shader_method_label->setCaption("HalfedgeMesh with faces");
+		break;
+	case Balle::Method::mesh_wireframe_no_indices:
+		shader_method_label->setCaption("HalfedgeMesh with wireframe");
+		break;
+	case Balle::Method::polygons_no_indices:
+		shader_method_label->setCaption("Polygon std::vector with faces");
+		break;
+	case Balle::Method::polygons_wirefame_no_indices:
+		shader_method_label->setCaption("Polygon std::vector with wireframe");
+		break;
+	case Balle::Method::not_ready:
+		shader_method_label->setCaption("Not Ready, draw plain spheres");
+		break;
+	}
 
 	switch (active_shader.type_hint)
 	{
@@ -347,16 +367,15 @@ void ClothSimulator::drawContents()
 		break;
 	}
 
-	for (CollisionObject* co : *collision_objects)
+	for (CollisionObject *co : *collision_objects)
 	{
 		co->render(shader);
 	}
 }
 
-void ClothSimulator::drawWireframe(GLShader& shader)
+void ClothSimulator::drawWireframe(GLShader &shader)
 {
-	bool mesh_ready = bmesh->mesh_ready;
-	if (!mesh_ready)
+	if (bmesh->shader_method == Balle::Method::not_ready)
 	{
 		// enable sphere rendering
 		int numlinks = bmesh->getNumLinks();
@@ -372,6 +391,7 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 
 		bmesh->fillPositions(positions);
 
+		shader.setUniform("u_balls", true, false);
 		shader.uploadAttrib("in_position", positions, false);
 		shader.uploadAttrib("in_normal", normals, false);
 
@@ -381,239 +401,271 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 	}
 	else
 	{
-		// METHOD 1: Draw the polygons not using indices (WORKING)
-		HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXf mesh_positions(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
-		MatrixXf mesh_normals(3, bmesh->triangles.size()*3 + bmesh->quadrangles.size() * 6);
 
-		int ind = 0;
-		for (const vector<size_t>& polygon : bmesh->polygons)
-		{
-			if (polygon.size() == 3)
+		if (bmesh->shader_method == Balle::Method::polygons_no_indices)
+		{ // METHOD 1: Draw the polygons not using indices (WORKING)
+			HalfedgeMesh *mesh = bmesh->mesh;
+			MatrixXf mesh_positions(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
+			MatrixXf mesh_normals(3, bmesh->triangles.size() * 3 + bmesh->quadrangles.size() * 6);
+
+			int ind = 0;
+			for (const vector<size_t> &polygon : bmesh->polygons)
 			{
-				//continue;
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
+				if (polygon.size() == 3)
+				{
+					// continue;
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
 
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
 
-				mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
-				mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
-				mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
+					mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
+					mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
+					mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
 
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
 
-				ind += 1;
+					ind += 1;
+				}
+				else if (polygon.size() == 4)
+				{
+					// continue;
+					Vector3D vertex0 = bmesh->vertices[polygon[0]];
+					Vector3D vertex1 = bmesh->vertices[polygon[1]];
+					Vector3D vertex2 = bmesh->vertices[polygon[2]];
+					Vector3D vertex3 = bmesh->vertices[polygon[3]];
+					Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+
+					mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
+					mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
+					mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+
+					mesh_positions.col(ind * 3) << vertex2.x, vertex2.y, vertex2.z;
+					mesh_positions.col(ind * 3 + 1) << vertex3.x, vertex3.y, vertex3.z;
+					mesh_positions.col(ind * 3 + 2) << vertex0.x, vertex0.y, vertex0.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
 			}
-			else if (polygon.size() == 4) {
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
-				Vector3D vertex3 = bmesh->vertices[polygon[3]];
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+			size_t actual_triangles_to_draw = ind * 3;
+			ind = 0;
 
-				mesh_positions.col(ind * 3) << vertex0.x, vertex0.y, vertex0.z;
-				mesh_positions.col(ind * 3 + 1) << vertex1.x, vertex1.y, vertex1.z;
-				mesh_positions.col(ind * 3 + 2) << vertex2.x, vertex2.y, vertex2.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-
-				mesh_positions.col(ind * 3) << vertex2.x, vertex2.y, vertex2.z;
-				mesh_positions.col(ind * 3 + 1) << vertex3.x, vertex3.y, vertex3.z;
-				mesh_positions.col(ind * 3 + 2) << vertex0.x, vertex0.y, vertex0.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-			}
+			shader.setUniform("u_balls", false, false);
+			shader.uploadAttrib("in_normal", mesh_normals);
+			shader.uploadAttrib("in_position", mesh_positions);
+			shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
 		}
-		size_t actual_triangles_to_draw = ind*3;
-		ind = 0;
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawArray(GL_TRIANGLES, 0, actual_triangles_to_draw);
+		else if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices)
+		{ // METHOD 2: Draw the mesh faces not using indices (WORKING)
 
-		// METHOD 2: Draw the mesh faces not using indices (WORKING)
-		/*HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXf mesh_positions(3, mesh->nFaces() * 6);
-		MatrixXf mesh_normals(3, mesh->nFaces() * 6);
+			HalfedgeMesh *mesh = bmesh->mesh;
+			MatrixXf mesh_positions(3, mesh->nFaces() * 6);
+			MatrixXf mesh_normals(3, mesh->nFaces() * 6);
 
-		int ind = 0;
-		for (auto face = mesh->facesBegin(); face != mesh->facesEnd(); face++)
-		{	
-			Vector3D normal = face->normal();
-
-			int deg = face->degree();
-			if (deg == 3)
+			int ind = 0;
+			for (auto face = mesh->facesBegin(); face != mesh->facesEnd(); face++)
 			{
-				Vector3D v0 = face->halfedge()->vertex()->position;
-				Vector3D v1 = face->halfedge()->next()->vertex()->position;
-				Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
+				Vector3D normal = face->normal();
 
-				mesh_positions.col(ind*3) << v0.x, v0.y, v0.z;
-				mesh_positions.col(ind*3+1) << v1.x, v1.y, v1.z;
-				mesh_positions.col(ind*3+2) << v2.x, v2.y, v2.z;
+				int deg = face->degree();
+				if (deg == 3)
+				{
+					Vector3D v0 = face->halfedge()->vertex()->position;
+					Vector3D v1 = face->halfedge()->next()->vertex()->position;
+					Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
 
-				mesh_normals.col(ind*3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind*3+1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind*3+2) << normal.x, normal.y, normal.z;
+					mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
+					mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
+					mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
 
-				ind += 1;
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
+				else if (deg == 4)
+				{
+					Vector3D v0 = face->halfedge()->vertex()->position;
+					Vector3D v1 = face->halfedge()->next()->vertex()->position;
+					Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
+					Vector3D v3 = face->halfedge()->next()->next()->next()->vertex()->position;
+
+					mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
+					mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
+					mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+
+					mesh_positions.col(ind * 3) << v2.x, v2.y, v2.z;
+					mesh_positions.col(ind * 3 + 1) << v3.x, v3.y, v3.z;
+					mesh_positions.col(ind * 3 + 2) << v0.x, v0.y, v0.z;
+
+					mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
+					mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
+
+					ind += 1;
+				}
 			}
-			else if (deg == 4) {
-				Vector3D v0 = face->halfedge()->vertex()->position;
-				Vector3D v1 = face->halfedge()->next()->vertex()->position;
-				Vector3D v2 = face->halfedge()->next()->next()->vertex()->position;
-				Vector3D v3 = face->halfedge()->next()->next()->next()->vertex()->position;
 
-				mesh_positions.col(ind * 3) << v0.x, v0.y, v0.z;
-				mesh_positions.col(ind * 3 + 1) << v1.x, v1.y, v1.z;
-				mesh_positions.col(ind * 3 + 2) << v2.x, v2.y, v2.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-
-				mesh_positions.col(ind * 3) << v2.x, v2.y, v2.z;
-				mesh_positions.col(ind * 3 + 1) << v3.x, v3.y, v3.z;
-				mesh_positions.col(ind * 3 + 2) << v0.x, v0.y, v0.z;
-
-				mesh_normals.col(ind * 3) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 1) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind * 3 + 2) << normal.x, normal.y, normal.z;
-
-				ind += 1;
-			}
+			shader.setUniform("u_balls", false, false);
+			shader.uploadAttrib("in_normal", mesh_normals);
+			shader.uploadAttrib("in_position", mesh_positions);
+			shader.drawArray(GL_TRIANGLES, 0, ind * 3);
 		}
+		else if (bmesh->shader_method == Balle::Method::polygons_wirefame_no_indices)
+		{ // METHOD 3: Draw the polygons wireframe without indices (NOT WORKING)
+			MatrixXf mesh_positions(3, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
+			MatrixXf mesh_normals(3, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
 
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawArray(GL_TRIANGLES, 0, ind*3);
-		*/
-
-
-		// METHOD 3: Draw the polygons using indices (NOT WORKING)
-		/*
-		HalfedgeMesh* mesh = bmesh->mesh;
-		MatrixXu mesh_indices(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
-		MatrixXf mesh_positions(3, bmesh->vertices.size());
-		MatrixXf mesh_normals(3, bmesh->triangles.size() + bmesh->quadrangles.size() * 2);
-
-		int ind = 0;
-		for (const vector<size_t>& polygon : bmesh->polygons)
-		{
-			if (polygon.size() == 3)
+			int ind = 0;
+			for (const Balle::Triangle &triangle : bmesh->triangles)
 			{
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
+				Vector3D vertex1 = triangle.a;
+				Vector3D vertex2 = triangle.b;
+				Vector3D vertex3 = triangle.c;
 
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 2) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 3) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 4) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 5) << vertex1.x, vertex1.y, vertex1.z;
 
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex0)).unit();
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+				mesh_normals.col(ind + 2) << 0., 0., 0.;
+				mesh_normals.col(ind + 3) << 0., 0., 0.;
+				mesh_normals.col(ind + 4) << 0., 0., 0.;
+				mesh_normals.col(ind + 5) << 0., 0., 0.;
 
-				//Vector3D normal = cross(vertex0 - vertex1, vertex0 - vertex2).unit();
-				////////////////// HERE THE NORMALS DO NOT CORRESPOND TO EACH VERTEX
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-				ind += 1;
+				ind += 6;
 			}
-			else if (polygon.size() == 4) {
-				mesh_indices.col(ind) << polygon[0], polygon[1], polygon[2];
-				mesh_indices.col(ind + 1) << polygon[2], polygon[3], polygon[0];
 
-				Vector3D vertex0 = bmesh->vertices[polygon[0]];
-				Vector3D vertex1 = bmesh->vertices[polygon[1]];
-				Vector3D vertex2 = bmesh->vertices[polygon[2]];
-				Vector3D vertex3 = bmesh->vertices[polygon[3]];
-				Vector3D normal = (cross(vertex0, vertex1) + cross(vertex1, vertex2) + cross(vertex2, vertex3) + cross(vertex3, vertex0)).unit();
+			for (const Balle::Quadrangle &quadrangle : bmesh->quadrangles)
+			{
+				Vector3D vertex1 = quadrangle.a;
+				Vector3D vertex2 = quadrangle.b;
+				Vector3D vertex3 = quadrangle.c;
+				Vector3D vertex4 = quadrangle.d;
 
-				//Vector3D normal = cross(vertex3 - vertex2, vertex1 - vertex2).unit();
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 2) << vertex2.x, vertex2.y, vertex2.z;
+				mesh_positions.col(ind + 3) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 4) << vertex3.x, vertex3.y, vertex3.z;
+				mesh_positions.col(ind + 5) << vertex4.x, vertex4.y, vertex4.z;
+				mesh_positions.col(ind + 6) << vertex4.x, vertex4.y, vertex4.z;
+				mesh_positions.col(ind + 7) << vertex1.x, vertex1.y, vertex1.z;
 
-				mesh_normals.col(ind) << normal.x, normal.y, normal.z;
-				mesh_normals.col(ind + 1) << normal.x, normal.y, normal.z;
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+				mesh_normals.col(ind + 2) << 0., 0., 0.;
+				mesh_normals.col(ind + 3) << 0., 0., 0.;
+				mesh_normals.col(ind + 4) << 0., 0., 0.;
+				mesh_normals.col(ind + 5) << 0., 0., 0.;
+				mesh_normals.col(ind + 6) << 0., 0., 0.;
+				mesh_normals.col(ind + 7) << 0., 0., 0.;
+
+				ind += 8;
+			}
+
+			shader.uploadAttrib("in_position", mesh_positions, false);
+			shader.uploadAttrib("in_normal", mesh_normals, false);
+			shader.setUniform("u_balls", false, false);
+			shader.drawArray(GL_LINES, 0, bmesh->triangles.size() * 6 + bmesh->quadrangles.size() * 8);
+
+			int numlinks = bmesh->getNumLinks();
+
+			MatrixXf positions(4, numlinks * 2);
+			MatrixXf normals(4, numlinks * 2);
+
+			for (int i = 0; i < numlinks; i++)
+			{
+				normals.col(i * 2) << 0., 0., 0., 0.0;
+				normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
+			}
+
+			bmesh->fillPositions(positions);
+
+			shader.uploadAttrib("in_position", positions, false);
+			shader.uploadAttrib("in_normal", normals, false);
+
+			shader.drawArray(GL_LINES, 0, numlinks * 2);
+
+			// bmesh->drawSpheres(shader);
+			bmesh->drawVertices(shader);
+		}
+		else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)
+		{ // METHOD 4: Draw the Wireframe not using indices (WORKING)
+			MatrixXf mesh_positions(3, bmesh->mesh->nEdges() * 2);
+			MatrixXf mesh_normals(3, bmesh->mesh->nEdges() * 2);
+
+			int ind = 0;
+			for (EdgeIter i = bmesh->mesh->edgesBegin(); i != bmesh->mesh->edgesEnd(); i++)
+			{
+				// TODO: Fix this for faces
+				Vector3D vertex1 = i->halfedge()->vertex()->position;
+				Vector3D vertex2 = i->halfedge()->next()->vertex()->position;
+
+				// Vector3D normal = i->face()->normal();
+
+				mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
+				mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
+
+				mesh_normals.col(ind) << 0., 0., 0.;
+				mesh_normals.col(ind + 1) << 0., 0., 0.;
+
 				ind += 2;
 			}
+
+			shader.uploadAttrib("in_position", mesh_positions, false);
+			shader.uploadAttrib("in_normal", mesh_normals, false);
+			shader.setUniform("u_balls", false, false);
+			shader.drawArray(GL_LINES, 0, bmesh->mesh->nEdges() * 2);
+
+			int numlinks = bmesh->getNumLinks();
+
+			MatrixXf positions(4, numlinks * 2);
+			MatrixXf normals(4, numlinks * 2);
+
+			for (int i = 0; i < numlinks; i++)
+			{
+				normals.col(i * 2) << 0., 0., 0., 0.0;
+				normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
+			}
+
+			bmesh->fillPositions(positions);
+
+			shader.uploadAttrib("in_position", positions, false);
+			shader.uploadAttrib("in_normal", normals, false);
+
+			shader.drawArray(GL_LINES, 0, numlinks * 2);
+
+			bmesh->drawSpheres(shader);
 		}
-		size_t actual_triangles_to_draw = ind;
-		ind = 0;
-		for (const Vector3D& vertex : bmesh->vertices)
-		{
-			mesh_positions.col(ind) << vertex.x, vertex.y, vertex.z;
-
-			ind += 1;
-		}
-		shader.bind();
-		shader.uploadIndices(mesh_indices);
-		shader.uploadAttrib("in_normal", mesh_normals);
-		shader.uploadAttrib("in_position", mesh_positions);
-		shader.drawIndexed(GL_TRIANGLES, 0, actual_triangles_to_draw);
-		*/
-
-		// METHOD 4: Draw the Wireframe not using indices (WORKING)
-		/*
-		MatrixXf mesh_positions(3, bmesh->mesh->nEdges()*2);
-		MatrixXf mesh_normals(3, bmesh->mesh->nEdges()*2);
-
-		int ind = 0;
-		for (EdgeIter i = bmesh->mesh->edgesBegin(); i != bmesh->mesh->edgesEnd(); i++) {
-			// TODO: Fix this for faces
-			Vector3D vertex1 = i->halfedge()->vertex()->position;
-			Vector3D vertex2 = i->halfedge()->next()->vertex()->position;
-
-			// Vector3D normal = i->face()->normal();
-
-			mesh_positions.col(ind) << vertex1.x, vertex1.y, vertex1.z;
-			mesh_positions.col(ind + 1) << vertex2.x, vertex2.y, vertex2.z;
-
-			mesh_normals.col(ind) << 0., 0., 0.;
-			mesh_normals.col(ind + 1) << 0., 0., 0.;
-
-			ind += 2;
-		}
-
-		shader.uploadAttrib("in_position", mesh_positions, false);
-		shader.uploadAttrib("in_normal", mesh_normals, false);
-
-		shader.drawArray(GL_LINES, 0, bmesh->mesh->nEdges()*2);
-		*/
-		
-		// METHOD 5: Draw the spheres too (WORKING)
-		/*
-		int numlinks = bmesh->getNumLinks();
-
-		MatrixXf positions(4, numlinks * 2);
-		MatrixXf normals(4, numlinks * 2);
-
-		for (int i = 0; i < numlinks; i++)
-		{
-			normals.col(i * 2) << 0., 0., 0., 0.0;
-			normals.col(i * 2 + 1) << 0., 0., 0., 0.0;
-		}
-
-		bmesh->fillPositions(positions);
-
-		shader.uploadAttrib("in_position", positions, false);
-		shader.uploadAttrib("in_normal", normals, false);
-
-		shader.drawArray(GL_LINES, 0, numlinks * 2);
-
-		bmesh->drawSpheres(shader);
-		*/
 	}
 }
 
-void ClothSimulator::drawNormals(GLShader& shader)
+void ClothSimulator::drawNormals(GLShader &shader)
 {
 	int num_tris = cloth->clothMesh->triangles.size();
 
@@ -622,7 +674,7 @@ void ClothSimulator::drawNormals(GLShader& shader)
 
 	for (int i = 0; i < num_tris; i++)
 	{
-		Triangle* tri = cloth->clothMesh->triangles[i];
+		Triangle *tri = cloth->clothMesh->triangles[i];
 
 		Vector3D p1 = tri->pm1->position;
 		Vector3D p2 = tri->pm2->position;
@@ -647,7 +699,7 @@ void ClothSimulator::drawNormals(GLShader& shader)
 	shader.drawArray(GL_TRIANGLES, 0, num_tris * 3);
 }
 
-void ClothSimulator::drawPhong(GLShader& shader)
+void ClothSimulator::drawPhong(GLShader &shader)
 {
 	int num_tris = cloth->clothMesh->triangles.size();
 
@@ -658,7 +710,7 @@ void ClothSimulator::drawPhong(GLShader& shader)
 
 	for (int i = 0; i < num_tris; i++)
 	{
-		Triangle* tri = cloth->clothMesh->triangles[i];
+		Triangle *tri = cloth->clothMesh->triangles[i];
 
 		Vector3D p1 = tri->pm1->position;
 		Vector3D p2 = tri->pm2->position;
@@ -830,7 +882,7 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 }
 
 bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
-	int modifiers)
+											  int modifiers)
 {
 	switch (action)
 	{
@@ -906,7 +958,7 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 }
 
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
-	int mods)
+									  int mods)
 {
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
@@ -963,17 +1015,42 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			interpolate_spheres();
 			break;
 		case ' ':
-			if (!bmesh->mesh_ready) {
+			if (bmesh->shader_method == Balle::Method::not_ready)
+			{
 				bmesh->generate_bmesh();
 			}
-			else {
+			else
+			{
 				delete bmesh->mesh;
+				bmesh->mesh = nullptr;
 				bmesh->triangles.clear();
 				bmesh->quadrangles.clear();
 				bmesh->polygons.clear();
 				bmesh->fringe_points.clear();
+				bmesh->all_points.clear();
+				bmesh->unique_extra_points.clear();
+
 				bmesh->vertices.clear();
-				bmesh->mesh_ready = false;
+				bmesh->shader_method = Balle::Method::not_ready;
+			}
+			break;
+		case 'W':
+		case 'w':
+			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::mesh_wireframe_no_indices;
+			}
+			else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::mesh_faces_no_indices;
+			}
+			else if (bmesh->shader_method == Balle::Method::polygons_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
+			}
+			else if (bmesh->shader_method == Balle::Method::polygons_wirefame_no_indices)
+			{
+				bmesh->shader_method = Balle::Method::polygons_no_indices;
 			}
 			break;
 		
@@ -1062,6 +1139,9 @@ void ClothSimulator::scale_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
+		if (selected->interpolated)
+			return;
+
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
 		original_rad = selected->radius;
@@ -1079,6 +1159,9 @@ void ClothSimulator::delete_node()
 	}
 	else
 	{
+		if (selected->interpolated)
+			return;
+
 		// delete it  and set selected to NULL
 		cout << "Deleting" << endl;
 		if (bmesh->deleteNode(selected))
@@ -1096,7 +1179,10 @@ void ClothSimulator::extrude_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
-		Balle::SkeletalNode* temp = new Balle::SkeletalNode(selected->pos, selected->radius, selected);
+		if (selected->interpolated)
+			return;
+
+		Balle::SkeletalNode *temp = new Balle::SkeletalNode(selected->pos, selected->radius, selected);
 		selected->children->push_back(temp);
 		bmesh->all_nodes_vector->push_back(temp);
 
@@ -1120,6 +1206,9 @@ void ClothSimulator::grab_node()
 	}
 	else
 	{
+		if (selected->interpolated)
+			return;
+
 		cout << "Grabbed" << endl;
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
@@ -1145,6 +1234,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	{
 		gui_state = GUI_STATES::IDLE;
 		cout << "Done grabbing. Cant move it anymore" << endl;
+		interpolate_spheres();
 		return;
 	}
 
@@ -1152,7 +1242,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	// TODO: NO support for layered spheres, NO support for random radius
 	bool found = false;
 
-	for (Balle::SkeletalNode* node : *(bmesh->all_nodes_vector))
+	for (Balle::SkeletalNode *node : *(bmesh->all_nodes_vector))
 	{
 		Matrix4f view = getViewMatrix();
 		Matrix4f projection = getProjectionMatrix();
@@ -1191,7 +1281,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	}
 }
 
-bool ClothSimulator::sphereSelectionTest(double x, double y, Vector3D center, double radius, float& w)
+bool ClothSimulator::sphereSelectionTest(double x, double y, Vector3D center, double radius, float &w)
 {
 	/*
 	 * Algorithm for computing from model space coordinates X to
@@ -1245,7 +1335,7 @@ bool ClothSimulator::sphereSelectionTest(double x, double y, Vector3D center, do
 	return false;
 }
 
-bool ClothSimulator::dropCallbackEvent(int count, const char** filenames)
+bool ClothSimulator::dropCallbackEvent(int count, const char **filenames)
 {
 	return true;
 }
@@ -1265,16 +1355,18 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 	return true;
 }
 
-void ClothSimulator::initGUI(Screen* screen)
+void ClothSimulator::initGUI(Screen *screen)
 {
+	Window *window;
 
-	/*
-	Window* window;
-
-	window = new Window(screen, "Simulation");
+	window = new Window(screen, "                Shader Method                ");
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	window->setLayout(new GroupLayout(15, 6, 14, 5));
 
+	shader_method_label = new Label(window, "Shader Method", "sans-bold");
+	//sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
+
+	/*
 	// Spring types
 
 	new Label(window, "Spring types", "sans-bold");
