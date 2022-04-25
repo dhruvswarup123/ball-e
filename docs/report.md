@@ -1,7 +1,7 @@
 ## Milestone Report
 
 ### The Demo Video
-<iframe src="https://drive.google.com/file/d/1YInP-B_s7MQDi8fbeLF9SdcVYu9kq20a/preview" width="640" height="480" allow="autoplay"></iframe>
+<iframe src="https://drive.google.com/file/d/1YInP-B_s7MQDi8fbeLF9SdcVYu9kq20a/preview" width="640" height="400" allow="autoplay"></iframe>
 
 ### The Main Report
 <iframe src="https://drive.google.com/file/d/1Q_YoM8MW1fJYFkMWP0TB4PBbvrPeEYvg/preview" width="640" height="1000" allow="autoplay"></iframe>
