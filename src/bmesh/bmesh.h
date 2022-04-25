@@ -111,7 +111,8 @@ namespace Balle
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
 		void _update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
-		void _catmull_clark(HalfedgeMesh &mesh);
+		void _catmull_clark(HalfedgeMesh& mesh);
+		void _remesh(HalfedgeMesh &mesh);
 	};
 };
 #endif

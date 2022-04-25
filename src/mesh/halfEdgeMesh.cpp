@@ -620,4 +620,12 @@ namespace CGL {
         return v4;
     }
 
+    VertexIter HalfedgeMesh::collapseEdge(EdgeIter e) {
+        return VertexIter();
+    }
+
+    VertexIter HalfedgeMesh::avgVertex(VertexIter v) {
+        return VertexIter();
+    }
+
 } // End of CMU 462 namespace.

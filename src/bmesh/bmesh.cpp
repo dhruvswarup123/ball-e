@@ -863,3 +863,6 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 
 }
 
+void BMesh::_remesh(HalfedgeMesh& mesh) {
+
+}
