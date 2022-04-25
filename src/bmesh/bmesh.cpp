@@ -139,7 +139,7 @@ void BMesh::interpolate_spheres()
 	interpspheres_helper(root, 1);
 }
 
-void BMesh::delete_interp(SkeletalNode* root)
+void BMesh::delete_interp(SkeletalNode *root)
 {
 	if (root == NULL)
 	{
@@ -147,27 +147,28 @@ void BMesh::delete_interp(SkeletalNode* root)
 	}
 
 	// Iterate through each child node
-	vector<SkeletalNode*>* original_children = new vector<SkeletalNode*>();
-	for (SkeletalNode* child : *(root->children))
+	vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
+	for (SkeletalNode *child : *(root->children))
 	{
 		original_children->push_back(child);
 	}
 
-	for (SkeletalNode* child : *(original_children))
+	for (SkeletalNode *child : *(original_children))
 	{
 
 		// Remove the child from the current parents list of children
-		if (child->interpolated) {
-			SkeletalNode* next = (*child->children)[0];
+		if (child->interpolated)
+		{
+			SkeletalNode *next = (*child->children)[0];
 			deleteNode(child);
 			delete_interp(next);
 		}
-		else {
+		else
+		{
 			delete_interp(child);
-		}		
+		}
 	}
 }
-
 
 void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 {
@@ -471,7 +472,7 @@ void BMesh::_stitch_faces()
 	// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
 
 	// This is just for checking fringe
-	for (const Vector3D& point : fringe_points)
+	for (const Vector3D &point : fringe_points)
 	{
 		if (fringe_ids.count(point) == 0)
 		{
@@ -570,7 +571,8 @@ void BMesh::_stitch_faces()
 		// or if all 3 points are not in the same face
 		if ((fringe_ids.count(triangle.a) == 0) ||
 			(fringe_ids.count(triangle.b) == 0) ||
-			(fringe_ids.count(triangle.c) == 0)) {
+			(fringe_ids.count(triangle.c) == 0))
+		{
 
 			if (ids.count(triangle.a) == 0)
 			{
@@ -589,10 +591,11 @@ void BMesh::_stitch_faces()
 			}
 
 			size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-			polygons.push_back({ ida, idb, idc });
+			polygons.push_back({ida, idb, idc});
 		}
-		else {
-			
+		else
+		{
+
 			size_t fringe_ida = fringe_ids[triangle.a];
 			size_t fringe_idb = fringe_ids[triangle.b];
 			size_t fringe_idc = fringe_ids[triangle.c];
@@ -600,10 +603,13 @@ void BMesh::_stitch_faces()
 			size_t fringe_maxid = max(max(fringe_ida, fringe_idb), fringe_idc);
 			size_t fringe_minid = min(min(fringe_ida, fringe_idb), fringe_idc);
 
-			unordered_set<size_t> distinct_ids = { fringe_ida, fringe_idb, fringe_idc };
+			unordered_set<size_t> distinct_ids = {fringe_ida, fringe_idb, fringe_idc};
 
 			if (distinct_ids.size() == 3)
 			{
+				// Quickhull will generate faces cover the limb fringe vertices
+				// We dont want those to be added to mesh
+				// Do this by:
 				// any_fringe_vertex_id divided by 4 is the group number
 				// if the triangle's 3 vertices are in the same group,
 				// then we don't want to add this to mesh cuz it's covering the fringe
@@ -627,18 +633,10 @@ void BMesh::_stitch_faces()
 					}
 
 					size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-					polygons.push_back({ ida, idb, idc });
+					polygons.push_back({ida, idb, idc});
 				}
 			}
-
 		}
-
-
-
-		
-		// Quickhull will generate faces cover the limb fringe vertices
-		// dont want those to be added to mesh
-		
 	}
 
 	// build halfedgeMesh
@@ -647,7 +645,7 @@ void BMesh::_stitch_faces()
 		delete mesh;
 	}
 	mesh = new HalfedgeMesh();
-	int result = mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
+	int result = mesh->build(polygons, vertices);
 	if (result == 0)
 	{
 		shader_method = mesh_faces_no_indices;
