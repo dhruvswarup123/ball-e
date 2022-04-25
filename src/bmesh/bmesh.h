@@ -16,6 +16,7 @@ using namespace CGL;
 
 namespace Balle
 {
+	enum Method { polygons_no_indices, mesh_faces_no_indices, polygons_with_indices, mesh_wireframe_no_indices, not_ready };
 
 	// Contains the tree and other functions that access the tree
 	struct BMesh
@@ -25,14 +26,14 @@ namespace Balle
 		{
 			root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, NULL); // root has no parent
 
-			// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.02, root);
-			// SkeletalNode *arml = new SkeletalNode(Vector3D(-0.5, 0.5, 0) / 3., 0.021, chest);
-			// SkeletalNode *armr = new SkeletalNode(Vector3D(0.5, 0.5, 0) / 3., 0.022, chest);
-			// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.5, 0) / 3., 0.023, chest);
-			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.75, -1, 0) / 3., 0.011, root);
-			SkeletalNode *footR = new SkeletalNode(Vector3D(0.75, -1, 0) / 3., 0.012, root);
+			// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
+			// SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
+			// SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
+			// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
+			SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
+			SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
 
-			//root->children->push_back(chest);
+			// root->children->push_back(chest);
 			root->children->push_back(footL);
 			root->children->push_back(footR);
 
@@ -49,7 +50,6 @@ namespace Balle
 			all_nodes_vector->push_back(footL);
 			all_nodes_vector->push_back(footR);
 
-			mesh = new HalfedgeMesh();
 		};
 
 		~BMesh() = default;
@@ -67,14 +67,17 @@ namespace Balle
 
 		SkeletalNode *root;
 		vector<SkeletalNode *> *all_nodes_vector;
+		Method shader_method = not_ready;
 
-		HalfedgeMesh *mesh;
+		HalfedgeMesh *mesh = nullptr;
 		vector<Triangle> triangles;
 		vector<Quadrangle> quadrangles;
 		vector<vector<size_t>> polygons;
 		vector<Vector3D> fringe_points;
+		vector<Vector3D> all_points;
+		unordered_set<Vector3D> unique_extra_points;
 		vector<Vector3D> vertices;
-		bool mesh_ready = false;
+		
 
 		// Function for the main bmesh algorithm
 		// Interpolate the sphere
@@ -98,7 +101,7 @@ namespace Balle
 		void _add_faces(SkeletalNode *root);
 		void _stitch_faces();
 		void _print_skeleton(SkeletalNode *root);
-		void _add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh);
+		void _update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
 		void _catmull_clark(HalfedgeMesh& mesh);
 	};
 };

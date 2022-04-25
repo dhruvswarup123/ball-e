@@ -194,5 +194,4 @@ namespace std
     }
   };
 }
-
 #endif // CGL_VECTOR3D_H

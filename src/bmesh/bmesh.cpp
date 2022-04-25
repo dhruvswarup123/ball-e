@@ -162,6 +162,9 @@ void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 
 	for (SkeletalNode *child : *(original_children))
 	{
+		// if ((root->children->size() == 1) && (child->children->size() <= 1))
+		// {
+
 		// Remove the child from the current parents list of children
 		int i = 0;
 		for (SkeletalNode *temp : *(root->children))
@@ -202,6 +205,7 @@ void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 		// New re add the child node back to the end of the joint
 		prev->children->push_back(child);
 		child->parent = prev;
+		// }
 
 		// Now do the recursive call
 		interpspheres_helper(child, divs);
@@ -213,45 +217,55 @@ void BMesh::generate_bmesh()
 	_joint_iterate(root);
 	_stitch_faces();
 }
-void BMesh::_add_mesh(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh)
+void BMesh::_update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf)
 {
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
+
 	Vector3D child_center = child->pos;
 	double child_radius = child->radius;
-	Vector3D localx = (child_center - root_center).unit();
-	// y = Z x x;
-	Vector3D localy = cross({0, 0, 1}, localx).unit();
-	Vector3D localz = cross(localx, localy).unit();
-	Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
-	Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
-	Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
-	Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
 
-	Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
-	Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
-	Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
-	Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
-	if (add_root)
+	Vector3D localx;
+	if ((root->children->size() == 1) && (root->parent != NULL))
 	{
-		limbmesh->add_layer(root_lfup, root_rtup, root_lfdn, root_rtdn);
-		// if(!root->visited){
-		// 	root->visited = true;
-		// }else{
-		// 	cout << "node has been visited!" << endl;
-		// }
-
+		localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
 	}
 	else
 	{
-		limbmesh->add_layer(child_lfup, child_rtup, child_lfdn, child_rtdn);
-		// if(!root->visited){
-		// 	root->visited = true;
-		// }else{
-		// 	cout << "node has been visited!" << endl;
-		// }
+		localx = (child_center - root_center).unit();
+	}
+
+	// y = Z x x;
+	Vector3D localy = cross({0, 0, 1}, localx).unit();
+	Vector3D localz = cross(localx, localy).unit();
+
+	if (add_root)
+	{
+		Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
+		Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
+		Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
+		Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
+		limbmesh->add_layer(root_lfdn, root_rtdn, root_rtup, root_lfup);
+	}
+	else
+	{
+		Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
+		Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
+		Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
+		Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
+		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
+	}
+
+	if (isleaf)
+	{
+		Vector3D child_rtup = child_center + child_radius * localx + child_radius / 3 * localy + child_radius / 3. * localz;
+		Vector3D child_rtdn = child_center + child_radius * localx + child_radius / 3. * localy - child_radius / 3. * localz;
+		Vector3D child_lfup = child_center + child_radius * localx - child_radius / 3. * localy + child_radius / 3. * localz;
+		Vector3D child_lfdn = child_center + child_radius * localx - child_radius / 3. * localy - child_radius / 3. * localz;
+		limbmesh->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
 	}
 }
+
 // Joint node helper
 // TODO: For the root, if the thing has 2 children, then it is not a joint
 void BMesh::_joint_iterate(SkeletalNode *root)
@@ -277,7 +291,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 		if (child->children->size() == 0)
 		{ // Leaf node
 			// That child should only have one rectangle mesh (essentially 2D)
-			_add_mesh(root, child, false, childlimb);
+			_update_limb(root, child, false, childlimb, true);
 			child->limb = childlimb;
 			childlimb->seal();
 		}
@@ -288,7 +302,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 			while (temp->children->size() == 1)
 			{
 				temp->limb = childlimb;
-				_add_mesh(temp, (*temp->children)[0], true, childlimb);
+				_update_limb(temp, (*temp->children)[0], true, childlimb, false);
 				if (first)
 				{
 					first = false;
@@ -299,7 +313,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 			}
 			if (temp->children->size() == 0)
 			{ // reached the end
-				_add_mesh(last, temp, false, childlimb);
+				_update_limb(last, temp, false, childlimb, true);
 				temp->limb = childlimb;
 				childlimb->seal();
 				// cout << "Reached the leaf " << temp->radius << endl;
@@ -317,6 +331,7 @@ void BMesh::_joint_iterate(SkeletalNode *root)
 			_joint_iterate(child);
 		}
 	}
+
 	_add_faces(root);
 }
 
@@ -330,57 +345,91 @@ void BMesh::_add_faces(SkeletalNode *root)
 	{
 		throw runtime_error("Adding faces from a limb node.");
 	}
-	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
-	if (root->parent && root->parent->limb)
-	{
-		for (const Vector3D &point : root->parent->limb->get_last_four_points())
-		{
-			fringe_points.push_back(point);
-		}
-	}
-	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-	for (SkeletalNode *child : *(root->children))
-	{
-		for (const Vector3D &point : child->limb->get_first_four_points())
-		{
-			fringe_points.push_back(point);
-		}
-	}
-	size_t n = fringe_points.size();
-	qh_vertex_t vertices[n];
-	for (size_t i = 0; i < n; i++)
-	{
-		vertices[i].x = fringe_points[i].x;
-		vertices[i].y = fringe_points[i].y;
-		vertices[i].z = fringe_points[i].z;
-	}
-	// Build a convex hull using quickhull algorithm and add the hull triangles
-	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
-	for (size_t i = 0; i < mesh.nindices; i += 3)
-	{
-		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
-		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
-		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		triangles.push_back({a, b, c});
-	}
-	qh_free_mesh(mesh);
 
 	// Add child Limb quadrangles
 	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
 	for (SkeletalNode *child : *(root->children))
 	{
-		for (const Quadrangle &quadrangle : child->limb->quadrangles)
+		if (child->limb)
 		{
-			quadrangles.push_back(quadrangle);
+			for (const Quadrangle &quadrangle : child->limb->quadrangles)
+			{
+				quadrangles.push_back(quadrangle);
+			}
 		}
+	}
+
+	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
+	vector<Vector3D> local_hull_points;
+
+	if (root->parent && root->parent->limb)
+	{
+		for (const Vector3D &point : root->parent->limb->get_last_four_points())
+		{
+			fringe_points.push_back(point);
+			local_hull_points.push_back(point);
+		}
+	}
+	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+	for (SkeletalNode *child : *(root->children))
+	{
+		if (child->limb)
+		{
+			for (const Vector3D &point : child->limb->get_first_four_points())
+			{
+				fringe_points.push_back(point);
+				local_hull_points.push_back(point);
+			}
+		}
+	}
+	// Add something related to current joint node
+	for (int tmp = 0; tmp < 500; tmp++)
+	{
+		Vector3D extra_point = root->pos;
+		double phi = rand() * PI / RAND_MAX, theta = rand() * 2 * PI / RAND_MAX;
+		double x = root->radius * cos(phi) * sin(theta);
+		double y = root->radius * sin(phi) * sin(theta);
+		double z = root->radius * cos(theta);
+		extra_point = extra_point + Vector3D(x, y, z);
+		local_hull_points.push_back(extra_point);
+	}
+
+	// QuickHull algorithm
+	size_t n = local_hull_points.size();
+	qh_vertex_t *vertices = (qh_vertex_t *)malloc(sizeof(qh_vertex_t) * n);
+	for (size_t i = 0; i < n; i++)
+	{
+		vertices[i].x = local_hull_points[i].x;
+		vertices[i].y = local_hull_points[i].y;
+		vertices[i].z = local_hull_points[i].z;
+	}
+
+	// Build a convex hull using quickhull algorithm and add the hull triangles
+	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+	unordered_set<Vector3D> unique_extra_points;
+	for (size_t i = 0; i < mesh.nindices; i += 3)
+	{
+		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
+		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
+		unique_extra_points.insert({a, b, c});
+		triangles.push_back({a, b, c});
+	}
+	qh_free_mesh(mesh);
+
+	for (const Vector3D &unique_extra_point : unique_extra_points)
+	{
+		fringe_points.push_back(unique_extra_point);
 	}
 }
 
 void BMesh::_stitch_faces()
 {
 	// label vertices in triangles and quadrangles
+	// id starts from 0
 	unordered_map<Vector3D, size_t> ids;
-	// label fringe points first
+	// label fringe points first in groups of 4
+	// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
 	for (const Vector3D &fringe_point : fringe_points)
 	{
 		if (ids.count(fringe_point) == 0)
@@ -419,8 +468,54 @@ void BMesh::_stitch_faces()
 		}
 	}
 	// label triangle vertices
-	for (const Triangle &triangle : triangles)
+	for (Triangle &triangle : triangles)
 	{
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
+			{
+				if ((vert - triangle.a).norm() < closest_dist)
+				{
+					closest_dist = (vert - triangle.a).norm();
+					closest = vert;
+				}
+			}
+			triangle.a = closest;
+		}
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
+			{
+				if ((vert - triangle.b).norm() < closest_dist)
+				{
+					closest_dist = (vert - triangle.b).norm();
+					closest = vert;
+				}
+			}
+			triangle.b = closest;
+		}
+		{
+			Vector3D closest;
+			float closest_dist = 100;
+			for (const Vector3D &vert : fringe_points)
+			{
+				if ((vert - triangle.c).norm() < closest_dist)
+				{
+					closest_dist = (vert - triangle.c).norm();
+					closest = vert;
+				}
+			}
+			triangle.c = closest;
+		}
+
+		// Check if the triangle is still valid
+		// if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
+		// {
+		// 	continue;
+		// }
+
 		if (ids.count(triangle.a) == 0)
 		{
 			ids[triangle.a] = ids.size();
@@ -444,7 +539,11 @@ void BMesh::_stitch_faces()
 		unordered_set<size_t> distinct_ids = {ida, idb, idc};
 		if (distinct_ids.size() == 3)
 		{
-			if (maxid / 4 != minid / 4 || maxid >= fringe_points.size())
+			// any_fringe_vertex_id divided by 4 is the group number
+			// if the triangle's 3 vertices are in the same group,
+			// then we don't want to add this to mesh cuz it's covering the fringe
+
+			if ((maxid / 4) != (minid / 4)) // || maxid >= fringe_points.size() TODO
 			{
 				polygons.push_back({ida, idb, idc});
 			}
@@ -452,8 +551,27 @@ void BMesh::_stitch_faces()
 	}
 
 	// build halfedgeMesh
-	// mesh->build(polygons, vertices);
-	mesh_ready = true;
+	if (mesh != nullptr)
+	{
+		delete mesh;
+	}
+	mesh = new HalfedgeMesh();
+	int result = mesh->build(polygons, vertices); // Comment this line to get polygon rendered without error
+	if (result == 0)
+	{
+		shader_method = mesh_faces_no_indices;
+		std::cout << "HalfedgeMesh building succeeded." << std::endl;
+	}
+	else
+	{
+		if (mesh != nullptr)
+		{
+			delete mesh;
+			mesh = nullptr;
+		}
+		shader_method = polygons_no_indices;
+		std::cout << "HalfedgeMesh building failed, using polygons instead." << std::endl;
+	}
 }
 
 void BMesh::print_skeleton()
