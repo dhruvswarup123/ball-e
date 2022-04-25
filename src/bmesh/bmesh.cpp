@@ -703,6 +703,7 @@ void BMesh::_print_skeleton(SkeletalNode *root)
 // ======================== for subdivision =====================
 void BMesh::subdivision(){
 	_catmull_clark(*mesh);
+	std::cout << "after updating the mesh by cc subdivision " << std::endl;
 }
 
 
@@ -760,7 +761,7 @@ Vector3D get_new_vertex(const VertexIter v)
 
 }
 
-void generate_new_quads(const FaceIter f, vector<Quadrangle> quadangles)
+void generate_new_quads(const FaceIter f, vector<Quadrangle>& quadangles)
 {
  	Vector3D v0 = f->newPosition;
 	HalfedgeIter h_start = f->halfedge();
@@ -772,7 +773,7 @@ void generate_new_quads(const FaceIter f, vector<Quadrangle> quadangles)
 		Vector3D v2 = h->next()->vertex()->newPosition;
 		Vector3D v3 = h->next()->edge()->newPosition;
 
-		// std::cout<<"in generate new quad, v0 " << v0 << std::endl;
+		 //std::cout<<"in generate new quad, v0 " << v0 << std::endl;
 
 		Quadrangle quad(v0, v1, v2, v3);
 		quadangles.push_back(quad);
@@ -783,7 +784,7 @@ void generate_new_quads(const FaceIter f, vector<Quadrangle> quadangles)
 
 
 
-HalfedgeMesh connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons, vector<Vector3D> vertices)
+HalfedgeMesh& connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons, vector<Vector3D> vertices)
 {
 	polygons.clear();
 	vertices.clear();
@@ -820,25 +821,24 @@ HalfedgeMesh connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size
 		{
 			polygons.push_back({ ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d] });
 		}
-
-		// std::cout<<"tag22 " << std::endl;
 	}
-
+	std::cout << "before build mesh " << std::endl;
 	HalfedgeMesh *mesh = new HalfedgeMesh();
 	mesh->build(polygons, vertices); 
+	std::cout << "after build mesh " << std::endl;
 	return *mesh;
 
 }
 
 void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 {
-	std::cout << "sub 1 " << std::endl;
+	//std::cout << "sub 1 " << std::endl;
 	// 1. Add new face point
 	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
 	{
-		std::cout << "face " << std::endl;
 		f->isNew = true;
 		f->newPosition = get_face_point(f);
+		//std::cout << "face " << f->newPosition << std::endl;
 		// VertexIter fp = mesh.newVertex();
 		// fp->position = f->newPosition;
 		// f->newVertex = fp;
@@ -849,6 +849,7 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 	{
 		e->isNew = true;
 		e->newPosition = get_edge_point(e);
+		//std::cout << "edge " << e->newPosition << std::endl;
 		// VertexIter ep = mesh.newVertex();
 		// ep->position = e->newPosition;
 		// e->newVertex = ep;
@@ -859,6 +860,7 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 	{
 		v->isNew = false;
 		v->newPosition = get_new_vertex(v);
+		//std::cout << "vertex " << v->newPosition << std::endl;
 		// VertexIter vp = mesh.newVertex();
 		// vp->position = v->newPosition;
 		// v->newVertex = vp;
@@ -872,10 +874,12 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 		generate_new_quads(f, quadrangles);
 	}
 
-	// std::cout<<"call subdivision 2, quad size" << quadrangles.size() << std::endl;
+	 std::cout<<"call subdivision 2, quad size " << quadrangles.size() << std::endl;
 
 	// 5. mapping the quads to the polygon and vertex
+    //HalfedgeMesh& new_mesh;
 	mesh = connect_new_mesh(quadrangles, polygons, vertices);
-
-	// std::cout<<"call subdivision 3" << std::endl;
+	std::cout << "call subdivision 3, finish connecting new mesh" << std::endl;
+	//return new_mesh;
+	// 
 }
