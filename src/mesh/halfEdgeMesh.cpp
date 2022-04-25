@@ -444,4 +444,180 @@ namespace CGL {
         *this = mesh;
     }
 
+    EdgeIter HalfedgeMesh::flipEdge(EdgeIter e0) {
+        // TODO Part 4.
+        // This method should flip the given edge and return an iterator to the flipped edge.
+
+        // Diagram source: https://cmu-graphics.github.io/Scotty3D/meshedit/local/edge_flip_diagram.png 
+
+        // First get all the elements
+        // Get all the halfedges
+        HalfedgeIter h0 = e0->halfedge();
+        HalfedgeIter h1 = h0->next();
+        HalfedgeIter h2 = h1->next();
+
+        HalfedgeIter h3 = h0->twin();
+        HalfedgeIter h4 = h3->next();
+        HalfedgeIter h5 = h4->next();
+
+        HalfedgeIter h6 = h1->twin();
+        HalfedgeIter h7 = h2->twin();
+        HalfedgeIter h8 = h4->twin();
+        HalfedgeIter h9 = h5->twin();
+
+        // Get all vertices
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h3->vertex();
+        VertexIter v2 = h5->vertex();
+        VertexIter v3 = h2->vertex();
+
+        // Get all the edges
+        EdgeIter e1 = h5->edge();
+        EdgeIter e2 = h4->edge();
+        EdgeIter e3 = h2->edge();
+        EdgeIter e4 = h1->edge();
+
+        // Get all the faces
+        FaceIter f0 = h0->face();
+        FaceIter f1 = h3->face();
+
+        // Check for boundary
+        if (f0->isBoundary() || f1->isBoundary()) return e0;
+
+        // Now make the changes and reassign stuff
+        // Edit halfedges
+        h0->setNeighbors(h2, h3, v2, e0, f0); // next, twin, vertex, edge, face;
+        h1->setNeighbors(h3, h6, v1, e4, f1);
+        h2->setNeighbors(h4, h7, v3, e3, f0);
+        h3->setNeighbors(h5, h0, v3, e0, f1);
+        h4->setNeighbors(h0, h8, v0, e2, f0);
+        h5->setNeighbors(h1, h9, v2, e1, f1);
+
+        // Edit vertices
+        v0->halfedge() = h4;
+        v1->halfedge() = h1;
+        v2->halfedge() = h5;
+        v3->halfedge() = h2;
+
+        // Edit faces
+        f0->halfedge() = h0;
+        f1->halfedge() = h3;
+
+        return e0;
+    }
+
+    VertexIter HalfedgeMesh::splitEdge(EdgeIter e0) {
+        // TODO Part 5.
+        // This method should split the given edge and return an iterator to the newly inserted vertex.
+        // The halfedge of this vertex should point along the edge that was split, rather than the new edges.
+
+        // Diagram source: https://cmu-graphics.github.io/Scotty3D/meshedit/local/edge_flip_diagram.png 
+        // Using the same initial diagram. The new post-split dia is in the gh pages
+        // 
+        // First get all the elements
+        // Get all the halfedges
+
+        HalfedgeIter h0 = e0->halfedge();
+        HalfedgeIter h1 = h0->next();
+        HalfedgeIter h2 = h1->next();
+
+        HalfedgeIter h3 = h0->twin();
+        HalfedgeIter h4 = h3->next();
+        HalfedgeIter h5 = h4->next();
+
+        HalfedgeIter h6 = h1->twin();
+        HalfedgeIter h7 = h2->twin();
+        HalfedgeIter h8 = h4->twin();
+        HalfedgeIter h9 = h5->twin();
+
+        // Get all vertices
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h3->vertex();
+        VertexIter v2 = h5->vertex();
+        VertexIter v3 = h2->vertex();
+
+        // Get all the edges
+        EdgeIter e1 = h5->edge();
+        EdgeIter e2 = h4->edge();
+        EdgeIter e3 = h2->edge();
+        EdgeIter e4 = h1->edge();
+
+        // Get all the faces
+        FaceIter f0 = h0->face();
+        FaceIter f1 = h3->face();
+
+        // Check for boundary
+        if (f0->isBoundary() || f1->isBoundary()) return v0;
+
+        // Create new elements
+        HalfedgeIter h10 = newHalfedge();
+        HalfedgeIter h11 = newHalfedge();
+        HalfedgeIter h12 = newHalfedge();
+        HalfedgeIter h13 = newHalfedge();
+        HalfedgeIter h14 = newHalfedge();
+        HalfedgeIter h15 = newHalfedge();
+
+        VertexIter v4 = newVertex();
+
+        EdgeIter e5 = newEdge();
+        EdgeIter e6 = newEdge();
+        EdgeIter e7 = newEdge();
+
+        FaceIter f2 = newFace();
+        FaceIter f3 = newFace();
+
+
+        // Do assignments
+        // Halfedges
+        h0->setNeighbors(h1, h3, v4, e0, f0); // next, twin, vertex, edge, face;
+        h1->setNeighbors(h10, h6, v1, e4, f0);
+        h2->setNeighbors(h14, h7, v3, e3, f2);
+        h3->setNeighbors(h12, h0, v1, e0, f1);
+        h4->setNeighbors(h13, h8, v0, e2, f3);
+        h5->setNeighbors(h3, h9, v2, e1, f1);
+
+        //h6->setNeighbors(h, h, v, e, f);
+        //h7->setNeighbors(h, h, v, e, f);
+        //h8->setNeighbors(h, h, v, e, f);
+        //h9->setNeighbors(h, h, v, e, f);
+
+        h10->setNeighbors(h0, h11, v3, e5, f0);
+        h11->setNeighbors(h2, h10, v4, e5, f2);
+        h12->setNeighbors(h5, h13, v4, e6, f1);
+        h13->setNeighbors(h15, h12, v2, e6, f3);
+        h14->setNeighbors(h11, h15, v0, e7, f2);
+        h15->setNeighbors(h4, h14, v4, e7, f3);
+
+        // Vertices
+        v0->halfedge() = h14;
+        v1->halfedge() = h3;
+        v2->halfedge() = h13;
+        v3->halfedge() = h10;
+        v4->halfedge() = h15;
+
+        v4->position = (v0->position + v1->position) / 2;
+        //v4->position = e0->newPosition;
+
+        e0->halfedge() = h0;
+        e1->halfedge() = h5;
+        e2->halfedge() = h4;
+        e3->halfedge() = h2;
+        e4->halfedge() = h1;
+        e5->halfedge() = h10;
+        e6->halfedge() = h12;
+        e7->halfedge() = h14;
+
+        // TODO: Is this necessary?
+        e7->newPosition = e0->newPosition;
+        e7->isNew = e0->isNew;
+
+        // Faces
+        f0->halfedge() = h0;
+        f1->halfedge() = h3;
+        f2->halfedge() = h14;
+        f3->halfedge() = h15;
+
+        return v4;
+    }
+
 } // End of CMU 462 namespace.

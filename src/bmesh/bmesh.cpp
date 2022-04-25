@@ -862,3 +862,4 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 	std::cout << "call subdivision, finish connecting new mesh" << std::endl;
 
 }
+
