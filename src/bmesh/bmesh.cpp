@@ -784,7 +784,8 @@ void generate_new_quads(const FaceIter f, vector<Quadrangle>& quadangles)
 
 
 
-HalfedgeMesh& connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons, vector<Vector3D> vertices)
+void connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons, 
+	vector<Vector3D> vertices, HalfedgeMesh& mesh)
 {
 	polygons.clear();
 	vertices.clear();
@@ -823,10 +824,10 @@ HalfedgeMesh& connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<siz
 		}
 	}
 	std::cout << "before build mesh " << std::endl;
-	HalfedgeMesh *mesh = new HalfedgeMesh();
-	mesh->build(polygons, vertices); 
+	//HalfedgeMesh *mesh = new HalfedgeMesh();
+	mesh.build(polygons, vertices); 
 	std::cout << "after build mesh " << std::endl;
-	return *mesh;
+	//return *mesh;
 
 }
 
@@ -878,7 +879,7 @@ void BMesh::_catmull_clark(HalfedgeMesh& mesh)
 
 	// 5. mapping the quads to the polygon and vertex
     //HalfedgeMesh& new_mesh;
-	mesh = connect_new_mesh(quadrangles, polygons, vertices);
+	connect_new_mesh(quadrangles, polygons, vertices, mesh);
 	std::cout << "call subdivision 3, finish connecting new mesh" << std::endl;
 	//return new_mesh;
 	// 
