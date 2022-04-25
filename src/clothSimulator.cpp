@@ -809,6 +809,7 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 					selected->radius = 0.01;
 				}
 			}
+
 		}
 		else if (gui_state == GUI_STATES::GRABBING)
 		{
@@ -827,6 +828,7 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 			Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
 			Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
 			selected->pos = sphere_pos_world_v3d;
+
 		}
 	}
 
@@ -1077,6 +1079,8 @@ void ClothSimulator::scale_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
+		if (selected->interpolated) return;
+
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
 		original_rad = selected->radius;
@@ -1093,7 +1097,9 @@ void ClothSimulator::delete_node()
 		return;
 	}
 	else
-	{
+	{	
+		if (selected->interpolated) return;
+
 		// delete it  and set selected to NULL
 		cout << "Deleting" << endl;
 		if (bmesh->deleteNode(selected))
@@ -1111,6 +1117,8 @@ void ClothSimulator::extrude_node()
 	}
 	else if (gui_state == GUI_STATES::IDLE)
 	{
+		if (selected->interpolated) return;
+
 		Balle::SkeletalNode *temp = new Balle::SkeletalNode(selected->pos, selected->radius, selected);
 		selected->children->push_back(temp);
 		bmesh->all_nodes_vector->push_back(temp);
@@ -1135,6 +1143,8 @@ void ClothSimulator::grab_node()
 	}
 	else
 	{
+		if (selected->interpolated) return;
+
 		cout << "Grabbed" << endl;
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
@@ -1160,6 +1170,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	{
 		gui_state = GUI_STATES::IDLE;
 		cout << "Done grabbing. Cant move it anymore" << endl;
+		interpolate_spheres();
 		return;
 	}
 

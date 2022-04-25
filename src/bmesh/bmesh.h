@@ -64,6 +64,7 @@ namespace Balle
 		void drawSpheres(GLShader &shader);
 
 		bool deleteNode(SkeletalNode *node);
+		void delete_interp(SkeletalNode* root);
 
 		SkeletalNode *root;
 		vector<SkeletalNode *> *all_nodes_vector;

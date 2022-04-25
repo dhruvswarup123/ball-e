@@ -143,8 +143,39 @@ bool BMesh::deleteNode(SkeletalNode *node)
 
 void BMesh::interpolate_spheres()
 {
+	delete_interp(root);
 	interpspheres_helper(root, 1);
 }
+
+void BMesh::delete_interp(SkeletalNode* root)
+{
+	if (root == NULL)
+	{
+		return;
+	}
+
+	// Iterate through each child node
+	vector<SkeletalNode*>* original_children = new vector<SkeletalNode*>();
+	for (SkeletalNode* child : *(root->children))
+	{
+		original_children->push_back(child);
+	}
+
+	for (SkeletalNode* child : *(original_children))
+	{
+
+		// Remove the child from the current parents list of children
+		if (child->interpolated) {
+			SkeletalNode* next = (*child->children)[0];
+			deleteNode(child);
+			delete_interp(next);
+		}
+		else {
+			delete_interp(child);
+		}		
+	}
+}
+
 
 void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 {
@@ -193,6 +224,7 @@ void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 
 			// Create the interp sphere
 			SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+			interp_sphere->interpolated = true;
 
 			// Add the interp sphere to the struct
 			prev->children->push_back(interp_sphere);
@@ -214,6 +246,7 @@ void BMesh::interpspheres_helper(SkeletalNode *root, int divs)
 
 void BMesh::generate_bmesh()
 {
+	interpolate_spheres();
 	_joint_iterate(root);
 	_stitch_faces();
 }
