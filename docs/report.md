@@ -3,7 +3,7 @@
 <head>
 <style>
 	.iframe_div {
-		background:url(../images/loader.gif) center center no-repeat;
+		background:url(images/loader.gif) center center no-repeat;
 	}
 </style>
 </head>
