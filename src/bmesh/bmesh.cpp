@@ -807,7 +807,7 @@ void BMesh::__remesh(HalfedgeMesh &mesh)
 	}
 
 	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
-		// v->position = v->newPosition;
+		v->position = v->newPosition;
 	}
 
 }
