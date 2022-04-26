@@ -740,6 +740,7 @@ void BMesh::__remesh(HalfedgeMesh &mesh)
 		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
 			mesh.collapseEdge(e);
 		}
+		std::cout << "out of if, in for: " << std::endl;
 	}
 
 	// Edge flip operation

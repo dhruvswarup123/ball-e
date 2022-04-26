@@ -676,6 +676,10 @@ namespace CGL {
         FaceIter f0 = h0->face();
         FaceIter f1 = h3->face();
 
+      /*  std::cout << "face degree 1: " << f0->degree() << std::endl;
+        std::cout << "face degree 2: " << f1->degree() << std::endl;
+        std::cout << "v degree 1: " << v0->degree() << std::endl;
+        std::cout << "v degree 2: " << v1->degree() << std::endl;*/
        
         // Fix halfedges
          h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
@@ -693,28 +697,29 @@ namespace CGL {
              h = h->twin()->next();
 
          } while (h != h9);
+         //std::cout << "step 2: "<< std::endl;
        
-         // halfedge
-         h2->next() = h1;
-         h5->next() = h4;
-
-
          // Fix Vertices
          v0->halfedge() = h7;
          v2->halfedge() = h8;
          v3->halfedge() = h6;
+         v0->position = (v0->position + v1->position);
 
          // Fix Edges
          e2->halfedge() = h8;
          e3->halfedge() = h7;
 
-         // Fix face
-         f0->halfedge() = h1;
-         f1->halfedge() = h5;
+   
+         //std::cout << "step 3: "  << std::endl;
+
         
          // Delete stuff
          deleteHalfedge(h0);
+
+         //std::cout << "step 4: "  << std::endl;
          deleteHalfedge(h1);
+
+         //std::cout << "step 5: "  << std::endl;
          deleteHalfedge(h2);
          deleteHalfedge(h3);
          deleteHalfedge(h4);
@@ -722,15 +727,13 @@ namespace CGL {
 
          deleteVertex(v1);
 
-
+         deleteEdge(e0);
          deleteEdge(e1);
          deleteEdge(e4);
-
-
          deleteFace(f0);
          deleteFace(f1);
          
-        std::cout << "finish at first " << std::endl;
+        std::cout << "finish collapse once " << std::endl;
         return v0;
     }
 
