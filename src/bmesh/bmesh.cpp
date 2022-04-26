@@ -526,6 +526,9 @@ void BMesh::subdivision()
 	__catmull_clark(*mesh);
 	std::cout << "after updating the mesh by cc subdivision " << std::endl;
 }
+void BMesh::remesh() {
+	__remesh(*mesh);
+}
 
 Vector3D get_face_point(const FaceIter f)
 {
@@ -684,6 +687,129 @@ void BMesh::__catmull_clark(HalfedgeMesh &mesh)
 
 void BMesh::__remesh(HalfedgeMesh &mesh)
 {
+	// Edge split operation
+	vector<EdgeIter> edges;
+
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		if (f->degree() == 3) {
+			EdgeIter e1 = f->halfedge()->edge();
+			EdgeIter e2 = f->halfedge()->next()->edge();
+			EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+			float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+			for (EdgeIter e : {e1, e2, e3}) {
+				if (e->length() > 4 * L / 3) {
+					edges.push_back(e);
+				}
+			}
+		}
+	}
+
+	for (EdgeIter e: edges)
+	{
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			//mesh.splitEdge(e);
+		}
+	}
+
+
+	// Edge collapse operation
+	edges.clear();
+
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		if (f->degree() == 3) {
+			EdgeIter e1 = f->halfedge()->edge();
+			EdgeIter e2 = f->halfedge()->next()->edge();
+			EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+			float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+			for (EdgeIter e : {e1, e2, e3}) {
+				if (e->length() < 4 * L / 5) {
+					edges.push_back(e);
+				}
+			}
+		}
+	}
+
+	for (EdgeIter e : edges)
+	{
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			//mesh.collapseEdge(e);
+		}
+	}
+
+	// Edge flip operation
+	edges.clear();
+
+	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+	{
+		// Both triangles
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			int a1, a2, b1, b2;
+			int degree_before, degree_after;
+
+			a1 = e->halfedge()->vertex()->degree();
+			a2 = e->halfedge()->twin()->vertex()->degree();
+
+			b1 = e->halfedge()->next()->next()->vertex()->degree();
+			b2 = e->halfedge()->twin()->next()->next()->vertex()->degree();
+
+			degree_before = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+			b1 = e->halfedge()->vertex()->degree() + 1;
+			b2 = e->halfedge()->twin()->vertex()->degree() + 1;
+
+			a1 = e->halfedge()->next()->next()->vertex()->degree() - 1;
+			a2 = e->halfedge()->twin()->next()->next()->vertex()->degree() - 1;
+
+			degree_after = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+			if (degree_after < degree_before) {
+				edges.push_back(e);
+			}
+		}
+	}
+
+	for (EdgeIter e : edges)
+	{
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			// mesh.flipEdge(e);
+		}
+	}
+
+	// Vertex average
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+		HalfedgeIter htemp = v->halfedge()->twin()->next();
+
+		float count = 0;
+		Vector3D centroid = 0;
+
+		HalfedgeIter h = v->halfedge();
+		do
+		{
+			centroid += h->next()->vertex()->position;
+			count += 1.;
+			h = h->twin()->next();
+
+		} while (h != v->halfedge());
+
+		centroid /= count;
+
+		Vector3D V = centroid - v->position;
+		V = V - dot(v->normal(), V) * v->normal();
+
+		v->newPosition = v->position + 0.3 * V;
+
+	}
+
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
+		v->position = v->newPosition;
+	}
+
 }
 
 /******************************

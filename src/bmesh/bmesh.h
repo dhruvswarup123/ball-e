@@ -44,6 +44,7 @@ namespace Balle
 		void clear_mesh();
 		void generate_bmesh();
 		void subdivision();
+		void remesh();
 
 		/******************************
 		 * Structual Manipulation     *

@@ -31,6 +31,28 @@ namespace CGL {
         return N.unit();
     }
 
+    Vector3D Vertex::normal(void) const
+    {
+        Vector3D N(0., 0., 0.);
+
+        HalfedgeCIter h = this->halfedge();
+        do
+        {
+            Vector3D pi = h->vertex()->position;
+            Vector3D pj = h->next()->vertex()->position;
+            Vector3D pk = h->next()->next()->vertex()->position;
+
+            N += cross(pj - pk, pi-pk);
+
+            h = h->twin()->next();
+
+        } while (h != this->halfedge());
+
+ 
+
+        return N.unit();
+    }
+
     int HalfedgeMesh::build(const vector< vector<Index> >& polygons,
         const vector<Vector3D>& vertexPositions)
         // This method initializes the halfedge data structure from a raw list of polygons,
@@ -620,8 +642,82 @@ namespace CGL {
         return v4;
     }
 
-    VertexIter HalfedgeMesh::collapseEdge(EdgeIter e) {
-        return VertexIter();
+    VertexIter HalfedgeMesh::collapseEdge(EdgeIter e0) {
+        // https://cmu-graphics.github.io/Scotty3D/meshedit/local/edge_flip_diagram.png
+        HalfedgeIter h0 = e0->halfedge();
+        HalfedgeIter h1 = h0->next();
+        HalfedgeIter h2 = h1->next();
+
+        HalfedgeIter h3 = h0->twin();
+        HalfedgeIter h4 = h3->next();
+        HalfedgeIter h5 = h4->next();
+
+        HalfedgeIter h6 = h1->twin();
+        HalfedgeIter h7 = h2->twin();
+        HalfedgeIter h8 = h4->twin();
+        HalfedgeIter h9 = h5->twin();
+
+        // Get all vertices
+        VertexIter v0 = h0->vertex();
+        VertexIter v1 = h3->vertex();
+        VertexIter v2 = h5->vertex();
+        VertexIter v3 = h2->vertex();
+
+        // Get all the edges
+        EdgeIter e1 = h5->edge();
+        EdgeIter e2 = h4->edge();
+        EdgeIter e3 = h2->edge();
+        EdgeIter e4 = h1->edge();
+
+        // Get all the faces
+        FaceIter f0 = h0->face();
+        FaceIter f1 = h3->face();
+
+        // Fix halfedges
+        h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
+        h7->setNeighbors(h7->next(), h6, v0, e3, h7->face()); // next, twin, vertex, edge, face;
+
+        h8->setNeighbors(h8->next(), h9, v2, e2, h8->face()); // next, twin, vertex, edge, face;
+        h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
+
+
+        // For every halkfedge from v1, set its origin to v0
+        HalfedgeIter h = h9->twin()->next();
+        do
+        {
+            h->vertex() = v0;
+            h = h->twin()->next();
+
+        } while (h != h9);
+       
+
+        // Fix Vertices
+        v0->halfedge() = h7;
+        v2->halfedge() = h8;
+        v3->halfedge() = h6;
+
+        // Fix Edges
+        e2->halfedge() = h8;
+        e3->halfedge() = h7;
+        
+        // Delete stuff
+        deleteHalfedge(h0);
+        deleteHalfedge(h1);
+        deleteHalfedge(h2);
+        deleteHalfedge(h3);
+        deleteHalfedge(h4);
+        deleteHalfedge(h5);
+
+        deleteVertex(v1);
+
+        deleteEdge(e1);
+        deleteEdge(e4);
+
+        deleteFace(f0);
+        deleteFace(f1);
+
+
+        return v0;
     }
 
     VertexIter HalfedgeMesh::avgVertex(VertexIter v) {

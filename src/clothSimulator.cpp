@@ -780,6 +780,10 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'd':
 			bmesh->subdivision();
 			break;
+		case 'R': // subdivision
+		case 'r':
+			bmesh->remesh();
+			break;
 		}
 	}
 
