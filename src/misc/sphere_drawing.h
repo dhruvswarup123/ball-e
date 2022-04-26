@@ -15,7 +15,7 @@ namespace Misc {
 class SphereMesh {
 public:
   // Supply the desired number of vertices
-  SphereMesh(int num_lat = 40, int num_lon = 40);
+  SphereMesh(int num_lat = 15, int num_lon = 15);
   
   
   /**

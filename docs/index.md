@@ -1,7 +1,11 @@
-## Usage guide for ball-e
+## CS284 Webpages
 
-### Other links
 [Project Proposal](proposal.md)
+
+[Milestone Report](report.md)
+
+## Usage Guide
+(To be updated soon)
 
 ### Using the GUI
 Here are all the keybinds:
