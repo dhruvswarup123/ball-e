@@ -644,6 +644,9 @@ namespace CGL {
 
     VertexIter HalfedgeMesh::collapseEdge(EdgeIter e0) {
         // https://cmu-graphics.github.io/Scotty3D/meshedit/local/edge_flip_diagram.png
+
+        // should use this one
+        // https://cmu-graphics.github.io/Scotty3D/meshedit/local/collapse_edge.svg
         HalfedgeIter h0 = e0->halfedge();
         HalfedgeIter h1 = h0->next();
         HalfedgeIter h2 = h1->next();
@@ -673,50 +676,61 @@ namespace CGL {
         FaceIter f0 = h0->face();
         FaceIter f1 = h3->face();
 
-        // Fix halfedges
-        h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
-        h7->setNeighbors(h7->next(), h6, v0, e3, h7->face()); // next, twin, vertex, edge, face;
-
-        h8->setNeighbors(h8->next(), h9, v2, e2, h8->face()); // next, twin, vertex, edge, face;
-        h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
-
-
-        // For every halkfedge from v1, set its origin to v0
-        HalfedgeIter h = h9->twin()->next();
-        do
-        {
-            h->vertex() = v0;
-            h = h->twin()->next();
-
-        } while (h != h9);
        
+        // Fix halfedges
+         h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
+         h7->setNeighbors(h7->next(), h6, v0, e3, h7->face()); // next, twin, vertex, edge, face;
 
-        // Fix Vertices
-        v0->halfedge() = h7;
-        v2->halfedge() = h8;
-        v3->halfedge() = h6;
+         h8->setNeighbors(h8->next(), h9, v2, e2, h8->face()); // next, twin, vertex, edge, face;
+         h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
 
-        // Fix Edges
-        e2->halfedge() = h8;
-        e3->halfedge() = h7;
+
+
+        // For every halfedge from v1, set its origin to v0
+         HalfedgeIter h = h9->twin()->next();
+         do
+         {
+             h->vertex() = v0;
+             h = h->twin()->next();
+
+         } while (h != h9);
+       
+         // halfedge
+         h2->next() = h1;
+         h5->next() = h4;
+
+
+         // Fix Vertices
+         v0->halfedge() = h7;
+         v2->halfedge() = h8;
+         v3->halfedge() = h6;
+
+         // Fix Edges
+         e2->halfedge() = h8;
+         e3->halfedge() = h7;
+
+         // Fix face
+         f0->halfedge() = h1;
+         f1->halfedge() = h5;
         
-        // Delete stuff
-        deleteHalfedge(h0);
-        deleteHalfedge(h1);
-        deleteHalfedge(h2);
-        deleteHalfedge(h3);
-        deleteHalfedge(h4);
-        deleteHalfedge(h5);
+         // Delete stuff
+         deleteHalfedge(h0);
+         deleteHalfedge(h1);
+         deleteHalfedge(h2);
+         deleteHalfedge(h3);
+         deleteHalfedge(h4);
+         deleteHalfedge(h5);
 
-        deleteVertex(v1);
+         deleteVertex(v1);
 
-        deleteEdge(e1);
-        deleteEdge(e4);
+         deleteEdge(e1);
+         deleteEdge(e4);
 
-        deleteFace(f0);
-        deleteFace(f1);
+         deleteFace(f0);
+         deleteFace(f1);
 
-
+         
+        std::cout << "finish at first " << std::endl;
         return v0;
     }
 
