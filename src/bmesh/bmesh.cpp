@@ -737,12 +737,22 @@ void BMesh::__remesh(HalfedgeMesh &mesh)
 
 	for (EdgeIter e : edges)
 	{
-		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+		if (!e->isDeleted && 
+			(e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
 			mesh.collapseEdge(e);
 		}
-		std::cout << "out of if, in for: " << std::endl;
+	}
+	std::cout << "finish collapse: " << std::endl;
+	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++) {
+		if (e->isDeleted) {
+			//mesh.deleteEdge(e);
+			std::cout << "!! Deleted edge !!" << std::endl;
+		}
 	}
 
+	std::cout << "deleted" << std::endl;
+
+	/*
 	// Edge flip operation
 	edges.clear();
 
@@ -781,6 +791,7 @@ void BMesh::__remesh(HalfedgeMesh &mesh)
 			// mesh.flipEdge(e);
 		}
 	}
+	*/
 
 	// Vertex average
 	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
@@ -808,7 +819,7 @@ void BMesh::__remesh(HalfedgeMesh &mesh)
 	}
 
 	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++) {
-		v->position = v->newPosition;
+		//v->position = v->newPosition;
 	}
 
 }

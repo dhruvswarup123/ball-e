@@ -709,29 +709,29 @@ namespace CGL {
          e2->halfedge() = h8;
          e3->halfedge() = h7;
 
-   
-         //std::cout << "step 3: "  << std::endl;
-
-        
+          
          // Delete stuff
          deleteHalfedge(h0);
-
-         //std::cout << "step 4: "  << std::endl;
          deleteHalfedge(h1);
 
-         //std::cout << "step 5: "  << std::endl;
          deleteHalfedge(h2);
          deleteHalfedge(h3);
          deleteHalfedge(h4);
          deleteHalfedge(h5);
 
          deleteVertex(v1);
-
-         deleteEdge(e0);
-         deleteEdge(e1);
-         deleteEdge(e4);
+         
          deleteFace(f0);
          deleteFace(f1);
+
+         /*
+         deleteEdge(e1);
+         deleteEdge(e4);
+         */
+
+         e0->isDeleted = true;
+         e1->isDeleted = true;
+         e4->isDeleted = true;
          
         std::cout << "finish collapse once " << std::endl;
         return v0;
