@@ -782,7 +782,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			break;
 		case 'R': // subdivision
 		case 'r':
-			bmesh->remesh();
+			//bmesh->remesh();
 			break;
 		}
 	}
@@ -833,8 +833,6 @@ void ClothSimulator::delete_node()
 	}
 	else
 	{
-		if (selected->interpolated)
-			return;
 
 		// delete it  and set selected to nullptr
 		cout << "Deleting" << endl;

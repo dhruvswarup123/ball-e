@@ -189,6 +189,7 @@ void BMesh::interpolate_spheres()
 	__interpspheres_helper(root, 1);
 }
 
+
 void BMesh::delete_interpolation(SkeletalNode *root)
 {
 	if (root == nullptr)
@@ -904,6 +905,17 @@ void BMesh::__draw_mesh_vertices(GLShader &shader, Misc::SphereMesh &msm)
 	}
 }
 
+void edge_interpolate(const SkeletalNode& n1, const SkeletalNode& n2, float * rad, float * x) {
+	// Interpolate a sphere touching n1
+
+	float d = (n2.pos - n1.pos).norm();
+	float r3 = n1.radius * (d + n2.radius - n1.radius) / (d - n2.radius + n1.radius);
+	*x = n1.radius + r3;
+
+	*rad = r3;
+//	*pos = n1.pos + x * (n2.pos - n1.pos).unit();
+}
+
 void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 {
 	if (root == nullptr)
@@ -916,6 +928,21 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 	for (SkeletalNode *child : *(root->children))
 	{
 		original_children->push_back(child);
+	}
+
+	float radius = 1000;
+	float x = 0;
+
+	for (SkeletalNode* child : *(original_children))
+	{
+		float temp_rad, temp_x;
+
+		edge_interpolate(*root, *child, &temp_rad, &temp_x);
+
+		if (temp_rad < radius) {
+			radius = temp_rad;
+			x = temp_x;
+		}
 	}
 
 	for (SkeletalNode *child : *(original_children))
@@ -941,7 +968,7 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 		// Distance or radius step size between the interpolated spheres
 		Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
 		float rad_step = (child->radius - root->radius) / (divs + 1.);
-
+		divs = 1;
 		// For each sphere to be created
 		for (int i = 0; i < divs; i++)
 		{
@@ -950,7 +977,8 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 			float new_radius = root->radius + (i + 1) * rad_step;
 
 			// Create the interp sphere
-			SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+			//SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+			SkeletalNode* interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
 			interp_sphere->interpolated = true;
 
 			// Add the interp sphere to the struct
@@ -989,7 +1017,9 @@ void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root
 	Vector3D localx;
 	if ((root->children->size() == 1) && (root->parent != nullptr))
 	{
-		localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+		//localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+		localx = (child_center - root_center).unit();
+
 	}
 	else
 	{
