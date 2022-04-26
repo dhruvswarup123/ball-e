@@ -34,11 +34,7 @@ namespace Balle
 		// World Coordinate position of the ball
 		Vector3D pos;
 		bool selected = false;
-<<<<<<< HEAD
-		bool visited = false;
-=======
 		bool interpolated = false;
->>>>>>> 5747b72c3f461cf768b89d48d59b2d9164470d1a
 
 		// The children of the ball
 		// Leaf node == end node -> connects to only one bone
