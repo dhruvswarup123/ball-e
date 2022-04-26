@@ -685,7 +685,6 @@ namespace CGL {
          h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
 
 
-
         // For every halfedge from v1, set its origin to v0
          HalfedgeIter h = h9->twin()->next();
          do
@@ -723,12 +722,13 @@ namespace CGL {
 
          deleteVertex(v1);
 
+
          deleteEdge(e1);
          deleteEdge(e4);
 
+
          deleteFace(f0);
          deleteFace(f1);
-
          
         std::cout << "finish at first " << std::endl;
         return v0;
