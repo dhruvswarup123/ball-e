@@ -644,6 +644,9 @@ namespace CGL {
 
     VertexIter HalfedgeMesh::collapseEdge(EdgeIter e0) {
         // https://cmu-graphics.github.io/Scotty3D/meshedit/local/edge_flip_diagram.png
+
+        // should use this one
+        // https://cmu-graphics.github.io/Scotty3D/meshedit/local/collapse_edge.svg
         HalfedgeIter h0 = e0->halfedge();
         HalfedgeIter h1 = h0->next();
         HalfedgeIter h2 = h1->next();
@@ -673,48 +676,109 @@ namespace CGL {
         FaceIter f0 = h0->face();
         FaceIter f1 = h3->face();
 
-        // Fix halfedges
-        h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
-        h7->setNeighbors(h7->next(), h6, v0, e3, h7->face()); // next, twin, vertex, edge, face;
-
-        h8->setNeighbors(h8->next(), h9, v2, e2, h8->face()); // next, twin, vertex, edge, face;
-        h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
+        
 
 
-        // For every halkfedge from v1, set its origin to v0
-        HalfedgeIter h = h9->twin()->next();
-        do
-        {
-            h->vertex() = v0;
-            h = h->twin()->next();
+        // squeeze all elements to v0
+        HalfedgeIter h_p;
 
-        } while (h != h9);
-       
+        // (1) calculate the new position of v0
+        v0->newPosition = (v0->position + v1->position) / 2;
 
-        // Fix Vertices
-        v0->halfedge() = h7;
-        v2->halfedge() = h8;
+        // (2) halfedge, remove 0, 2, 3, 4, 7, 8  ; keep 6
+        h1->setNeighbors(h7->next(), h6, v1, e4, h7->face());
+        h5->setNeighbors(h3, h9, v2, e1, h8->face());
+
+        h_p = h8;
+        do{h_p = h_p->next();} 
+        while(h_p->next() != h8);
+        h9->setNeighbors(h_p->twin(), h5, v1, e1, h9->face());
+
+        // (3) vertex, remove v0
+        v1->halfedge() = h1;
+        v2->halfedge() = h5;
         v3->halfedge() = h6;
 
-        // Fix Edges
-        e2->halfedge() = h8;
-        e3->halfedge() = h7;
-        
-        // Delete stuff
+        // (4) edge, remove e0, e2, e3
+        e1->halfedge() = h5;
+        e4->halfedge() = h1;
+
+        // (5) face, remove f0, f1
+
+        // (6) h7->prev()
+        h_p = h7;
+        do{ h_p = h_p->next(); } 
+        while (h_p->next() != h7);
+        h_p->next() = h1;
+
+        // (7) connect halfedge on v0 to v1
+        h_p = h4;
+        do{
+            h_p = h_p->twin()->next();
+            h_p->vertex() = v0;
+        } while(h_p != h7);
+
+
         deleteHalfedge(h0);
-        deleteHalfedge(h1);
         deleteHalfedge(h2);
         deleteHalfedge(h3);
         deleteHalfedge(h4);
-        deleteHalfedge(h5);
-
-        deleteVertex(v1);
-
-        deleteEdge(e1);
-        deleteEdge(e4);
+        deleteHalfedge(h7);
+        deleteHalfedge(h8);
 
         deleteFace(f0);
         deleteFace(f1);
+
+        deleteEdge(e0);
+        deleteEdge(e2);
+        deleteEdge(e3);
+
+        deleteVertex(v0);
+
+
+        // Fix halfedges
+        // h6->setNeighbors(h6->next(), h7, v3, e3, h6->face()); // next, twin, vertex, edge, face;
+        // h7->setNeighbors(h7->next(), h6, v0, e3, h7->face()); // next, twin, vertex, edge, face;
+
+        // h8->setNeighbors(h8->next(), h9, v2, e2, h8->face()); // next, twin, vertex, edge, face;
+        // h9->setNeighbors(h9->next(), h8, v0, e2, h9->face()); // next, twin, vertex, edge, face;
+
+
+
+        // For every halkfedge from v1, set its origin to v0
+        // HalfedgeIter h = h9->twin()->next();
+        // do
+        // {
+        //     h->vertex() = v0;
+        //     h = h->twin()->next();
+
+        // } while (h != h9);
+       
+
+        // // Fix Vertices
+        // v0->halfedge() = h7;
+        // v2->halfedge() = h8;
+        // v3->halfedge() = h6;
+
+        // // Fix Edges
+        // e2->halfedge() = h8;
+        // e3->halfedge() = h7;
+        
+        // // Delete stuff
+        // deleteHalfedge(h0);
+        // deleteHalfedge(h1);
+        // deleteHalfedge(h2);
+        // deleteHalfedge(h3);
+        // deleteHalfedge(h4);
+        // deleteHalfedge(h5);
+
+        // deleteVertex(v1);
+
+        // deleteEdge(e1);
+        // deleteEdge(e4);
+
+        // deleteFace(f0);
+        // deleteFace(f1);
 
 
         return v0;
