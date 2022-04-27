@@ -711,21 +711,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			// Extrude the currently sel sphere
 			// scale_node();
 			if (ctrl_down) {
-				// Time source https://stackoverflow.com/a/16358264/13292618
-				time_t rawtime;
-				struct tm* timeinfo;
-				char buffer[80];
-
-				time(&rawtime);
-				timeinfo = localtime(&rawtime);
-
-				strftime(buffer, sizeof(buffer), "%d-%m-%Y_%H-%M-%S", timeinfo);
-				std::string str(buffer);
-
-				str = "spheres_" + str + ".balle";
-
-				cout << "Saving the config to " + str << endl;
-				bmesh->save_to_file(str);
+				save_bmesh_to_file();
 			}
 			break;
 		case 'N':
@@ -787,6 +773,23 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 	}
 
 	return true;
+}
+
+void ClothSimulator::save_bmesh_to_file()
+{
+	// Time source https://stackoverflow.com/a/16358264/13292618
+	time_t rawtime;
+	struct tm* timeinfo;
+	char buffer[80];
+
+	time(&rawtime);
+	timeinfo = localtime(&rawtime);
+
+	strftime(buffer, sizeof(buffer), "spheres_%d-%m-%Y_%H-%M-%S.balle", timeinfo);
+	std::string str(buffer);
+
+	cout << "Saving the config to " + str << endl;
+	bmesh->save_to_file(str);
 }
 
 void ClothSimulator::select_next()

@@ -158,6 +158,7 @@ private:
   Balle::SkeletalNode *selected = NULL;
   GUI_STATES gui_state = GUI_STATES::IDLE;
 
+  void save_bmesh_to_file();
   void reset_grab_scale();
   void finish_grab_scale();
   void delete_node();
