@@ -772,7 +772,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'L':
 		case 'l':
 			if (ctrl_down) {
-				bmesh->load_from_file("spheres_27-04-2022_12-54-53.balle");
+				bmesh->load_from_file("spheres_27-04-2022_13-45-53.balle");
 			}
 			break;
 		}

@@ -291,17 +291,7 @@ bool BMesh::load_from_file(const string& filename) {
 	file >> j;
 	file.close();
 
-	SkeletalNode * temp = __json_to_skeleton(j);
-	if (temp == NULL) {
-		return false;
-	}
-	else {
-		// destroy current struct
-		__avada_kedavra();
-
-		// Update root
-		root = temp;
-	}
+	__json_to_skeleton(j);
 
 	return true;
 }
@@ -333,43 +323,72 @@ void BMesh::__skeleton_to_json(json& j) {
 		}
 
 		j["spheres"][spheres_to_index[s]]["children"] = children;
+		if (s->parent == NULL) {
+			j["spheres"][spheres_to_index[s]]["parent"] = -1;
+
+		}
+		else {
+			j["spheres"][spheres_to_index[s]]["parent"] = spheres_to_index[s->parent];
+
+		}
 	}
 }
 
-SkeletalNode* BMesh::__json_to_skeleton(const json& j) {
+bool BMesh::__json_to_skeleton(const json& j) {
 
 	int count = -1;
 
 	if (j.find("count") != j.end()) {
 		count = j["count"];
+		cout << "count " << typeid(count).name() << " " << count << endl;
 	}
 	else {
-		return NULL;
+		return false;
 	}
 
-	if (j.find("spheres") != j.end()) {
-		count = j["count"];
-	}
-	else {
-		return NULL;
+	if (j.find("spheres") == j.end()) {
+		return false;
 	}
 
-	unordered_map<SkeletalNode*, int> index_to_spheres;
+	// Delet all the spheres
+	__avada_kedavra();
 
-	/*for (int i = 0; i < all_nodes_vector.size(); i++) {
-		
+	unordered_map<int, SkeletalNode*> index_to_spheres;
+
+	// For each sphere
+	for (auto s : j["spheres"]) {
 		Vector3D pos;
-		double radius = j[radius];
+		pos.x = s["pos"][0];
+		pos.y = s["pos"][1];
+		pos.z = s["pos"][2];
 
-		SkeletalNode* s = new SkeletalNode();
+		double radius = s["radius"];
+		int i = s["index"];
 
-		index_to_spheres[i] = s;
+		SkeletalNode* temp = new SkeletalNode(pos, radius, NULL);
+		all_nodes.insert(temp);
+		index_to_spheres[i] = temp;
+	}
 
-		j["spheres"][i]["radius"] = s->radius;
-		j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
-	}*/
+	for (auto s : j["spheres"]) {
+		int i = s["index"];
+		int i_parent = s["parent"];
+		SkeletalNode* temp = index_to_spheres[i];
 
-	return NULL;
+		if (i_parent == -1) {
+			temp->parent = NULL;
+			root = temp;
+		}
+		else {
+			temp->parent = index_to_spheres[i_parent];
+		}
+
+		for (int i_child : s["children"]) {
+			temp->children->push_back(index_to_spheres[i_child]);
+		}
+	}
+
+	return true;
 }
 
 void BMesh::__avada_kedavra() {

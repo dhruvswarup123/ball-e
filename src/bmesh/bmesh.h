@@ -86,7 +86,7 @@ namespace Balle
 		void __interpspheres_helper(SkeletalNode *root, int divs);
 		void __delete_interpolation_helper(SkeletalNode *root);
 		void __skeleton_to_json(json& j);
-		SkeletalNode* __json_to_skeleton(const json& j);
+		bool __json_to_skeleton(const json& j);
 		void __avada_kedavra();
 
 		/******************************
