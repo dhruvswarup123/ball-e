@@ -882,8 +882,8 @@ namespace Balle
 		Vector3D localx;
 		if ((root->children->size() == 1) && (root->parent != nullptr))
 		{
-			// localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
-			localx = (child_center - root_center).unit();
+			localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+		//	localx = (child_center - root_center).unit();
 		}
 		else
 		{
