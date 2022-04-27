@@ -769,6 +769,12 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			bmesh->clear_mesh();
 			init();
 			break;
+		case 'L':
+		case 'l':
+			if (ctrl_down) {
+				bmesh->load_from_file("spheres_27-04-2022_12-54-53.balle");
+			}
+			break;
 		}
 	}
 

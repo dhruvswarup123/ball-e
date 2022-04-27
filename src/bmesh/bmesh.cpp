@@ -289,13 +289,20 @@ bool BMesh::load_from_file(const string& filename) {
 	}
 	json j;
 	file >> j;
-
-	// destroy current struct
-
-	// Set root
-	root = __json_to_skeleton(j);
-
 	file.close();
+
+	SkeletalNode * temp = __json_to_skeleton(j);
+	if (temp == NULL) {
+		return false;
+	}
+	else {
+		// destroy current struct
+		__avada_kedavra();
+
+		// Update root
+		root = temp;
+	}
+
 	return true;
 }
 
@@ -304,31 +311,77 @@ void BMesh::__skeleton_to_json(json& j) {
 	// REMOVE INTERPOLATED NODES 
 	__delete_interpolation_helper(root);
 
-	j["count"] = all_nodes_vector.size();
+	j["count"] = all_nodes.size();
 	unordered_map<SkeletalNode *, int> spheres_to_index;
 
-	for (int i = 0; i < all_nodes_vector.size(); i++) {
-		SkeletalNode* s = all_nodes_vector[i];
+	int i = 0;
+
+	for (auto s: all_nodes) {
 		spheres_to_index[s] = i;
 
+		j["spheres"][i]["index"] = i; // Just for debugging
 		j["spheres"][i]["radius"] = s->radius;
 		j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
+
+		i++;
 	}
 
-	for (int i = 0; i < all_nodes_vector.size(); i++) {
-		SkeletalNode* s = all_nodes_vector[i];
-
+	for (auto s : all_nodes) {
 		vector<int> children;
 		for (SkeletalNode* child : *s->children) {
 			children.push_back(spheres_to_index[child]);
 		}
 
-		j["spheres"][i]["children"] = children;
+		j["spheres"][spheres_to_index[s]]["children"] = children;
 	}
 }
 
-SkeletalNode * BMesh::__json_to_skeleton(const json& j) {
+SkeletalNode* BMesh::__json_to_skeleton(const json& j) {
+
+	int count = -1;
+
+	if (j.find("count") != j.end()) {
+		count = j["count"];
+	}
+	else {
+		return NULL;
+	}
+
+	if (j.find("spheres") != j.end()) {
+		count = j["count"];
+	}
+	else {
+		return NULL;
+	}
+
+	unordered_map<SkeletalNode*, int> index_to_spheres;
+
+	/*for (int i = 0; i < all_nodes_vector.size(); i++) {
+		
+		Vector3D pos;
+		double radius = j[radius];
+
+		SkeletalNode* s = new SkeletalNode();
+
+		index_to_spheres[i] = s;
+
+		j["spheres"][i]["radius"] = s->radius;
+		j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
+	}*/
+
 	return NULL;
+}
+
+void BMesh::__avada_kedavra() {
+	/*vector<SkeletalNode*> temp;
+
+	for (SkeletalNode * i : all_nodes_vector) {
+		temp.push_back(i);
+	}
+
+	for (int i = 0; i < temp.size(); i++) {
+		delete_node(temp[i]);
+	}*/
 }
 
 /******************************
