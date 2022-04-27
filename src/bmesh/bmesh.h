@@ -55,6 +55,7 @@ namespace Balle
 		SkeletalNode* create_skeletal_node_after(SkeletalNode* parent);
 
 		void interpolate_spheres();
+		void delete_interpolated();
 		bool delete_node(SkeletalNode *node);
 		void delete_interpolation(SkeletalNode *root);
 		vector<SkeletalNode*> get_all_node();

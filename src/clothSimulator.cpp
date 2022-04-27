@@ -903,7 +903,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	{
 		gui_state = GUI_STATES::IDLE;
 		cout << "Done grabbing. Cant move it anymore" << endl;
-		interpolate_spheres();
+		//interpolate_spheres();
 		return;
 	}
 

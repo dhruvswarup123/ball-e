@@ -189,28 +189,39 @@ void BMesh::interpolate_spheres()
 	__interpspheres_helper(root, 1);
 }
 
+void BMesh::delete_interpolated() {
+	delete_interpolation(root);
+}
 
 void BMesh::delete_interpolation(SkeletalNode *root)
 {
-	if (root == nullptr)
+	/*if (root == nullptr)
 	{
 		return;
 	}
 
-	// Iterate through each child node
-	vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
 	for (SkeletalNode *child : *(root->children))
+	{
+		delete_interpolation(child);
+	}
+
+	if (root->interpolated) {
+		delete_node(root);
+	}*/
+
+
+	vector<SkeletalNode*>* original_children = new vector<SkeletalNode*>();
+	for (SkeletalNode* child : *(root->children))
 	{
 		original_children->push_back(child);
 	}
 
-	for (SkeletalNode *child : *(original_children))
+	for (SkeletalNode* child : *(original_children))
 	{
-
 		// Remove the child from the current parents list of children
 		if (child->interpolated)
 		{
-			SkeletalNode *next = (*child->children)[0];
+			SkeletalNode* next = (*child->children)[0];
 			delete_node(child);
 			delete_interpolation(next);
 		}
@@ -918,6 +929,7 @@ void edge_interpolate(const SkeletalNode& n1, const SkeletalNode& n2, float * ra
 
 void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 {
+
 	if (root == nullptr)
 	{
 		return;
@@ -933,6 +945,7 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 	float radius = 1000;
 	float x = 0;
 
+	// Get the smallest interpolation between joint, to parents and children
 	for (SkeletalNode* child : *(original_children))
 	{
 		float temp_rad, temp_x;
@@ -943,6 +956,38 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 			radius = temp_rad;
 			x = temp_x;
 		}
+	}
+
+	if ((root->parent != NULL)) {
+		
+		float temp_rad, temp_x;
+		edge_interpolate(*root, *(root->parent), &temp_rad, &temp_x);
+		if (temp_rad < radius) {
+			radius = temp_rad;
+			x = temp_x;
+		}
+
+		// Now interpolate to the parent
+		SkeletalNode* interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
+		interp_sphere->interpolated = true;
+
+		SkeletalNode* temp_parent = root->parent;
+
+		int i = 0;
+		for (SkeletalNode* temp : *(root->parent->children))
+		{
+			if (temp == root)
+			{
+				root->parent->children->erase(root->parent->children->begin() + i);
+				break;
+			}
+			i += 1;
+		}
+
+		temp_parent->children->push_back(interp_sphere);
+		interp_sphere->children->push_back(root);
+		root->parent = interp_sphere;
+		all_nodes_vector.push_back(interp_sphere);
 	}
 
 	for (SkeletalNode *child : *(original_children))
