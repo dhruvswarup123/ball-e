@@ -2,6 +2,7 @@
 #define BMESH_H
 
 #include <vector>
+#include <unordered_set>
 #include <nanogui/nanogui.h>
 
 #include "../misc/sphere_drawing.h"
@@ -56,7 +57,7 @@ namespace Balle
 
 		void interpolate_spheres();
 		bool delete_node(SkeletalNode *node);
-		vector<SkeletalNode*> get_all_node();
+		unordered_set<SkeletalNode*> get_all_node();
 
 		/******************************
 		 * Rendering Functions        *
@@ -111,7 +112,7 @@ namespace Balle
 	private:
 		// Root of the tree structured skeletal nodes
 		SkeletalNode *root = nullptr;
-		vector<SkeletalNode *> all_nodes_vector;
+		unordered_set<SkeletalNode *> all_nodes;
 
 		// Generated Halfedge Mesh
 		HalfedgeMesh *mesh = nullptr;

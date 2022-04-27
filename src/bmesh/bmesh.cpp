@@ -33,13 +33,13 @@ BMesh::BMesh()
 	// chest->children->push_back(armr);
 	// chest->children->push_back(head);
 
-	all_nodes_vector.push_back(root);
-	// all_nodes_vector.push_back(chest);
-	// all_nodes_vector.push_back(arml);
-	// all_nodes_vector.push_back(armr);
-	// all_nodes_vector.push_back(head);
-	all_nodes_vector.push_back(footL);
-	all_nodes_vector.push_back(footR);
+	all_nodes.emplace(root);
+	// all_nodes.emplace(chest);
+	// all_nodes.emplace(arml);
+	// all_nodes.emplace(armr);
+	// all_nodes.emplace(head);
+	all_nodes.emplace(footL);
+	all_nodes.emplace(footR);
 };
 
 void BMesh::clear_mesh()
@@ -162,45 +162,36 @@ SkeletalNode *BMesh::create_skeletal_node_after(SkeletalNode *parent)
 {
 	SkeletalNode *temp = new Balle::SkeletalNode(parent->pos, parent->radius, parent);
 	parent->children->push_back(temp);
-	all_nodes_vector.push_back(temp);
+	all_nodes.emplace(temp);
 	return temp;
 }
 
 bool BMesh::delete_node(SkeletalNode *node)
 {
-	if (node == root)
+	if (node == root || node->interpolated)
 	{
 		cout << "WARNING: Cant delete root!" << endl;
 		return false;
 	}
 
 	// First remove the node from the master list
-	int i = 0;
-	for (SkeletalNode *temp : all_nodes_vector)
-	{
-		if (temp == node)
-		{
-			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE
-			all_nodes_vector.erase(all_nodes_vector.begin() + i);
-			break;
-		}
-		i += 1;
+	if (all_nodes.count(node) != 0) {
+		all_nodes.erase(node);
 	}
 
-	// First remove the node from the master list
+	// Second remove the node from the parent list
 	SkeletalNode *parent = node->parent;
 
-	i = 0;
+	size_t idx = 0;
 	for (SkeletalNode *temp : *(parent->children))
 	{
 		if (temp == node)
 		{
-			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE . it removes the node entirely?
-			parent->children->erase(parent->children->begin() + i);
 			break;
 		}
-		i += 1;
+		idx += 1;
 	}
+	parent->children->erase(parent->children->begin() + idx);
 
 	for (SkeletalNode *temp : *(node->children))
 	{
@@ -250,9 +241,9 @@ void BMesh::__delete_interpolation_helper(SkeletalNode *root)
 	root->children = new_children;
 }
 
-vector<SkeletalNode *> BMesh::get_all_node()
+unordered_set<SkeletalNode *> BMesh::get_all_node()
 {
-	return all_nodes_vector;
+	return all_nodes;
 }
 
 /******************************
@@ -663,7 +654,7 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 		temp_parent->children->push_back(interp_sphere);
 		interp_sphere->children->push_back(root);
 		root->parent = interp_sphere;
-		all_nodes_vector.push_back(interp_sphere);
+		all_nodes.emplace(interp_sphere);
 	}
 
 	for (SkeletalNode *child : *(original_children))
@@ -701,7 +692,7 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 
 			// Add the interp sphere to the struct
 			prev->children->push_back(interp_sphere);
-			all_nodes_vector.push_back(interp_sphere);
+			all_nodes.emplace(interp_sphere);
 
 			// Update prev
 			prev = interp_sphere;
