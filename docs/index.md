@@ -16,13 +16,15 @@ Here are all the keybinds:
 | `1` | Set camera to front view |
 | `3` | Set camera to side view |
 | `7` | Set camera to top view |
-| `c` |  Go to a child node |
+| `Left click and drag` | (grab) Move the selected node |
+| `Right click and drag` or `Left click and drag with control pressed` | Scale the selected sphere |
 | `e` |  Extrude the current node |
-| `g` |  (grab) Move the selected node |
-| `n` |  Go to a sibling node |
-| `p` |  Go to a parent node |
-| `s` |  Scale the selected sphere |
+| `d` | Catmull-Clark subdivision |
 | `x` | Delete the selected sphere |
+| `r` | Reset all nodes to default sticky man |
+| `n` |  Go to a sibling node (deprecated)|
+| `p` |  Go to a parent node (deprecated)|
+| `c` |  Go to a child node (deprecated)|
 
 Additionally, 
 1. Left click and drag to rotate camera

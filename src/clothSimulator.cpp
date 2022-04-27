@@ -563,48 +563,6 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 	else if (!left_down && !middle_down && !right_down)
 	{
 		mouseMoved(x, y);
-
-		// Nothing was clicked
-		// check and perform grabbing if needed
-		if (gui_state == GUI_STATES::SCALING)
-		{
-
-			double scaleval = sqrt(pow(scale_mouse_x - x, 2) + pow(scale_mouse_y - y, 2)) * 0.002;
-
-			if (mouse_x > scale_mouse_x)
-			{ // Scale up
-				selected->radius = original_rad + scaleval;
-			}
-			else
-			{
-				if (original_rad - scaleval > 0.01)
-				{
-					selected->radius = original_rad - scaleval;
-				}
-				else
-				{
-					selected->radius = 0.01;
-				}
-			}
-		}
-		else if (gui_state == GUI_STATES::GRABBING)
-		{
-			// First change the point to camera coordanates
-			Matrix4f view = getViewMatrix();
-			Matrix4f projection = getProjectionMatrix();
-			Matrix4f viewProjection = projection * view; // World to screen
-
-			// Get the original position of the sphere
-			Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
-
-			Vector4f original_screenpos = viewProjection * original_worldpos;
-
-			Vector4f movebyvec(x - grab_mouse_x, -(y - grab_mouse_y), 0, 0);
-
-			Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
-			Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
-			selected->pos = sphere_pos_world_v3d;
-		}
 	}
 
 	mouse_x = x;
@@ -623,14 +581,13 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			// Find point here.
-			sceneIntersect(mouse_x, mouse_y);
 			left_down = true;
+			sceneIntersect(mouse_x, mouse_y);
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			reset_grab_scale();
 			right_down = true;
 			break;
 		}
@@ -641,18 +598,26 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			left_down = false;
+			finish_grab_scale();
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = false;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			right_down = false;
+			finish_grab_scale();
 			break;
 		}
 		return true;
 	}
 
 	return false;
+}
+
+void ClothSimulator::finish_grab_scale()
+{
+
+	gui_state = GUI_STATES::IDLE;
 }
 
 void ClothSimulator::reset_grab_scale()
@@ -680,13 +645,26 @@ void ClothSimulator::mouseLeftDragged(double x, double y)
 {
 	float dx = x - mouse_x;
 	float dy = y - mouse_y;
-
-	camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+	if (selected == nullptr)
+	{
+		camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+	}
+	else
+	{
+		grab_node(x, y);
+	}
 }
 
 void ClothSimulator::mouseRightDragged(double x, double y)
 {
-	camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
+	if (selected == nullptr)
+	{
+		camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
+	}
+	else
+	{
+		scale_node(x, y);
+	}
 }
 
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
@@ -723,12 +701,12 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'g':
 		case 'G':
 			// Extrude the currently sel sphere
-			grab_node();
+			// grab_node();
 			break;
 		case 's':
 		case 'S':
 			// Extrude the currently sel sphere
-			scale_node();
+			// scale_node();
 			break;
 		case 'N':
 		case 'n':
@@ -806,23 +784,41 @@ void ClothSimulator::select_child()
 	bmesh->select_child_skeletal_node(selected);
 }
 
-void ClothSimulator::scale_node()
+void ClothSimulator::scale_node(double x, double y)
 {
-	if (selected == nullptr)
+	if (selected == nullptr || selected->interpolated)
 	{
 		return;
 	}
-	else if (gui_state == GUI_STATES::IDLE)
-	{
-		if (selected->interpolated)
-			return;
 
+	if (gui_state == GUI_STATES::IDLE)
+	{
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
 		original_rad = selected->radius;
 		gui_state = GUI_STATES::SCALING;
 
 		cout << "Scaling" << endl;
+	}
+	else
+	{
+		double scaleval = sqrt(pow(scale_mouse_x - x, 2) + pow(scale_mouse_y - y, 2)) * 0.002;
+
+		if (mouse_x > scale_mouse_x)
+		{ // Scale up
+			selected->radius = original_rad + scaleval;
+		}
+		else
+		{
+			if (original_rad - scaleval > 0.01)
+			{
+				selected->radius = original_rad - scaleval;
+			}
+			else
+			{
+				selected->radius = 0.01;
+			}
+		}
 	}
 }
 
@@ -848,49 +844,60 @@ void ClothSimulator::delete_node()
 
 void ClothSimulator::extrude_node()
 {
-	if (selected == nullptr)
+	if (selected == nullptr || selected->interpolated)
 	{
 		return;
 	}
-	else if (gui_state == GUI_STATES::IDLE)
+
+	if (gui_state == GUI_STATES::IDLE)
 	{
-		if (selected->interpolated)
-			return;
-
 		Balle::SkeletalNode *temp = bmesh->create_skeletal_node_after(selected);
-
 		cout << "Created a new node" << endl;
+		Vector3D offset(0.05, 0.05, 0.05);
+		if (temp->parent->parent) {
+			offset = (temp->parent->pos - temp->parent->parent->pos).unit() * 0.08;
+		}
+		temp->pos = selected->pos + offset;
+		cout << temp->pos << endl;
 		selected->selected = false;
 		selected = temp;
 		selected->selected = true;
-
-		grab_node();
-		gui_state = GUI_STATES::GRABBING;
-		cout << "Move it around" << endl;
 	}
 }
 
-void ClothSimulator::grab_node()
+void ClothSimulator::grab_node(double x, double y)
 {
-	if (selected == nullptr)
+	if (selected == nullptr || selected->interpolated)
 	{
 		return;
 	}
-	else
-	{
-		if (selected->interpolated)
-			return;
 
-		cout << "Grabbed" << endl;
+	if (gui_state == GUI_STATES::IDLE)
+	{
+		gui_state = GUI_STATES::GRABBING;
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
 		original_pos = selected->pos;
-
-		gui_state = GUI_STATES::GRABBING;
-
+		// cout << "gbms: " << grab_mouse_x << " " << grab_mouse_y << endl;
+	}
+	else if (gui_state == GUI_STATES::GRABBING)
+	{
 		// do grab stuff
 		// set state to grabbing
 		// remove grab state in the callback func
+		// First change the point to camera coordanates
+		Matrix4f view = getViewMatrix();
+		Matrix4f projection = getProjectionMatrix();
+		Matrix4f viewProjection = projection * view; // World to screen
+
+		// Get the original position of the sphere
+		Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
+		Vector4f original_screenpos = viewProjection * original_worldpos;
+		Vector4f movebyvec(x - grab_mouse_x, -(y - grab_mouse_y), 0, 0);
+
+		Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
+		Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
+		selected->pos = sphere_pos_world_v3d;
 	}
 }
 
@@ -901,18 +908,10 @@ void ClothSimulator::interpolate_spheres()
 
 void ClothSimulator::sceneIntersect(double x, double y)
 {
-	// If grabbing, but click again
-	if (gui_state == GUI_STATES::GRABBING || gui_state == GUI_STATES::SCALING)
-	{
-		gui_state = GUI_STATES::IDLE;
-		cout << "Done grabbing. Cant move it anymore" << endl;
-		interpolate_spheres();
-		return;
-	}
-
 	// Go over each sphere, and check if it intersects
 	// TODO: NO support for layered spheres, NO support for random radius
 	bool found = false;
+	// cout << "x/screen_w: " << x << "/" << screen_w << " y/screen_h: " << y << "/" << screen_h << endl;
 
 	for (Balle::SkeletalNode *node : bmesh->get_all_node())
 	{
@@ -938,7 +937,6 @@ void ClothSimulator::sceneIntersect(double x, double y)
 				selected->selected = false;
 			}
 
-			cout << "selecting" << endl;
 			selected = node; // remove this
 			selected->selected = true;
 			found = true;

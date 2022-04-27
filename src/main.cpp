@@ -39,12 +39,15 @@ ClothSimulator *app = nullptr;
 GLFWwindow *window = nullptr;
 Screen *screen = nullptr;
 
-void error_callback(int error, const char* description) {
+void error_callback(int error, const char *description)
+{
   puts(description);
 }
 
-void createGLContexts() {
-  if (!glfwInit()) {
+void createGLContexts()
+{
+  if (!glfwInit())
+  {
     return;
   }
 
@@ -66,21 +69,22 @@ void createGLContexts() {
 
   // Create a GLFWwindow object
   window = glfwCreateWindow(800, 800, "B-Mesh project", nullptr, nullptr);
-  if (window == nullptr) {
+  if (window == nullptr)
+  {
     std::cout << "Failed to create GLFW window" << std::endl;
     glfwTerminate();
     return;
   }
   glfwMakeContextCurrent(window);
 
-  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+  {
     throw std::runtime_error("Could not initialize GLAD!");
   }
   glGetError(); // pull and ignore unhandled errors like GL_INVALID_ENUM
 
   glClearColor(0.2f, 0.25f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-
 
   // Create a nanogui screen and pass the glfw pointer to initialize
   screen = new Screen();
@@ -94,53 +98,55 @@ void createGLContexts() {
   glfwSwapBuffers(window);
 }
 
-void setGLFWCallbacks() {
-  glfwSetCursorPosCallback(window, [](GLFWwindow *, double x, double y) {
+void setGLFWCallbacks()
+{
+  glfwSetCursorPosCallback(window, [](GLFWwindow *, double x, double y)
+                           {
     if (!screen->cursorPosCallbackEvent(x, y)) {
-      app->cursorPosCallbackEvent(x / screen->pixelRatio(),
-                                  y / screen->pixelRatio());
-    }
-  });
+      app->cursorPosCallbackEvent(x, y);
+    } });
 
   glfwSetMouseButtonCallback(
-      window, [](GLFWwindow *, int button, int action, int modifiers) {
+      window, [](GLFWwindow *, int button, int action, int modifiers)
+      {
         if (!screen->mouseButtonCallbackEvent(button, action, modifiers) ||
             action == GLFW_RELEASE) {
           app->mouseButtonCallbackEvent(button, action, modifiers);
-        }
-      });
+        } });
 
   glfwSetKeyCallback(
-      window, [](GLFWwindow *, int key, int scancode, int action, int mods) {
+      window, [](GLFWwindow *, int key, int scancode, int action, int mods)
+      {
         if (!screen->keyCallbackEvent(key, scancode, action, mods)) {
           app->keyCallbackEvent(key, scancode, action, mods);
-        }
-      });
+        } });
 
-  glfwSetCharCallback(window, [](GLFWwindow *, unsigned int codepoint) {
-    screen->charCallbackEvent(codepoint);
-  });
+  glfwSetCharCallback(window, [](GLFWwindow *, unsigned int codepoint)
+                      { screen->charCallbackEvent(codepoint); });
 
   glfwSetDropCallback(window,
-                      [](GLFWwindow *, int count, const char **filenames) {
+                      [](GLFWwindow *, int count, const char **filenames)
+                      {
                         screen->dropCallbackEvent(count, filenames);
                         app->dropCallbackEvent(count, filenames);
                       });
 
-  glfwSetScrollCallback(window, [](GLFWwindow *, double x, double y) {
+  glfwSetScrollCallback(window, [](GLFWwindow *, double x, double y)
+                        {
     if (!screen->scrollCallbackEvent(x, y)) {
       app->scrollCallbackEvent(x, y);
-    }
-  });
+    } });
 
   glfwSetFramebufferSizeCallback(window,
-                                 [](GLFWwindow *, int width, int height) {
+                                 [](GLFWwindow *, int width, int height)
+                                 {
                                    screen->resizeCallbackEvent(width, height);
                                    app->resizeCallbackEvent(width, height);
                                  });
 }
 
-void usageError(const char *binaryName) {
+void usageError(const char *binaryName)
+{
   printf("Usage: %s [options]\n", binaryName);
   printf("Required program options:\n");
   printf("  -f     <STRING>    Filename of scene\n");
@@ -153,27 +159,32 @@ void usageError(const char *binaryName) {
   exit(-1);
 }
 
-void incompleteObjectError(const char *object, const char *attribute) {
+void incompleteObjectError(const char *object, const char *attribute)
+{
   cout << "Incomplete " << object << " definition, missing " << attribute << endl;
   exit(-1);
 }
 
-bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vector<CollisionObject *>* objects, int sphere_num_lat, int sphere_num_lon) {
+bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vector<CollisionObject *> *objects, int sphere_num_lat, int sphere_num_lon)
+{
   // Read JSON from file
   ifstream i(filename);
-  if (!i.good()) {
+  if (!i.good())
+  {
     return false;
   }
   json j;
   i >> j;
 
   // Loop over objects in scene
-  for (json::iterator it = j.begin(); it != j.end(); ++it) {
+  for (json::iterator it = j.begin(); it != j.end(); ++it)
+  {
     string key = it.key();
 
     // Check that object is valid
     unordered_set<string>::const_iterator query = VALID_KEYS.find(key);
-    if (query == VALID_KEYS.end()) {
+    if (query == VALID_KEYS.end())
+    {
       cout << "Invalid scene object found: " << key << endl;
       exit(-1);
     }
@@ -182,7 +193,8 @@ bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vec
     json object = it.value();
 
     // Parse object depending on type (cloth, sphere, or plane)
-    if (key == CLOTH) {
+    if (key == CLOTH)
+    {
       // Cloth
       double width, height;
       int num_width_points, num_height_points;
@@ -191,51 +203,71 @@ bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vec
       vector<vector<int>> pinned;
 
       auto it_width = object.find("width");
-      if (it_width != object.end()) {
+      if (it_width != object.end())
+      {
         width = *it_width;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "width");
       }
 
       auto it_height = object.find("height");
-      if (it_height != object.end()) {
+      if (it_height != object.end())
+      {
         height = *it_height;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "height");
       }
 
       auto it_num_width_points = object.find("num_width_points");
-      if (it_num_width_points != object.end()) {
+      if (it_num_width_points != object.end())
+      {
         num_width_points = *it_num_width_points;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "num_width_points");
       }
 
       auto it_num_height_points = object.find("num_height_points");
-      if (it_num_height_points != object.end()) {
+      if (it_num_height_points != object.end())
+      {
         num_height_points = *it_num_height_points;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "num_height_points");
       }
 
       auto it_thickness = object.find("thickness");
-      if (it_thickness != object.end()) {
+      if (it_thickness != object.end())
+      {
         thickness = *it_thickness;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "thickness");
       }
 
       auto it_orientation = object.find("orientation");
-      if (it_orientation != object.end()) {
+      if (it_orientation != object.end())
+      {
         orientation = *it_orientation;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "orientation");
       }
 
       auto it_pinned = object.find("pinned");
-      if (it_pinned != object.end()) {
+      if (it_pinned != object.end())
+      {
         vector<json> points = *it_pinned;
-        for (auto pt : points) {
+        for (auto pt : points)
+        {
           vector<int> point = pt;
           pinned.push_back(point);
         }
@@ -254,44 +286,62 @@ bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vec
       double damping, density, ks;
 
       auto it_enable_structural = object.find("enable_structural");
-      if (it_enable_structural != object.end()) {
+      if (it_enable_structural != object.end())
+      {
         enable_structural_constraints = *it_enable_structural;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "enable_structural");
       }
 
       auto it_enable_shearing = object.find("enable_shearing");
-      if (it_enable_shearing != object.end()) {
+      if (it_enable_shearing != object.end())
+      {
         enable_shearing_constraints = *it_enable_shearing;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "it_enable_shearing");
       }
 
       auto it_enable_bending = object.find("enable_bending");
-      if (it_enable_bending != object.end()) {
+      if (it_enable_bending != object.end())
+      {
         enable_bending_constraints = *it_enable_bending;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "it_enable_bending");
       }
 
       auto it_damping = object.find("damping");
-      if (it_damping != object.end()) {
+      if (it_damping != object.end())
+      {
         damping = *it_damping;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "damping");
       }
 
       auto it_density = object.find("density");
-      if (it_density != object.end()) {
+      if (it_density != object.end())
+      {
         density = *it_density;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "density");
       }
 
       auto it_ks = object.find("ks");
-      if (it_ks != object.end()) {
+      if (it_ks != object.end())
+      {
         ks = *it_ks;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("cloth", "ks");
       }
 
@@ -301,58 +351,80 @@ bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vec
       cp->density = density;
       cp->damping = damping;
       cp->ks = ks;
-    } else if (key == SPHERE) {
+    }
+    else if (key == SPHERE)
+    {
       Vector3D origin;
       double radius, friction;
 
       auto it_origin = object.find("origin");
-      if (it_origin != object.end()) {
+      if (it_origin != object.end())
+      {
         vector<double> vec_origin = *it_origin;
         origin = Vector3D(vec_origin[0], vec_origin[1], vec_origin[2]);
-      } else {
+      }
+      else
+      {
         incompleteObjectError("sphere", "origin");
       }
 
       auto it_radius = object.find("radius");
-      if (it_radius != object.end()) {
+      if (it_radius != object.end())
+      {
         radius = *it_radius;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("sphere", "radius");
       }
 
       auto it_friction = object.find("friction");
-      if (it_friction != object.end()) {
+      if (it_friction != object.end())
+      {
         friction = *it_friction;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("sphere", "friction");
       }
 
       Sphere *s = new Sphere(origin, radius, friction, sphere_num_lat, sphere_num_lon);
       objects->push_back(s);
-    } else { // PLANE
+    }
+    else
+    { // PLANE
       Vector3D point, normal;
       double friction;
 
       auto it_point = object.find("point");
-      if (it_point != object.end()) {
+      if (it_point != object.end())
+      {
         vector<double> vec_point = *it_point;
         point = Vector3D(vec_point[0], vec_point[1], vec_point[2]);
-      } else {
+      }
+      else
+      {
         incompleteObjectError("plane", "point");
       }
 
       auto it_normal = object.find("normal");
-      if (it_normal != object.end()) {
+      if (it_normal != object.end())
+      {
         vector<double> vec_normal = *it_normal;
         normal = Vector3D(vec_normal[0], vec_normal[1], vec_normal[2]);
-      } else {
+      }
+      else
+      {
         incompleteObjectError("plane", "normal");
       }
 
       auto it_friction = object.find("friction");
-      if (it_friction != object.end()) {
+      if (it_friction != object.end())
+      {
         friction = *it_friction;
-      } else {
+      }
+      else
+      {
         incompleteObjectError("plane", "friction");
       }
 
@@ -362,24 +434,28 @@ bool loadObjectsFromFile(string filename, Cloth *cloth, ClothParameters *cp, vec
   }
 
   i.close();
-  
+
   return true;
 }
 
-bool is_valid_project_root(const std::string& search_path) {
-    std::stringstream ss;
-    ss << search_path;
-    ss << "/";
-    ss << "shaders/Default.vert";
-    
-    return FileUtils::file_exists(ss.str());
+bool is_valid_project_root(const std::string &search_path)
+{
+  std::stringstream ss;
+  ss << search_path;
+  ss << "/";
+  ss << "shaders/Default.vert";
+
+  return FileUtils::file_exists(ss.str());
 }
 
 // Attempt to locate the project root automatically
-bool find_project_root(const std::vector<std::string>& search_paths, std::string& retval) {
-  
-  for (std::string search_path : search_paths) {
-    if (is_valid_project_root(search_path)) {
+bool find_project_root(const std::vector<std::string> &search_paths, std::string &retval)
+{
+
+  for (std::string search_path : search_paths)
+  {
+    if (is_valid_project_root(search_path))
+    {
       retval = search_path;
       return true;
     }
@@ -387,83 +463,98 @@ bool find_project_root(const std::vector<std::string>& search_paths, std::string
   return false;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   // Attempt to find project root
   std::vector<std::string> search_paths = {
-    ".",
-    "..",
-    "../..",
-    "../../.."
-  };
+      ".",
+      "..",
+      "../..",
+      "../../.."};
   std::string project_root;
   bool found_project_root = find_project_root(search_paths, project_root);
-  
+
   Cloth cloth;
   ClothParameters cp;
   vector<CollisionObject *> objects;
-  
+
   int c;
-  
+
   int sphere_num_lat = 40;
   int sphere_num_lon = 40;
-  
+
   std::string file_to_load_from;
   bool file_specified = false;
-  
-  while ((c = getopt (argc, argv, "f:r:a:o:")) != -1) {
-    switch (c) {
-      case 'f': {
-        file_to_load_from = optarg;
-        file_specified = true;
-        break;
+
+  while ((c = getopt(argc, argv, "f:r:a:o:")) != -1)
+  {
+    switch (c)
+    {
+    case 'f':
+    {
+      file_to_load_from = optarg;
+      file_specified = true;
+      break;
+    }
+    case 'r':
+    {
+      project_root = optarg;
+      if (!is_valid_project_root(project_root))
+      {
+        std::cout << "Warn: Could not find required file \"shaders/Default.vert\" in specified project root: " << project_root << std::endl;
       }
-      case 'r': {
-        project_root = optarg;
-        if (!is_valid_project_root(project_root)) {
-          std::cout << "Warn: Could not find required file \"shaders/Default.vert\" in specified project root: " << project_root << std::endl;
-        }
-        found_project_root = true;
-        break;
+      found_project_root = true;
+      break;
+    }
+    case 'a':
+    {
+      int arg_int = atoi(optarg);
+      if (arg_int < 1)
+      {
+        arg_int = 1;
       }
-      case 'a': {
-        int arg_int = atoi(optarg);
-        if (arg_int < 1) {
-          arg_int = 1;
-        }
-        sphere_num_lat = arg_int;
-        break;
+      sphere_num_lat = arg_int;
+      break;
+    }
+    case 'o':
+    {
+      int arg_int = atoi(optarg);
+      if (arg_int < 1)
+      {
+        arg_int = 1;
       }
-      case 'o': {
-        int arg_int = atoi(optarg);
-        if (arg_int < 1) {
-          arg_int = 1;
-        }
-        sphere_num_lon = arg_int;
-        break;
-      }
-      default: {
-        usageError(argv[0]);
-        break;
-      }
+      sphere_num_lon = arg_int;
+      break;
+    }
+    default:
+    {
+      usageError(argv[0]);
+      break;
+    }
     }
   }
-  
-  if (!found_project_root) {
+
+  if (!found_project_root)
+  {
     std::cout << "Error: Could not find required file \"shaders/Default.vert\" anywhere!" << std::endl;
     return -1;
-  } else {
+  }
+  else
+  {
     std::cout << "Loading files starting from: " << project_root << std::endl;
   }
 
-  if (!file_specified) { // No arguments, default initialization
+  if (!file_specified)
+  { // No arguments, default initialization
     std::stringstream def_fname;
     def_fname << project_root;
     def_fname << "/scene/pinned2.json";
     file_to_load_from = def_fname.str();
   }
-  
+
   bool success = loadObjectsFromFile(file_to_load_from, &cloth, &cp, &objects, sphere_num_lat, sphere_num_lon);
-  if (!success) {
+  if (!success)
+  {
     std::cout << "Warn: Unable to load from file: " << file_to_load_from << std::endl;
   }
 
@@ -491,7 +582,8 @@ int main(int argc, char **argv) {
 
   setGLFWCallbacks();
 
-  while (!glfwWindowShouldClose(window)) {
+  while (!glfwWindowShouldClose(window))
+  {
     glfwPollEvents();
 
     glClearColor(0.25f, 0.25f, 0.25f, 1.0f);
@@ -505,7 +597,8 @@ int main(int argc, char **argv) {
 
     glfwSwapBuffers(window);
 
-    if (!app->isAlive()) {
+    if (!app->isAlive())
+    {
       glfwSetWindowShouldClose(window, 1);
     }
   }
