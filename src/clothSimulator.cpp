@@ -772,7 +772,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'L':
 		case 'l':
 			if (ctrl_down) {
-				bmesh->load_from_file("spheres_27-04-2022_13-45-53.balle");
+				load_bmesh_from_file();
 			}
 			break;
 		}
@@ -783,8 +783,11 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 
 void ClothSimulator::save_bmesh_to_file()
 {
+	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+	bmesh->save_to_file(filename);
+
 	// Time source https://stackoverflow.com/a/16358264/13292618
-	time_t rawtime;
+	/*time_t rawtime;
 	struct tm* timeinfo;
 	char buffer[80];
 
@@ -795,7 +798,13 @@ void ClothSimulator::save_bmesh_to_file()
 	std::string str(buffer);
 
 	cout << "Saving the config to " + str << endl;
-	bmesh->save_to_file(str);
+	bmesh->save_to_file(str);*/
+}
+
+void ClothSimulator::load_bmesh_from_file()
+{
+	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
+	bmesh->load_from_file(filename);
 }
 
 void ClothSimulator::select_next()
