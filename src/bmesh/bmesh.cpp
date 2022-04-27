@@ -270,7 +270,7 @@ void BMesh::save_to_file(const string& filename, SaveType saveas) {
 	else if (saveas == SaveType::fbx) {
 		cout << "fbx" << endl;
 	}
-	
+
 }
 
 bool BMesh::load_from_file(const string& filename) {
