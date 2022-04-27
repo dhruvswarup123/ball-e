@@ -254,31 +254,23 @@ namespace Balle
 		return all_nodes;
 	}
 
-void BMesh::save_to_file(const string& filename) {
-	/*
-	* { 
-	* 
-	*	"count": count,
-	*	"spheres" : {
-	*		index : { 
-	*			"radius": radius,
-	*			"pos": [posx, posy, posz],
-	*			"children": [indices]
-	*		}, 
-	*	}
-	* }
-	 */
+void BMesh::save_to_file(const string& filename, SaveType saveas) {
+	
+	if (saveas == SaveType::balle) {
+		// Load all info into json
+		json j;
+		__skeleton_to_json(j);
 
-
-	// Load all info into json
-	json j;
-	__skeleton_to_json(j);
-
-	// Dump json to file
-	ofstream file;
-	file.open(filename);
-	file << std::setw(4) << j << std::endl;
-	file.close();
+		// Dump json to file
+		ofstream file;
+		file.open(filename);
+		file << std::setw(4) << j << std::endl;
+		file.close();
+	}
+	else if (saveas == SaveType::fbx) {
+		cout << "fbx" << endl;
+	}
+	
 }
 
 bool BMesh::load_from_file(const string& filename) {
@@ -297,6 +289,22 @@ bool BMesh::load_from_file(const string& filename) {
 }
 
 void BMesh::__skeleton_to_json(json& j) {
+
+	/*
+	* {
+	*
+	*	"count": count,
+	*	"spheres" : {
+	*		index :
+	*			"index": index,
+	*			"parent": parent_idx,
+	*			"radius": radius,
+	*			"pos": [posx, posy, posz],
+	*			"children": [indices]
+	*		},
+	*	}
+	* }
+	 */
 
 	// REMOVE INTERPOLATED NODES 
 	__delete_interpolation_helper(root);
@@ -325,11 +333,9 @@ void BMesh::__skeleton_to_json(json& j) {
 		j["spheres"][spheres_to_index[s]]["children"] = children;
 		if (s->parent == NULL) {
 			j["spheres"][spheres_to_index[s]]["parent"] = -1;
-
 		}
 		else {
 			j["spheres"][spheres_to_index[s]]["parent"] = spheres_to_index[s->parent];
-
 		}
 	}
 }

@@ -783,18 +783,39 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 
 void ClothSimulator::save_bmesh_to_file()
 {
-	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+	std::string filename;
+	Balle::SaveType saveas;
 
-	size_t pos = filename.rfind('.', filename.length());
-	if (pos == -1) {
-		filename += ".balle";
+	if ((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
+		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)) 
+	{
+		filename = nanogui::file_dialog({ {"fbx", "filmbox"} }, true);
+		if (filename.length() == 0) {
+			return;
+		}
+
+		size_t pos = filename.rfind('.', filename.length());
+		if (pos == -1) {
+			filename += ".fbx";
+		}
+
+		saveas = Balle::SaveType::fbx;
 	}
-	/*else {
-		return(s.substr(i + 1, s.length() - i));
-	}*/
+	else {
+		filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+		if (filename.length() == 0) {
+			return;
+		}
 
-	bmesh->save_to_file(filename);
+		size_t pos = filename.rfind('.', filename.length());
+		if (pos == -1) {
+			filename += ".balle";
+		}
 
+		saveas = Balle::SaveType::balle;
+	}
+	
+	bmesh->save_to_file(filename, saveas);
 
 	// Time source https://stackoverflow.com/a/16358264/13292618
 	/*time_t rawtime;
@@ -812,7 +833,7 @@ void ClothSimulator::save_bmesh_to_file()
 }
 
 void ClothSimulator::load_bmesh_from_file()
-{
+{	
 	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
 	bmesh->load_from_file(filename);
 }

@@ -28,6 +28,9 @@ namespace Balle
 		not_ready
 	};
 
+	enum SaveType { fbx, balle };
+
+
 	// Contains the tree and other functions that access the tree
 	struct BMesh
 	{
@@ -61,7 +64,7 @@ namespace Balle
 		bool delete_node(SkeletalNode *node);
 		unordered_set<SkeletalNode *> get_all_node();
 
-		void save_to_file(const string& filename);
+		void save_to_file(const string& filename, SaveType saveas);
 		bool load_from_file(const string& filename);
 
 		/******************************
