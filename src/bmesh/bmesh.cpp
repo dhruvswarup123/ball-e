@@ -185,39 +185,38 @@ bool BMesh::delete_node(SkeletalNode *node)
 
 void BMesh::interpolate_spheres()
 {
-	delete_interpolation(root);
-	__interpspheres_helper(root, 2);
+	__delete_interpolation_helper(root);
+	__interpspheres_helper(root, 1);
 }
 
-void BMesh::delete_interpolation(SkeletalNode *root)
+void BMesh::__delete_interpolation_helper(SkeletalNode *root)
 {
-	if (root == nullptr)
+	if (root == nullptr || root->interpolated)
 	{
+		// Cannot delete nullptr;
+		// Will not delete interpolated node as root.
 		return;
 	}
 
-	// Iterate through each child node
-	vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
+	vector<SkeletalNode*> *new_children = new vector<SkeletalNode*>();
+
 	for (SkeletalNode *child : *(root->children))
 	{
-		original_children->push_back(child);
-	}
-
-	for (SkeletalNode *child : *(original_children))
-	{
-
-		// Remove the child from the current parents list of children
-		if (child->interpolated)
+		SkeletalNode* cur = child;
+		while (cur != nullptr && cur->interpolated)
 		{
-			SkeletalNode *next = (*child->children)[0];
-			delete_node(child);
-			delete_interpolation(next);
+			SkeletalNode* next = (*cur->children)[0];
+			delete cur;
+			cur = next;
 		}
-		else
-		{
-			delete_interpolation(child);
+		if (cur != nullptr) {
+			new_children->push_back(cur);
+			__delete_interpolation_helper(cur);
 		}
 	}
+
+	delete root->children;
+	root->children = new_children;
 }
 
 vector<SkeletalNode *> BMesh::get_all_node()
@@ -541,6 +540,10 @@ void BMesh::subdivision()
 	}
 	__catmull_clark(*mesh);
 }
+void BMesh::remesh()
+{
+	__remesh(*mesh);
+}
 
 Vector3D get_face_point(const FaceIter f)
 {
@@ -696,6 +699,150 @@ void BMesh::__catmull_clark(HalfedgeMesh &mesh)
 
 void BMesh::__remesh(HalfedgeMesh &mesh)
 {
+	// Edge split operation
+	vector<EdgeIter> edges;
+
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		if (f->degree() == 3)
+		{
+			EdgeIter e1 = f->halfedge()->edge();
+			EdgeIter e2 = f->halfedge()->next()->edge();
+			EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+			float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+			for (EdgeIter e : {e1, e2, e3})
+			{
+				if (e->length() > 4 * L / 3)
+				{
+					edges.push_back(e);
+				}
+			}
+		}
+	}
+
+	for (EdgeIter e : edges)
+	{
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+		{
+			// mesh.splitEdge(e);
+		}
+	}
+
+	// Edge collapse operation
+	edges.clear();
+
+	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	{
+		if (f->degree() == 3)
+		{
+			EdgeIter e1 = f->halfedge()->edge();
+			EdgeIter e2 = f->halfedge()->next()->edge();
+			EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+			float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+			for (EdgeIter e : {e1, e2, e3})
+			{
+				if (e->length() < 4 * L / 5)
+				{
+					edges.push_back(e);
+				}
+			}
+		}
+	}
+
+	for (EdgeIter e : edges)
+	{
+		if (!e->isDeleted &&
+			(e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+		{
+			mesh.collapseEdge(e);
+		}
+	}
+	std::cout << "finish collapse: " << std::endl;
+	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+	{
+		if (e->isDeleted)
+		{
+			// mesh.deleteEdge(e);
+			std::cout << "!! Deleted edge !!" << std::endl;
+		}
+	}
+
+	std::cout << "deleted" << std::endl;
+
+	/*
+	// Edge flip operation
+	edges.clear();
+
+	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+	{
+		// Both triangles
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			int a1, a2, b1, b2;
+			int degree_before, degree_after;
+
+			a1 = e->halfedge()->vertex()->degree();
+			a2 = e->halfedge()->twin()->vertex()->degree();
+
+			b1 = e->halfedge()->next()->next()->vertex()->degree();
+			b2 = e->halfedge()->twin()->next()->next()->vertex()->degree();
+
+			degree_before = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+			b1 = e->halfedge()->vertex()->degree() + 1;
+			b2 = e->halfedge()->twin()->vertex()->degree() + 1;
+
+			a1 = e->halfedge()->next()->next()->vertex()->degree() - 1;
+			a2 = e->halfedge()->twin()->next()->next()->vertex()->degree() - 1;
+
+			degree_after = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+			if (degree_after < degree_before) {
+				edges.push_back(e);
+			}
+		}
+	}
+
+	for (EdgeIter e : edges)
+	{
+		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			// mesh.flipEdge(e);
+		}
+	}
+	*/
+
+	// Vertex average
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+	{
+		HalfedgeIter htemp = v->halfedge()->twin()->next();
+
+		float count = 0;
+		Vector3D centroid = 0;
+
+		HalfedgeIter h = v->halfedge();
+		do
+		{
+			centroid += h->next()->vertex()->position;
+			count += 1.;
+			h = h->twin()->next();
+
+		} while (h != v->halfedge());
+
+		centroid /= count;
+
+		Vector3D V = centroid - v->position;
+		V = V - dot(v->normal(), V) * v->normal();
+
+		v->newPosition = v->position + 0.3 * V;
+	}
+
+	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+	{
+		// v->position = v->newPosition;
+	}
 }
 
 /******************************
@@ -778,8 +925,21 @@ void BMesh::__draw_mesh_vertices(GLShader &shader, Misc::SphereMesh &msm)
 	}
 }
 
+void edge_interpolate(const SkeletalNode &n1, const SkeletalNode &n2, float *rad, float *x)
+{
+	// Interpolate a sphere touching n1
+
+	float d = (n2.pos - n1.pos).norm();
+	float r3 = n1.radius * (d + n2.radius - n1.radius) / (d - n2.radius + n1.radius);
+	*x = n1.radius + r3;
+
+	*rad = r3;
+	//	*pos = n1.pos + x * (n2.pos - n1.pos).unit();
+}
+
 void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 {
+
 	if (root == nullptr)
 	{
 		return;
@@ -790,6 +950,57 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 	for (SkeletalNode *child : *(root->children))
 	{
 		original_children->push_back(child);
+	}
+
+	float radius = 1000;
+	float x = 0;
+
+	// Get the smallest interpolation between joint, to parents and children
+	for (SkeletalNode *child : *(original_children))
+	{
+		float temp_rad, temp_x;
+
+		edge_interpolate(*root, *child, &temp_rad, &temp_x);
+
+		if (temp_rad < radius)
+		{
+			radius = temp_rad;
+			x = temp_x;
+		}
+	}
+
+	if ((root->parent != NULL))
+	{
+
+		float temp_rad, temp_x;
+		edge_interpolate(*root, *(root->parent), &temp_rad, &temp_x);
+		if (temp_rad < radius)
+		{
+			radius = temp_rad;
+			x = temp_x;
+		}
+
+		// Now interpolate to the parent
+		SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
+		interp_sphere->interpolated = true;
+
+		SkeletalNode *temp_parent = root->parent;
+
+		int i = 0;
+		for (SkeletalNode *temp : *(root->parent->children))
+		{
+			if (temp == root)
+			{
+				root->parent->children->erase(root->parent->children->begin() + i);
+				break;
+			}
+			i += 1;
+		}
+
+		temp_parent->children->push_back(interp_sphere);
+		interp_sphere->children->push_back(root);
+		root->parent = interp_sphere;
+		all_nodes_vector.push_back(interp_sphere);
 	}
 
 	for (SkeletalNode *child : *(original_children))
@@ -812,7 +1023,7 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 		// Distance or radius step size between the interpolated spheres
 		Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
 		float rad_step = (child->radius - root->radius) / (divs + 1.);
-
+		divs = 1;
 		// For each sphere to be created
 		for (int i = 0; i < divs; i++)
 		{
@@ -821,7 +1032,8 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 			float new_radius = root->radius + (i + 1) * rad_step;
 
 			// Create the interp sphere
-			SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+			// SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+			SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
 			interp_sphere->interpolated = true;
 
 			// Add the interp sphere to the struct
@@ -852,7 +1064,8 @@ void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root
 	Vector3D localx;
 	if ((root->children->size() == 1) && (root->parent != nullptr))
 	{
-		localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+		// localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+		localx = (child_center - root_center).unit();
 	}
 	else
 	{

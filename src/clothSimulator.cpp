@@ -830,8 +830,6 @@ void ClothSimulator::delete_node()
 	}
 	else
 	{
-		if (selected->interpolated)
-			return;
 
 		// delete it  and set selected to nullptr
 		cout << "Deleting" << endl;

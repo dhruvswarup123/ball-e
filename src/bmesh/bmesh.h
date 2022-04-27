@@ -44,6 +44,7 @@ namespace Balle
 		void clear_mesh();
 		void generate_bmesh();
 		void subdivision();
+		void remesh();
 
 		/******************************
 		 * Structual Manipulation     *
@@ -55,7 +56,6 @@ namespace Balle
 
 		void interpolate_spheres();
 		bool delete_node(SkeletalNode *node);
-		void delete_interpolation(SkeletalNode *root);
 		vector<SkeletalNode*> get_all_node();
 
 		/******************************
@@ -76,6 +76,7 @@ namespace Balle
 		 * Structual Manipulation     *
 		 ******************************/
 		void __interpspheres_helper(SkeletalNode *root, int divs);
+		void __delete_interpolation_helper(SkeletalNode *root);
 
 		/******************************
 		 * Rendering Functions Helper *
