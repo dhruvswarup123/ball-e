@@ -352,6 +352,8 @@ bool BMesh::__json_to_skeleton(const json& j) {
 
 	// Delet all the spheres
 	__avada_kedavra();
+	all_nodes.clear();
+
 
 	unordered_map<int, SkeletalNode*> index_to_spheres;
 

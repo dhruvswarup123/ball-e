@@ -784,7 +784,17 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 void ClothSimulator::save_bmesh_to_file()
 {
 	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+
+	size_t pos = filename.rfind('.', filename.length());
+	if (pos == -1) {
+		filename += ".balle";
+	}
+	/*else {
+		return(s.substr(i + 1, s.length() - i));
+	}*/
+
 	bmesh->save_to_file(filename);
+
 
 	// Time source https://stackoverflow.com/a/16358264/13292618
 	/*time_t rawtime;
