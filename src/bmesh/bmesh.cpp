@@ -4,10 +4,13 @@
 #include "bmesh.h"
 #define QUICKHULL_IMPLEMENTATION 1
 #include "quickhull.h"
+#include "../json.hpp"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 using namespace nanogui;
-using namespace CGL;
+using nlohmann::json;
 
 namespace Balle
 {
@@ -251,9 +254,86 @@ namespace Balle
 		return all_nodes;
 	}
 
-	/******************************
-	 * Sweeping and stitching     *
-	 ******************************/
+void BMesh::save_to_file(const string& filename) {
+	/*
+	* { 
+	* 
+	*	"count": count,
+	*	"spheres" : {
+	*		index : { 
+	*			"radius": radius,
+	*			"pos": [posx, posy, posz],
+	*			"children": [indices]
+	*		}, 
+	*	}
+	* }
+	 */
+
+
+	// Load all info into json
+	json j;
+	__skeleton_to_json(j);
+
+	// Dump json to file
+	ofstream file;
+	file.open(filename);
+	file << std::setw(4) << j << std::endl;
+	file.close();
+}
+
+bool BMesh::load_from_file(const string& filename) {
+	ifstream file(filename);
+	if (!file.good())
+	{
+		return false;
+	}
+	json j;
+	file >> j;
+
+	// destroy current struct
+
+	// Set root
+	root = __json_to_skeleton(j);
+
+	file.close();
+	return true;
+}
+
+void BMesh::__skeleton_to_json(json& j) {
+
+	// REMOVE INTERPOLATED NODES 
+	__delete_interpolation_helper(root);
+
+	j["count"] = all_nodes_vector.size();
+	unordered_map<SkeletalNode *, int> spheres_to_index;
+
+	for (int i = 0; i < all_nodes_vector.size(); i++) {
+		SkeletalNode* s = all_nodes_vector[i];
+		spheres_to_index[s] = i;
+
+		j["spheres"][i]["radius"] = s->radius;
+		j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
+	}
+
+	for (int i = 0; i < all_nodes_vector.size(); i++) {
+		SkeletalNode* s = all_nodes_vector[i];
+
+		vector<int> children;
+		for (SkeletalNode* child : *s->children) {
+			children.push_back(spheres_to_index[child]);
+		}
+
+		j["spheres"][i]["children"] = children;
+	}
+}
+
+SkeletalNode * BMesh::__json_to_skeleton(const json& j) {
+	return NULL;
+}
+
+/******************************
+ * Sweeping and stitching     *
+ ******************************/
 
 	void BMesh::generate_bmesh()
 	{
