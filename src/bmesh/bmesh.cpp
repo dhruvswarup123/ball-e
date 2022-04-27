@@ -517,13 +517,28 @@ void BMesh::draw_mesh_wireframe(GLShader &shader)
 }
 
 /******************************
+ * Sweeping and stitching     *
+ ******************************/
+
+void BMesh::generate_bmesh()
+{
+	// interpolate_spheres();
+	__joint_iterate(root);
+	__stitch_faces();
+}
+
+/******************************
  * SUBDIVISTION               *
  ******************************/
 
 void BMesh::subdivision()
 {
+	if (mesh == nullptr)
+	{
+		std::cout << "ERROR: Subdividing a nullptr" << std::endl;
+		return;
+	}
 	__catmull_clark(*mesh);
-	std::cout << "after updating the mesh by cc subdivision " << std::endl;
 }
 void BMesh::remesh()
 {
@@ -598,8 +613,6 @@ void generate_new_quads(const FaceIter f, vector<Quadrangle> &quadangles)
 		Vector3D v2 = h->next()->vertex()->newPosition;
 		Vector3D v3 = h->next()->edge()->newPosition;
 
-		// std::cout<<"in generate new quad, v0 " << v0 << std::endl;
-
 		Quadrangle quad(v0, v1, v2, v3);
 		quadangles.push_back(quad);
 
@@ -650,7 +663,6 @@ void connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> pol
 
 void BMesh::__catmull_clark(HalfedgeMesh &mesh)
 {
-	// std::cout << "sub 1 " << std::endl;
 	//  1. Add new face point
 	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
 	{
@@ -993,9 +1005,6 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 
 	for (SkeletalNode *child : *(original_children))
 	{
-		// if ((root->children->size() == 1) && (child->children->size() <= 1))
-		// {
-
 		// Remove the child from the current parents list of children
 		int i = 0;
 		for (SkeletalNode *temp : *(root->children))
@@ -1038,18 +1047,10 @@ void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
 		// New re add the child node back to the end of the joint
 		prev->children->push_back(child);
 		child->parent = prev;
-		// }
 
 		// Now do the recursive call
 		__interpspheres_helper(child, divs);
 	}
-}
-
-void BMesh::generate_bmesh()
-{
-	interpolate_spheres();
-	__joint_iterate(root);
-	__stitch_faces();
 }
 
 void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limb, bool isleaf)
@@ -1112,6 +1113,7 @@ void BMesh::__joint_iterate(SkeletalNode *root)
 	// cout << "current root address = " << root << endl;
 	Vector3D root_center = root->pos;
 	double root_radius = root->radius;
+
 	// Because this is a joint node, iterate through all children
 	for (SkeletalNode *child : *(root->children))
 	{
@@ -1130,33 +1132,28 @@ void BMesh::__joint_iterate(SkeletalNode *root)
 		}
 		else if (child->children->size() == 1)
 		{ // limb node
-			SkeletalNode *temp = child;
+			SkeletalNode *cur = child;
 			SkeletalNode *last;
-			while (temp->children->size() == 1)
+			while (cur->children->size() == 1)
 			{
-				temp->limb = childlimb;
-				__update_limb(temp, (*temp->children)[0], true, childlimb, false);
+				cur->limb = childlimb;
+				__update_limb(cur, (*cur->children)[0], true, childlimb, false);
 				if (first)
 				{
 					first = false;
 				}
-				// cout << "sliding: " << temp->radius << endl;
-				last = temp;
-				temp = (*temp->children)[0];
+				last = cur;
+				cur = (*cur->children)[0];
 			}
-			if (temp->children->size() == 0)
-			{ // reached the end
-				__update_limb(last, temp, false, childlimb, true);
-				temp->limb = childlimb;
+			if (cur->children->size() == 0)
+			{ // sweeping reached the end leaf node
+				__update_limb(last, cur, false, childlimb, true);
+				cur->limb = childlimb;
 				childlimb->seal();
-				// cout << "Reached the leaf " << temp->radius << endl;
-				// cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
 			}
 			else
-			{ // The only other possible case is that we have reached a joint node
-				// cout << "Reached a joint " << temp->radius << endl;
-				// cout << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^" << endl;
-				__joint_iterate(temp);
+			{ // Sweeping reached a joint node
+				__joint_iterate(cur);
 			}
 		}
 		else
@@ -1165,10 +1162,10 @@ void BMesh::__joint_iterate(SkeletalNode *root)
 		}
 	}
 
-	__add_faces(root);
+	__add_limb_faces(root);
 }
 
-void BMesh::__add_faces(SkeletalNode *root)
+void BMesh::__add_limb_faces(SkeletalNode *root)
 {
 	if (root == nullptr)
 	{
@@ -1218,15 +1215,19 @@ void BMesh::__add_faces(SkeletalNode *root)
 		}
 	}
 	// Add something related to current joint node
-	for (int tmp = 0; tmp < 10; tmp++)
+	// 6 uniform nodes across the joint node sphere
+	for (int phi_deg = 0; phi_deg < 180; phi_deg += 90)
 	{
-		Vector3D extra_point = root->pos;
-		double phi = rand() * PI / RAND_MAX, theta = rand() * 2 * PI / RAND_MAX;
-		double x = root->radius * cos(phi) * sin(theta);
-		double y = root->radius * sin(phi) * sin(theta);
-		double z = root->radius * cos(theta);
-		extra_point = extra_point + Vector3D(x, y, z);
-		local_hull_points.push_back(extra_point);
+		for (int theta_deg = 0; theta_deg < 360; theta_deg += 90)
+		{
+			Vector3D extra_point = root->pos;
+			double phi = phi_deg * PI / 180, theta = theta_deg * PI / 180;
+			double x = root->radius * cos(phi) * sin(theta);
+			double y = root->radius * sin(phi) * sin(theta);
+			double z = root->radius * cos(theta);
+			extra_point = extra_point + Vector3D(x, y, z);
+			local_hull_points.push_back(extra_point);
+		}
 	}
 
 	// QuickHull algorithm
@@ -1287,15 +1288,6 @@ void BMesh::__stitch_faces()
 			fringe_ids[point] = fringe_ids.size();
 		}
 	}
-
-	/*for (const Vector3D &point : all_points)
-	{
-		if (ids.count(point) == 0)
-		{
-			ids[point] = ids.size();
-			vertices.push_back(point);
-		}
-	}*/
 
 	// label quadrangle vertices
 	for (const Quadrangle &quadrangle : quadrangles)
@@ -1381,7 +1373,6 @@ void BMesh::__stitch_faces()
 			(fringe_ids.count(triangle.b) == 0) ||
 			(fringe_ids.count(triangle.c) == 0))
 		{
-
 			if (ids.count(triangle.a) == 0)
 			{
 				ids[triangle.a] = ids.size();
@@ -1422,7 +1413,7 @@ void BMesh::__stitch_faces()
 				// if the triangle's 3 vertices are in the same group,
 				// then we don't want to add this to mesh cuz it's covering the fringe
 
-				if ((fringe_maxid / 4) != (fringe_minid / 4)) // || maxid >= fringe_points.size() TODO
+				if ((fringe_maxid / 4) != (fringe_minid / 4))
 				{
 					if (ids.count(triangle.a) == 0)
 					{
@@ -1480,10 +1471,9 @@ void BMesh::__print_skeleton(SkeletalNode *root)
 {
 	if (!root)
 		return;
-	cout << "At root: " << root->radius << endl;
+	cout << "Current node radius " << root->radius << endl;
 	for (SkeletalNode *child : *(root->children))
 	{
-		// cout << root->radius << "->" << child->radius << endl;
 		__print_skeleton(child);
 	}
 }

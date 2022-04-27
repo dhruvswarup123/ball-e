@@ -92,7 +92,7 @@ namespace Balle
 		void __joint_iterate(SkeletalNode *root);
 		void __joint_iterate_limbs(SkeletalNode *root);
 		void __update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
-		void __add_faces(SkeletalNode *root);
+		void __add_limb_faces(SkeletalNode *root);
 		void __stitch_faces();
 
 		/******************************
