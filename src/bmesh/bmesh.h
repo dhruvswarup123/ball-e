@@ -61,6 +61,7 @@ namespace Balle
 		/******************************
 		 * Rendering Functions        *
 		 ******************************/
+		//Rendering Class
 		void draw_skeleton(GLShader &shader);
 		void draw_polygon_faces(GLShader &shader);
 		void draw_mesh_faces(GLShader &shader);
@@ -79,14 +80,6 @@ namespace Balle
 		void __delete_interpolation_helper(SkeletalNode *root);
 
 		/******************************
-		 * Rendering Functions Helper *
-		 ******************************/
-		void __fill_position(MatrixXf &positions, SkeletalNode *root, int& si);
-		void __draw_skeletal_spheres(GLShader &shader, Misc::SphereMesh &msm, SkeletalNode *root);
-		void __draw_mesh_vertices(GLShader &shader, Misc::SphereMesh &msm);
-		int __get_num_bones(SkeletalNode *root);
-
-		/******************************
 		 * Sweeping and stitching     *
 		 ******************************/
 		void __joint_iterate(SkeletalNode *root);
@@ -94,6 +87,7 @@ namespace Balle
 		void __update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
 		void __add_limb_faces(SkeletalNode *root);
 		void __stitch_faces();
+		
 
 		/******************************
 		 * Catmull-Clark              *

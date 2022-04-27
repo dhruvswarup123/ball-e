@@ -14,6 +14,7 @@ set(CLOTHSIM_VIEWER_SOURCE
     mesh/halfEdgeMesh.cpp
     mesh/mesh.cpp
     mesh/scene.cpp
+
     
     # Application
     main.cpp
@@ -26,6 +27,10 @@ set(CLOTHSIM_VIEWER_SOURCE
 
     # Camera
     camera.cpp
+
+    # Bmesh
+    bmesh/bmesh.cpp 
+    bmesh/renderer.cpp
 )
 
 # Windows-only sources
@@ -71,7 +76,7 @@ link_directories(
 #-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
-add_executable(clothsim ${CLOTHSIM_VIEWER_SOURCE} "bmesh/bmesh.h" "bmesh/bmesh.cpp" "mesh/mesh.h" "mesh/scene.h" "mesh/scene.cpp" "mesh/mesh.cpp"    )
+add_executable(clothsim ${CLOTHSIM_VIEWER_SOURCE})
 
 target_link_libraries(clothsim
     CGL ${CGL_LIBRARIES}
