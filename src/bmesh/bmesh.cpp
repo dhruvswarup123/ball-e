@@ -10,254 +10,249 @@
 
 using namespace std;
 using namespace nanogui;
-using namespace CGL;
-using namespace Balle;
-using json = nlohmann::json;
+using nlohmann::json;
 
-/******************************
- * PUBLIC                      *
- ******************************/
-
-BMesh::BMesh()
+namespace Balle
 {
-	root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, nullptr); // root has no parent
+	/******************************
+	 * PUBLIC                      *
+	 ******************************/
 
-	// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
-	// SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
-	// SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
-	// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
-	SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
-	SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
-
-	// root->children->push_back(chest);
-	root->children->push_back(footL);
-	root->children->push_back(footR);
-
-	// chest->children->push_back(arml);
-	// chest->children->push_back(armr);
-	// chest->children->push_back(head);
-
-	all_nodes_vector.push_back(root);
-	// all_nodes_vector.push_back(chest);
-	// all_nodes_vector.push_back(arml);
-	// all_nodes_vector.push_back(armr);
-	// all_nodes_vector.push_back(head);
-	all_nodes_vector.push_back(footL);
-	all_nodes_vector.push_back(footR);
-};
-
-void BMesh::clear_mesh()
-{
-	if (mesh != nullptr)
+	BMesh::BMesh()
 	{
-		delete mesh;
-	}
-	mesh = nullptr;
-	triangles.clear();
-	quadrangles.clear();
-	polygons.clear();
-	fringe_points.clear();
-	all_points.clear();
-	unique_extra_points.clear();
+		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, nullptr); // root has no parent
 
-	vertices.clear();
-	shader_method = Balle::Method::not_ready;
-}
-/******************************
- * Render                     *
- ******************************/
+		// SkeletalNode *chest = new SkeletalNode(Vector3D(0, 1, 0) / 3., 0.03, root);
+		// SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
+		// SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
+		// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
+		SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
+		SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
 
-void BMesh::draw_skeleton(GLShader &shader)
-{
-	Balle::Renderer render;
-	render.draw_skeleton(shader, root);
-}
-void BMesh::draw_polygon_faces(GLShader &shader)
-{
-	Balle::Renderer render;
-	render.draw_polygon_faces(shader, quadrangles, triangles, polygons, vertices);
-}
+		// root->children->push_back(chest);
+		root->children->push_back(footL);
+		root->children->push_back(footR);
 
-void BMesh::draw_mesh_faces(GLShader &shader)
-{
-	Balle::Renderer render;
-	render.draw_mesh_faces(shader, mesh);
-}
-void BMesh::draw_polygon_wireframe(GLShader &shader)
-{
-	Balle::Renderer render;
-	render.draw_polygon_wireframe(shader, quadrangles, triangles, root, vertices);
-}
-void BMesh::draw_mesh_wireframe(GLShader &shader)
-{
-	Balle::Renderer render;
-	render.draw_mesh_wireframe(shader, mesh, root);
-}
-/******************************
- * Structural Manipulation    *
- ******************************/
-void BMesh::select_next_skeletal_node(SkeletalNode *&selected)
-{
-	if (selected == nullptr)
+		// chest->children->push_back(arml);
+		// chest->children->push_back(armr);
+		// chest->children->push_back(head);
+
+		all_nodes.emplace(root);
+		// all_nodes.emplace(chest);
+		// all_nodes.emplace(arml);
+		// all_nodes.emplace(armr);
+		// all_nodes.emplace(head);
+		all_nodes.emplace(footL);
+		all_nodes.emplace(footR);
+	};
+
+	void BMesh::clear_mesh()
 	{
-		selected = root;
-		selected->selected = true;
-	}
-	else if (selected == root)
-	{
-		selected->selected = false;
-		selected = (*root->children)[0];
-		selected->selected = true;
-	}
-	else
-	{
-		selected->selected = false;
-
-		int index = rand() % selected->parent->children->size();
-		if ((*selected->parent->children)[index] == selected)
+		if (mesh != nullptr)
 		{
-			index = (index + 1) % selected->parent->children->size();
+			delete mesh;
 		}
+		mesh = nullptr;
+		triangles.clear();
+		quadrangles.clear();
+		polygons.clear();
+		fringe_points.clear();
+		all_points.clear();
+		unique_extra_points.clear();
 
-		selected = (*selected->parent->children)[index];
-		selected->selected = true;
+		vertices.clear();
+		shader_method = Balle::Method::not_ready;
 	}
-}
+	/******************************
+	 * Render                     *
+	 ******************************/
 
-void BMesh::select_parent_skeletal_node(SkeletalNode *&selected)
-{
-	if (selected == nullptr)
+	void BMesh::draw_skeleton(GLShader &shader)
 	{
-		selected = root;
-		selected->selected = true;
+		Balle::Renderer renderer;
+		renderer.draw_skeleton(shader, root);
 	}
-	else if (selected == root)
+	void BMesh::draw_polygon_faces(GLShader &shader)
 	{
-		return;
-	}
-	else
-	{
-		selected->selected = false;
-
-		selected = selected->parent;
-		selected->selected = true;
-	}
-}
-
-void BMesh::select_child_skeletal_node(SkeletalNode *&selected)
-{
-	if (selected == nullptr)
-	{
-		selected = root;
-		selected->selected = true;
-	}
-	else
-	{
-		if (selected->children->size() == 0)
-			return; // No children
-
-		selected->selected = false;
-		selected = (*selected->children)[0];
-		selected->selected = true;
-	}
-}
-
-SkeletalNode *BMesh::create_skeletal_node_after(SkeletalNode *parent)
-{
-	SkeletalNode *temp = new Balle::SkeletalNode(parent->pos, parent->radius, parent);
-	parent->children->push_back(temp);
-	all_nodes_vector.push_back(temp);
-	return temp;
-}
-
-bool BMesh::delete_node(SkeletalNode *node)
-{
-	if (node == root)
-	{
-		cout << "WARNING: Cant delete root!" << endl;
-		return false;
+		Balle::Renderer renderer;
+		renderer.draw_polygon_faces(shader, quadrangles, triangles, polygons, vertices);
 	}
 
-	// First remove the node from the master list
-	int i = 0;
-	for (SkeletalNode *temp : all_nodes_vector)
+	void BMesh::draw_mesh_faces(GLShader &shader)
 	{
-		if (temp == node)
+		Balle::Renderer renderer;
+		renderer.draw_mesh_faces(shader, mesh);
+	}
+	void BMesh::draw_polygon_wireframe(GLShader &shader)
+	{
+		Balle::Renderer renderer;
+		renderer.draw_polygon_wireframe(shader, quadrangles, triangles, root, vertices);
+	}
+	void BMesh::draw_mesh_wireframe(GLShader &shader)
+	{
+		Balle::Renderer renderer;
+		renderer.draw_mesh_wireframe(shader, mesh, root);
+	}
+	/******************************
+	 * Structural Manipulation    *
+	 ******************************/
+	void BMesh::select_next_skeletal_node(SkeletalNode *&selected)
+	{
+		if (selected == nullptr)
 		{
-			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE
-			all_nodes_vector.erase(all_nodes_vector.begin() + i);
-			break;
+			selected = root;
+			selected->selected = true;
 		}
-		i += 1;
-	}
-
-	// First remove the node from the master list
-	SkeletalNode *parent = node->parent;
-
-	i = 0;
-	for (SkeletalNode *temp : *(parent->children))
-	{
-		if (temp == node)
+		else if (selected == root)
 		{
-			// TODO: FIX THIS. IT IS HIGHLY UNSTABLE . it removes the node entirely?
-			parent->children->erase(parent->children->begin() + i);
-			break;
+			selected->selected = false;
+			selected = (*root->children)[0];
+			selected->selected = true;
 		}
-		i += 1;
+		else
+		{
+			selected->selected = false;
+
+			int index = rand() % selected->parent->children->size();
+			if ((*selected->parent->children)[index] == selected)
+			{
+				index = (index + 1) % selected->parent->children->size();
+			}
+
+			selected = (*selected->parent->children)[index];
+			selected->selected = true;
+		}
 	}
 
-	for (SkeletalNode *temp : *(node->children))
+	void BMesh::select_parent_skeletal_node(SkeletalNode *&selected)
 	{
+		if (selected == nullptr)
+		{
+			selected = root;
+			selected->selected = true;
+		}
+		else if (selected == root)
+		{
+			return;
+		}
+		else
+		{
+			selected->selected = false;
+
+			selected = selected->parent;
+			selected->selected = true;
+		}
+	}
+
+	void BMesh::select_child_skeletal_node(SkeletalNode *&selected)
+	{
+		if (selected == nullptr)
+		{
+			selected = root;
+			selected->selected = true;
+		}
+		else
+		{
+			if (selected->children->size() == 0)
+				return; // No children
+
+			selected->selected = false;
+			selected = (*selected->children)[0];
+			selected->selected = true;
+		}
+	}
+
+	SkeletalNode *BMesh::create_skeletal_node_after(SkeletalNode *parent)
+	{
+		SkeletalNode *temp = new Balle::SkeletalNode(parent->pos, parent->radius, parent);
 		parent->children->push_back(temp);
-		temp->parent = parent;
+		all_nodes.emplace(temp);
+		return temp;
 	}
 
-	delete node;
-
-	return true;
-}
-
-void BMesh::interpolate_spheres()
-{
-	__delete_interpolation_helper(root);
-	__interpspheres_helper(root, 1);
-}
-
-void BMesh::__delete_interpolation_helper(SkeletalNode *root)
-{
-	if (root == nullptr || root->interpolated)
+	bool BMesh::delete_node(SkeletalNode *node)
 	{
-		// Cannot delete nullptr;
-		// Will not delete interpolated node as root.
-		return;
-	}
-
-	vector<SkeletalNode *> *new_children = new vector<SkeletalNode *>();
-
-	for (SkeletalNode *child : *(root->children))
-	{
-		SkeletalNode *cur = child;
-		while (cur != nullptr && cur->interpolated)
+		if (node == root)
 		{
-			SkeletalNode *next = (*cur->children)[0];
+			cout << "WARNING: Cant delete root!" << endl;
+			return false;
+		}
+
+		SkeletalNode *cur = node;
+		vector<SkeletalNode *> node_children(*node->children);
+		do
+		{
+			// First remove the node from the master list
+			if (all_nodes.count(cur) != 0)
+			{
+				all_nodes.erase(cur);
+			}
+			// Second remove the node from the parent list
+			SkeletalNode *parent = cur->parent;
+			size_t idx = 0;
+			for (SkeletalNode *temp : *(parent->children))
+			{
+				if (temp == cur)
+				{
+					break;
+				}
+				idx += 1;
+			}
+			parent->children->erase(parent->children->begin() + idx);
+			
+			// Delete cur
 			delete cur;
-			cur = next;
+			cur = parent;
+		} while (cur != nullptr && cur->interpolated);
+
+		// Third add origin node children to the first non-interpolated ancestor's
+		for (SkeletalNode* node_child : node_children) {
+			cur->children->emplace_back(node_child);
 		}
-		if (cur != nullptr)
-		{
-			new_children->push_back(cur);
-			__delete_interpolation_helper(cur);
-		}
+		return true;
 	}
 
-	delete root->children;
-	root->children = new_children;
-}
+	void BMesh::interpolate_spheres()
+	{
+		__delete_interpolation_helper(root);
+		__interpspheres_helper(root, 1);
+	}
 
-vector<SkeletalNode *> BMesh::get_all_node()
-{
-	return all_nodes_vector;
-}
+	void BMesh::__delete_interpolation_helper(SkeletalNode *root)
+	{
+		if (root == nullptr || root->interpolated)
+		{
+			// Cannot delete nullptr;
+			// Will not delete interpolated node as root.
+			return;
+		}
+
+		vector<SkeletalNode *> *new_children = new vector<SkeletalNode *>();
+
+		for (SkeletalNode *child : *(root->children))
+		{
+			SkeletalNode *cur = child;
+			while (cur != nullptr && cur->interpolated)
+			{
+				SkeletalNode *next = (*cur->children)[0];
+				delete cur;
+				cur = next;
+			}
+			if (cur != nullptr)
+			{
+				new_children->push_back(cur);
+				__delete_interpolation_helper(cur);
+			}
+		}
+
+		delete root->children;
+		root->children = new_children;
+	}
+
+	unordered_set<SkeletalNode *> BMesh::get_all_node()
+	{
+		return all_nodes;
+	}
 
 void BMesh::save_to_file(const string& filename) {
 	/*
@@ -340,884 +335,885 @@ SkeletalNode * BMesh::__json_to_skeleton(const json& j) {
  * Sweeping and stitching     *
  ******************************/
 
-void BMesh::generate_bmesh()
-{
-	// interpolate_spheres();
-	__joint_iterate(root);
-	__stitch_faces();
-}
-
-/******************************
- * SUBDIVISTION               *
- ******************************/
-
-void BMesh::subdivision()
-{
-	if (mesh == nullptr)
+	void BMesh::generate_bmesh()
 	{
-		std::cout << "ERROR: Subdividing a nullptr" << std::endl;
-		return;
+		// interpolate_spheres();
+		__joint_iterate(root);
+		__stitch_faces();
 	}
-	__catmull_clark(*mesh);
-}
-void BMesh::remesh()
-{
-	__remesh(*mesh);
-}
 
-Vector3D get_face_point(const FaceIter f)
-{
-	Vector3D fp{Vector3D(0, 0, 0)};
-	int num_vertices{0};
+	/******************************
+	 * SUBDIVISTION               *
+	 ******************************/
 
-	HalfedgeCIter h_start = f->halfedge();
-	HalfedgeCIter h = f->halfedge();
-
-	do
+	void BMesh::subdivision()
 	{
-		num_vertices++;
-		fp += h->vertex()->position;
-		h = h->next();
-	} while (h != h_start);
-	fp = fp / num_vertices;
-	return fp;
-}
-
-Vector3D get_edge_point(const EdgeIter e)
-{
-	Vector3D ep{Vector3D(0, 0, 0)};
-
-	HalfedgeCIter h0 = e->halfedge();
-	HalfedgeCIter h1 = h0->twin();
-
-	// face points
-	ep += h0->face()->newPosition + h1->face()->newPosition;
-	// vertices
-	ep += h0->vertex()->position + h1->vertex()->position;
-	ep = ep / 4.0;
-
-	return ep;
-}
-
-Vector3D get_new_vertex(const VertexIter v)
-{
-	Vector3D vp{Vector3D(0, 0, 0)};
-	int num_edges{0};
-	HalfedgeCIter h_start = v->halfedge();
-	HalfedgeCIter h = v->halfedge();
-
-	do
-	{
-		num_edges++;
-		vp += 1.0 * h->face()->newPosition;
-		vp += 2.0 * h->edge()->newPosition;
-		h = h->twin()->next();
-	} while (h != h_start);
-
-	vp += num_edges * v->position;
-	vp = vp / (4 * num_edges);
-
-	return vp;
-}
-
-void generate_new_quads(const FaceIter f, vector<Quadrangle> &quadangles)
-{
-	Vector3D v0 = f->newPosition;
-	HalfedgeIter h_start = f->halfedge();
-	HalfedgeIter h = f->halfedge();
-
-	do
-	{
-
-		Vector3D v1 = h->edge()->newPosition;
-		Vector3D v2 = h->next()->vertex()->newPosition;
-		Vector3D v3 = h->next()->edge()->newPosition;
-
-		Quadrangle quad(v0, v1, v2, v3);
-		quadangles.push_back(quad);
-
-		h = h->next();
-	} while (h != h_start);
-}
-
-void connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons,
-					  vector<Vector3D> vertices, HalfedgeMesh &mesh)
-{
-	polygons.clear();
-	vertices.clear();
-
-	unordered_map<Vector3D, size_t> ids;
-
-	// label quadrangle vertices
-	for (const Quadrangle &quadrangle : quadrangles)
-	{
-		if (ids.count(quadrangle.a) == 0)
+		if (mesh == nullptr)
 		{
-			ids[quadrangle.a] = ids.size();
-			vertices.push_back(quadrangle.a);
+			std::cout << "ERROR: Subdividing a nullptr" << std::endl;
+			return;
 		}
-		if (ids.count(quadrangle.b) == 0)
-		{
-			ids[quadrangle.b] = ids.size();
-			vertices.push_back(quadrangle.b);
-		}
-		if (ids.count(quadrangle.c) == 0)
-		{
-			ids[quadrangle.c] = ids.size();
-			vertices.push_back(quadrangle.c);
-		}
-		if (ids.count(quadrangle.d) == 0)
-		{
-			ids[quadrangle.d] = ids.size();
-			vertices.push_back(quadrangle.d);
-		}
-		unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
-		if (distinct_ids.size() == 4)
-		{
-			polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
-		}
+		__catmull_clark(*mesh);
+	}
+	void BMesh::remesh()
+	{
+		__remesh(*mesh);
 	}
 
-	mesh.build(polygons, vertices);
-}
-
-void BMesh::__catmull_clark(HalfedgeMesh &mesh)
-{
-	//  1. Add new face point
-	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+	Vector3D get_face_point(const FaceIter f)
 	{
-		f->isNew = true;
-		f->newPosition = get_face_point(f);
-	}
+		Vector3D fp{Vector3D(0, 0, 0)};
+		int num_vertices{0};
 
-	// 2. Add new edge point
-	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
-	{
-		e->isNew = true;
-		e->newPosition = get_edge_point(e);
-	}
+		HalfedgeCIter h_start = f->halfedge();
+		HalfedgeCIter h = f->halfedge();
 
-	// 3. Calculate new vertex
-	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
-	{
-		v->isNew = false;
-		v->newPosition = get_new_vertex(v);
-	}
-	// 4. generate quads, 1 face divide in to 4 faces
-	quadrangles.clear();
-	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
-	{
-		generate_new_quads(f, quadrangles);
-	}
-
-	std::cout << "call subdivision, new quad size" << quadrangles.size() << std::endl;
-
-	// 5. mapping the quads to the polygon and vertex
-	connect_new_mesh(quadrangles, polygons, vertices, mesh);
-	std::cout << "call subdivision, finish connecting new mesh" << std::endl;
-}
-
-void BMesh::__remesh(HalfedgeMesh &mesh)
-{
-	// Edge split operation
-	vector<EdgeIter> edges;
-
-	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
-	{
-		if (f->degree() == 3)
-		{
-			EdgeIter e1 = f->halfedge()->edge();
-			EdgeIter e2 = f->halfedge()->next()->edge();
-			EdgeIter e3 = f->halfedge()->next()->next()->edge();
-
-			float L = (e1->length() + e2->length() + e3->length()) / 3;
-
-			for (EdgeIter e : {e1, e2, e3})
-			{
-				if (e->length() > 4 * L / 3)
-				{
-					edges.push_back(e);
-				}
-			}
-		}
-	}
-
-	for (EdgeIter e : edges)
-	{
-		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
-		{
-			// mesh.splitEdge(e);
-		}
-	}
-
-	// Edge collapse operation
-	edges.clear();
-
-	for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
-	{
-		if (f->degree() == 3)
-		{
-			EdgeIter e1 = f->halfedge()->edge();
-			EdgeIter e2 = f->halfedge()->next()->edge();
-			EdgeIter e3 = f->halfedge()->next()->next()->edge();
-
-			float L = (e1->length() + e2->length() + e3->length()) / 3;
-
-			for (EdgeIter e : {e1, e2, e3})
-			{
-				if (e->length() < 4 * L / 5)
-				{
-					edges.push_back(e);
-				}
-			}
-		}
-	}
-
-	for (EdgeIter e : edges)
-	{
-		if (!e->isDeleted &&
-			(e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
-		{
-			mesh.collapseEdge(e);
-		}
-	}
-	std::cout << "finish collapse: " << std::endl;
-	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
-	{
-		if (e->isDeleted)
-		{
-			// mesh.deleteEdge(e);
-			std::cout << "!! Deleted edge !!" << std::endl;
-		}
-	}
-
-	std::cout << "deleted" << std::endl;
-
-	/*
-	// Edge flip operation
-	edges.clear();
-
-	for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
-	{
-		// Both triangles
-		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
-			int a1, a2, b1, b2;
-			int degree_before, degree_after;
-
-			a1 = e->halfedge()->vertex()->degree();
-			a2 = e->halfedge()->twin()->vertex()->degree();
-
-			b1 = e->halfedge()->next()->next()->vertex()->degree();
-			b2 = e->halfedge()->twin()->next()->next()->vertex()->degree();
-
-			degree_before = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
-
-			b1 = e->halfedge()->vertex()->degree() + 1;
-			b2 = e->halfedge()->twin()->vertex()->degree() + 1;
-
-			a1 = e->halfedge()->next()->next()->vertex()->degree() - 1;
-			a2 = e->halfedge()->twin()->next()->next()->vertex()->degree() - 1;
-
-			degree_after = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
-
-			if (degree_after < degree_before) {
-				edges.push_back(e);
-			}
-		}
-	}
-
-	for (EdgeIter e : edges)
-	{
-		if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
-			// mesh.flipEdge(e);
-		}
-	}
-	*/
-
-	// Vertex average
-	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
-	{
-		HalfedgeIter htemp = v->halfedge()->twin()->next();
-
-		float count = 0;
-		Vector3D centroid = 0;
-
-		HalfedgeIter h = v->halfedge();
 		do
 		{
-			centroid += h->next()->vertex()->position;
-			count += 1.;
+			num_vertices++;
+			fp += h->vertex()->position;
+			h = h->next();
+		} while (h != h_start);
+		fp = fp / num_vertices;
+		return fp;
+	}
+
+	Vector3D get_edge_point(const EdgeIter e)
+	{
+		Vector3D ep{Vector3D(0, 0, 0)};
+
+		HalfedgeCIter h0 = e->halfedge();
+		HalfedgeCIter h1 = h0->twin();
+
+		// face points
+		ep += h0->face()->newPosition + h1->face()->newPosition;
+		// vertices
+		ep += h0->vertex()->position + h1->vertex()->position;
+		ep = ep / 4.0;
+
+		return ep;
+	}
+
+	Vector3D get_new_vertex(const VertexIter v)
+	{
+		Vector3D vp{Vector3D(0, 0, 0)};
+		int num_edges{0};
+		HalfedgeCIter h_start = v->halfedge();
+		HalfedgeCIter h = v->halfedge();
+
+		do
+		{
+			num_edges++;
+			vp += 1.0 * h->face()->newPosition;
+			vp += 2.0 * h->edge()->newPosition;
 			h = h->twin()->next();
+		} while (h != h_start);
 
-		} while (h != v->halfedge());
+		vp += num_edges * v->position;
+		vp = vp / (4 * num_edges);
 
-		centroid /= count;
-
-		Vector3D V = centroid - v->position;
-		V = V - dot(v->normal(), V) * v->normal();
-
-		v->newPosition = v->position + 0.3 * V;
+		return vp;
 	}
 
-	for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+	void generate_new_quads(const FaceIter f, vector<Quadrangle> &quadangles)
 	{
-		// v->position = v->newPosition;
-	}
-}
+		Vector3D v0 = f->newPosition;
+		HalfedgeIter h_start = f->halfedge();
+		HalfedgeIter h = f->halfedge();
 
-/******************************
- * PRIVATE                    *
- ******************************/
-
-void edge_interpolate(const SkeletalNode &n1, const SkeletalNode &n2, float *rad, float *x)
-{
-	// Interpolate a sphere touching n1
-
-	float d = (n2.pos - n1.pos).norm();
-	float r3 = n1.radius * (d + n2.radius - n1.radius) / (d - n2.radius + n1.radius);
-	*x = n1.radius + r3;
-
-	*rad = r3;
-	//	*pos = n1.pos + x * (n2.pos - n1.pos).unit();
-}
-
-void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
-{
-
-	if (root == nullptr)
-	{
-		return;
-	}
-
-	// Iterate through each child node
-	vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
-	for (SkeletalNode *child : *(root->children))
-	{
-		original_children->push_back(child);
-	}
-
-	float radius = 1000;
-	float x = 0;
-
-	// Get the smallest interpolation between joint, to parents and children
-	for (SkeletalNode *child : *(original_children))
-	{
-		float temp_rad, temp_x;
-
-		edge_interpolate(*root, *child, &temp_rad, &temp_x);
-
-		if (temp_rad < radius)
+		do
 		{
-			radius = temp_rad;
-			x = temp_x;
-		}
+
+			Vector3D v1 = h->edge()->newPosition;
+			Vector3D v2 = h->next()->vertex()->newPosition;
+			Vector3D v3 = h->next()->edge()->newPosition;
+
+			Quadrangle quad(v0, v1, v2, v3);
+			quadangles.push_back(quad);
+
+			h = h->next();
+		} while (h != h_start);
 	}
 
-	if ((root->parent != NULL))
+	void connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons,
+						  vector<Vector3D> vertices, HalfedgeMesh &mesh)
 	{
+		polygons.clear();
+		vertices.clear();
 
-		float temp_rad, temp_x;
-		edge_interpolate(*root, *(root->parent), &temp_rad, &temp_x);
-		if (temp_rad < radius)
+		unordered_map<Vector3D, size_t> ids;
+
+		// label quadrangle vertices
+		for (const Quadrangle &quadrangle : quadrangles)
 		{
-			radius = temp_rad;
-			x = temp_x;
-		}
-
-		// Now interpolate to the parent
-		SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
-		interp_sphere->interpolated = true;
-
-		SkeletalNode *temp_parent = root->parent;
-
-		int i = 0;
-		for (SkeletalNode *temp : *(root->parent->children))
-		{
-			if (temp == root)
+			if (ids.count(quadrangle.a) == 0)
 			{
-				root->parent->children->erase(root->parent->children->begin() + i);
-				break;
+				ids[quadrangle.a] = ids.size();
+				vertices.push_back(quadrangle.a);
 			}
-			i += 1;
+			if (ids.count(quadrangle.b) == 0)
+			{
+				ids[quadrangle.b] = ids.size();
+				vertices.push_back(quadrangle.b);
+			}
+			if (ids.count(quadrangle.c) == 0)
+			{
+				ids[quadrangle.c] = ids.size();
+				vertices.push_back(quadrangle.c);
+			}
+			if (ids.count(quadrangle.d) == 0)
+			{
+				ids[quadrangle.d] = ids.size();
+				vertices.push_back(quadrangle.d);
+			}
+			unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
+			if (distinct_ids.size() == 4)
+			{
+				polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
+			}
 		}
 
-		temp_parent->children->push_back(interp_sphere);
-		interp_sphere->children->push_back(root);
-		root->parent = interp_sphere;
-		all_nodes_vector.push_back(interp_sphere);
+		mesh.build(polygons, vertices);
 	}
 
-	for (SkeletalNode *child : *(original_children))
+	void BMesh::__catmull_clark(HalfedgeMesh &mesh)
 	{
-		// Remove the child from the current parents list of children
-		int i = 0;
-		for (SkeletalNode *temp : *(root->children))
+		//  1. Add new face point
+		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
 		{
-			if (temp == child)
-			{
-				root->children->erase(root->children->begin() + i);
-				break;
-			}
-			i += 1;
+			f->isNew = true;
+			f->newPosition = get_face_point(f);
 		}
 
-		// Between the parent and each child, create new spheres
-		SkeletalNode *prev = root;
-
-		// Distance or radius step size between the interpolated spheres
-		Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
-		float rad_step = (child->radius - root->radius) / (divs + 1.);
-		divs = 1;
-		// For each sphere to be created
-		for (int i = 0; i < divs; i++)
+		// 2. Add new edge point
+		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
 		{
-			// Final pos, rad of the interp sphere
-			Vector3D new_position = root->pos + (i + 1) * pos_step;
-			float new_radius = root->radius + (i + 1) * rad_step;
+			e->isNew = true;
+			e->newPosition = get_edge_point(e);
+		}
 
-			// Create the interp sphere
-			// SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
-			SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
+		// 3. Calculate new vertex
+		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+		{
+			v->isNew = false;
+			v->newPosition = get_new_vertex(v);
+		}
+		// 4. generate quads, 1 face divide in to 4 faces
+		quadrangles.clear();
+		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+		{
+			generate_new_quads(f, quadrangles);
+		}
+
+		std::cout << "call subdivision, new quad size" << quadrangles.size() << std::endl;
+
+		// 5. mapping the quads to the polygon and vertex
+		connect_new_mesh(quadrangles, polygons, vertices, mesh);
+		std::cout << "call subdivision, finish connecting new mesh" << std::endl;
+	}
+
+	void BMesh::__remesh(HalfedgeMesh &mesh)
+	{
+		// Edge split operation
+		vector<EdgeIter> edges;
+
+		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+		{
+			if (f->degree() == 3)
+			{
+				EdgeIter e1 = f->halfedge()->edge();
+				EdgeIter e2 = f->halfedge()->next()->edge();
+				EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+				float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+				for (EdgeIter e : {e1, e2, e3})
+				{
+					if (e->length() > 4 * L / 3)
+					{
+						edges.push_back(e);
+					}
+				}
+			}
+		}
+
+		for (EdgeIter e : edges)
+		{
+			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+			{
+				// mesh.splitEdge(e);
+			}
+		}
+
+		// Edge collapse operation
+		edges.clear();
+
+		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
+		{
+			if (f->degree() == 3)
+			{
+				EdgeIter e1 = f->halfedge()->edge();
+				EdgeIter e2 = f->halfedge()->next()->edge();
+				EdgeIter e3 = f->halfedge()->next()->next()->edge();
+
+				float L = (e1->length() + e2->length() + e3->length()) / 3;
+
+				for (EdgeIter e : {e1, e2, e3})
+				{
+					if (e->length() < 4 * L / 5)
+					{
+						edges.push_back(e);
+					}
+				}
+			}
+		}
+
+		for (EdgeIter e : edges)
+		{
+			if (!e->isDeleted &&
+				(e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+			{
+				mesh.collapseEdge(e);
+			}
+		}
+		std::cout << "finish collapse: " << std::endl;
+		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+		{
+			if (e->isDeleted)
+			{
+				// mesh.deleteEdge(e);
+				std::cout << "!! Deleted edge !!" << std::endl;
+			}
+		}
+
+		std::cout << "deleted" << std::endl;
+
+		/*
+		// Edge flip operation
+		edges.clear();
+
+		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
+		{
+			// Both triangles
+			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+				int a1, a2, b1, b2;
+				int degree_before, degree_after;
+
+				a1 = e->halfedge()->vertex()->degree();
+				a2 = e->halfedge()->twin()->vertex()->degree();
+
+				b1 = e->halfedge()->next()->next()->vertex()->degree();
+				b2 = e->halfedge()->twin()->next()->next()->vertex()->degree();
+
+				degree_before = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+				b1 = e->halfedge()->vertex()->degree() + 1;
+				b2 = e->halfedge()->twin()->vertex()->degree() + 1;
+
+				a1 = e->halfedge()->next()->next()->vertex()->degree() - 1;
+				a2 = e->halfedge()->twin()->next()->next()->vertex()->degree() - 1;
+
+				degree_after = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
+
+				if (degree_after < degree_before) {
+					edges.push_back(e);
+				}
+			}
+		}
+
+		for (EdgeIter e : edges)
+		{
+			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+				// mesh.flipEdge(e);
+			}
+		}
+		*/
+
+		// Vertex average
+		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+		{
+			HalfedgeIter htemp = v->halfedge()->twin()->next();
+
+			float count = 0;
+			Vector3D centroid = 0;
+
+			HalfedgeIter h = v->halfedge();
+			do
+			{
+				centroid += h->next()->vertex()->position;
+				count += 1.;
+				h = h->twin()->next();
+
+			} while (h != v->halfedge());
+
+			centroid /= count;
+
+			Vector3D V = centroid - v->position;
+			V = V - dot(v->normal(), V) * v->normal();
+
+			v->newPosition = v->position + 0.3 * V;
+		}
+
+		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
+		{
+			// v->position = v->newPosition;
+		}
+	}
+
+	/******************************
+	 * PRIVATE                    *
+	 ******************************/
+
+	void edge_interpolate(const SkeletalNode &n1, const SkeletalNode &n2, float *rad, float *x)
+	{
+		// Interpolate a sphere touching n1
+
+		float d = (n2.pos - n1.pos).norm();
+		float r3 = n1.radius * (d + n2.radius - n1.radius) / (d - n2.radius + n1.radius);
+		*x = n1.radius + r3;
+
+		*rad = r3;
+		//	*pos = n1.pos + x * (n2.pos - n1.pos).unit();
+	}
+
+	void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
+	{
+
+		if (root == nullptr)
+		{
+			return;
+		}
+
+		// Iterate through each child node
+		vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
+		for (SkeletalNode *child : *(root->children))
+		{
+			original_children->push_back(child);
+		}
+
+		float radius = 1000;
+		float x = 0;
+
+		// Get the smallest interpolation between joint, to parents and children
+		for (SkeletalNode *child : *(original_children))
+		{
+			float temp_rad, temp_x;
+
+			edge_interpolate(*root, *child, &temp_rad, &temp_x);
+
+			if (temp_rad < radius)
+			{
+				radius = temp_rad;
+				x = temp_x;
+			}
+		}
+
+		if ((root->parent != NULL))
+		{
+
+			float temp_rad, temp_x;
+			edge_interpolate(*root, *(root->parent), &temp_rad, &temp_x);
+			if (temp_rad < radius)
+			{
+				radius = temp_rad;
+				x = temp_x;
+			}
+
+			// Now interpolate to the parent
+			SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
 			interp_sphere->interpolated = true;
 
-			// Add the interp sphere to the struct
-			prev->children->push_back(interp_sphere);
-			all_nodes_vector.push_back(interp_sphere);
+			SkeletalNode *temp_parent = root->parent;
 
-			// Update prev
-			prev = interp_sphere;
-		}
-
-		// New re add the child node back to the end of the joint
-		prev->children->push_back(child);
-		child->parent = prev;
-
-		// Now do the recursive call
-		__interpspheres_helper(child, divs);
-	}
-}
-
-void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limb, bool isleaf)
-{
-	Vector3D root_center = root->pos;
-	double root_radius = root->radius;
-
-	Vector3D child_center = child->pos;
-	double child_radius = child->radius;
-
-	Vector3D localx;
-	if ((root->children->size() == 1) && (root->parent != nullptr))
-	{
-		// localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
-		localx = (child_center - root_center).unit();
-	}
-	else
-	{
-		localx = (child_center - root_center).unit();
-	}
-
-	// y = Z x x;
-	Vector3D localy = cross({0, 0, 1}, localx).unit();
-	Vector3D localz = cross(localx, localy).unit();
-
-	if (add_root)
-	{
-		Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
-		Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
-		Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
-		Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
-		limb->add_layer(root_lfdn, root_rtdn, root_rtup, root_lfup);
-	}
-	else
-	{
-		Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
-		Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
-		Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
-		Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
-		limb->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
-	}
-
-	if (isleaf)
-	{
-		Vector3D child_rtup = child_center + child_radius * localx + child_radius / 3 * localy + child_radius / 3. * localz;
-		Vector3D child_rtdn = child_center + child_radius * localx + child_radius / 3. * localy - child_radius / 3. * localz;
-		Vector3D child_lfup = child_center + child_radius * localx - child_radius / 3. * localy + child_radius / 3. * localz;
-		Vector3D child_lfdn = child_center + child_radius * localx - child_radius / 3. * localy - child_radius / 3. * localz;
-		limb->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
-	}
-}
-
-void BMesh::__joint_iterate(SkeletalNode *root)
-{
-	if (root == nullptr)
-	{
-		// This should not be possible cause im calling this func only on joint nodes
-		throw runtime_error("ERROR: joint node is null");
-	}
-	// cout << "current root address = " << root << endl;
-	Vector3D root_center = root->pos;
-	double root_radius = root->radius;
-
-	// Because this is a joint node, iterate through all children
-	for (SkeletalNode *child : *(root->children))
-	{
-		// cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
-		// cout << "Joint node: " << root->radius << endl;
-		// Create a new limb for this child
-		Limb *childlimb = new Limb(); // Add the sweeping stuff here
-		bool first = true;
-
-		if (child->children->size() == 0)
-		{ // Leaf node
-			// That child should only have one rectangle mesh (essentially 2D)
-			__update_limb(root, child, false, childlimb, true);
-			child->limb = childlimb;
-			childlimb->seal();
-		}
-		else if (child->children->size() == 1)
-		{ // limb node
-			SkeletalNode *cur = child;
-			SkeletalNode *last;
-			while (cur->children->size() == 1)
+			int i = 0;
+			for (SkeletalNode *temp : *(root->parent->children))
 			{
-				cur->limb = childlimb;
-				__update_limb(cur, (*cur->children)[0], true, childlimb, false);
-				if (first)
+				if (temp == root)
 				{
-					first = false;
+					root->parent->children->erase(root->parent->children->begin() + i);
+					break;
 				}
-				last = cur;
-				cur = (*cur->children)[0];
+				i += 1;
 			}
-			if (cur->children->size() == 0)
-			{ // sweeping reached the end leaf node
-				__update_limb(last, cur, false, childlimb, true);
-				cur->limb = childlimb;
-				childlimb->seal();
+
+			temp_parent->children->push_back(interp_sphere);
+			interp_sphere->children->push_back(root);
+			root->parent = interp_sphere;
+			all_nodes.emplace(interp_sphere);
+		}
+
+		for (SkeletalNode *child : *(original_children))
+		{
+			// Remove the child from the current parents list of children
+			int i = 0;
+			for (SkeletalNode *temp : *(root->children))
+			{
+				if (temp == child)
+				{
+					root->children->erase(root->children->begin() + i);
+					break;
+				}
+				i += 1;
 			}
-			else
-			{ // Sweeping reached a joint node
-				__joint_iterate(cur);
+
+			// Between the parent and each child, create new spheres
+			SkeletalNode *prev = root;
+
+			// Distance or radius step size between the interpolated spheres
+			Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
+			float rad_step = (child->radius - root->radius) / (divs + 1.);
+			divs = 1;
+			// For each sphere to be created
+			for (int i = 0; i < divs; i++)
+			{
+				// Final pos, rad of the interp sphere
+				Vector3D new_position = root->pos + (i + 1) * pos_step;
+				float new_radius = root->radius + (i + 1) * rad_step;
+
+				// Create the interp sphere
+				// SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
+				SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
+				interp_sphere->interpolated = true;
+
+				// Add the interp sphere to the struct
+				prev->children->push_back(interp_sphere);
+				all_nodes.emplace(interp_sphere);
+
+				// Update prev
+				prev = interp_sphere;
 			}
+
+			// New re add the child node back to the end of the joint
+			prev->children->push_back(child);
+			child->parent = prev;
+
+			// Now do the recursive call
+			__interpspheres_helper(child, divs);
+		}
+	}
+
+	void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limb, bool isleaf)
+	{
+		Vector3D root_center = root->pos;
+		double root_radius = root->radius;
+
+		Vector3D child_center = child->pos;
+		double child_radius = child->radius;
+
+		Vector3D localx;
+		if ((root->children->size() == 1) && (root->parent != nullptr))
+		{
+			// localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
+			localx = (child_center - root_center).unit();
 		}
 		else
-		{ // Joint node
-			__joint_iterate(child);
+		{
+			localx = (child_center - root_center).unit();
+		}
+
+		// y = Z x x;
+		Vector3D localy = cross({0, 0, 1}, localx).unit();
+		Vector3D localz = cross(localx, localy).unit();
+
+		if (add_root)
+		{
+			Vector3D root_rtup = root_center + root_radius * localy + root_radius * localz;
+			Vector3D root_rtdn = root_center + root_radius * localy - root_radius * localz;
+			Vector3D root_lfup = root_center - root_radius * localy + root_radius * localz;
+			Vector3D root_lfdn = root_center - root_radius * localy - root_radius * localz;
+			limb->add_layer(root_lfdn, root_rtdn, root_rtup, root_lfup);
+		}
+		else
+		{
+			Vector3D child_rtup = child_center + child_radius * localy + child_radius * localz;
+			Vector3D child_rtdn = child_center + child_radius * localy - child_radius * localz;
+			Vector3D child_lfup = child_center - child_radius * localy + child_radius * localz;
+			Vector3D child_lfdn = child_center - child_radius * localy - child_radius * localz;
+			limb->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
+		}
+
+		if (isleaf)
+		{
+			Vector3D child_rtup = child_center + child_radius * localx + child_radius / 3 * localy + child_radius / 3. * localz;
+			Vector3D child_rtdn = child_center + child_radius * localx + child_radius / 3. * localy - child_radius / 3. * localz;
+			Vector3D child_lfup = child_center + child_radius * localx - child_radius / 3. * localy + child_radius / 3. * localz;
+			Vector3D child_lfdn = child_center + child_radius * localx - child_radius / 3. * localy - child_radius / 3. * localz;
+			limb->add_layer(child_lfdn, child_rtdn, child_rtup, child_lfup);
 		}
 	}
 
-	__add_limb_faces(root);
-}
-
-void BMesh::__add_limb_faces(SkeletalNode *root)
-{
-	if (root == nullptr)
+	void BMesh::__joint_iterate(SkeletalNode *root)
 	{
-		throw runtime_error("Adding faces from a null joint node.");
-	}
-	if (root->children->size() <= 1)
-	{
-		throw runtime_error("Adding faces from a limb node.");
-	}
-
-	// Add child Limb quadrangles
-	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-	for (SkeletalNode *child : *(root->children))
-	{
-		if (child->limb)
+		if (root == nullptr)
 		{
-			for (const Quadrangle &quadrangle : child->limb->quadrangles)
-			{
-				quadrangles.push_back(quadrangle);
+			// This should not be possible cause im calling this func only on joint nodes
+			throw runtime_error("ERROR: joint node is null");
+		}
+		// cout << "current root address = " << root << endl;
+		Vector3D root_center = root->pos;
+		double root_radius = root->radius;
+
+		// Because this is a joint node, iterate through all children
+		for (SkeletalNode *child : *(root->children))
+		{
+			// cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
+			// cout << "Joint node: " << root->radius << endl;
+			// Create a new limb for this child
+			Limb *childlimb = new Limb(); // Add the sweeping stuff here
+			bool first = true;
+
+			if (child->children->size() == 0)
+			{ // Leaf node
+				// That child should only have one rectangle mesh (essentially 2D)
+				__update_limb(root, child, false, childlimb, true);
+				child->limb = childlimb;
+				childlimb->seal();
+			}
+			else if (child->children->size() == 1)
+			{ // limb node
+				SkeletalNode *cur = child;
+				SkeletalNode *last;
+				while (cur->children->size() == 1)
+				{
+					cur->limb = childlimb;
+					__update_limb(cur, (*cur->children)[0], true, childlimb, false);
+					if (first)
+					{
+						first = false;
+					}
+					last = cur;
+					cur = (*cur->children)[0];
+				}
+				if (cur->children->size() == 0)
+				{ // sweeping reached the end leaf node
+					__update_limb(last, cur, false, childlimb, true);
+					cur->limb = childlimb;
+					childlimb->seal();
+				}
+				else
+				{ // Sweeping reached a joint node
+					__joint_iterate(cur);
+				}
+			}
+			else
+			{ // Joint node
+				__joint_iterate(child);
 			}
 		}
+
+		__add_limb_faces(root);
 	}
 
-	// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
-	vector<Vector3D> local_hull_points;
-
-	if (root->parent && root->parent->limb)
+	void BMesh::__add_limb_faces(SkeletalNode *root)
 	{
-		for (const Vector3D &point : root->parent->limb->get_last_four_points())
+		if (root == nullptr)
 		{
-			fringe_points.push_back(point);
-			local_hull_points.push_back(point);
-			all_points.push_back(point);
+			throw runtime_error("Adding faces from a null joint node.");
 		}
-	}
-	// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-	for (SkeletalNode *child : *(root->children))
-	{
-		if (child->limb)
+		if (root->children->size() <= 1)
 		{
-			for (const Vector3D &point : child->limb->get_first_four_points())
+			throw runtime_error("Adding faces from a limb node.");
+		}
+
+		// Add child Limb quadrangles
+		// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+		for (SkeletalNode *child : *(root->children))
+		{
+			if (child->limb)
+			{
+				for (const Quadrangle &quadrangle : child->limb->quadrangles)
+				{
+					quadrangles.push_back(quadrangle);
+				}
+			}
+		}
+
+		// Assume the last 4 mesh vertices of parent skeletal nodes are fringe vertices
+		vector<Vector3D> local_hull_points;
+
+		if (root->parent && root->parent->limb)
+		{
+			for (const Vector3D &point : root->parent->limb->get_last_four_points())
 			{
 				fringe_points.push_back(point);
 				local_hull_points.push_back(point);
 				all_points.push_back(point);
 			}
 		}
-	}
-	// Add something related to current joint node
-	// 6 uniform nodes across the joint node sphere
-	for (int phi_deg = 0; phi_deg < 180; phi_deg += 90)
-	{
-		for (int theta_deg = 0; theta_deg < 360; theta_deg += 90)
+		// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
+		for (SkeletalNode *child : *(root->children))
 		{
-			Vector3D extra_point = root->pos;
-			double phi = phi_deg * PI / 180, theta = theta_deg * PI / 180;
-			double x = root->radius * cos(phi) * sin(theta);
-			double y = root->radius * sin(phi) * sin(theta);
-			double z = root->radius * cos(theta);
-			extra_point = extra_point + Vector3D(x, y, z);
-			local_hull_points.push_back(extra_point);
-		}
-	}
-
-	// QuickHull algorithm
-	size_t n = local_hull_points.size();
-	qh_vertex_t *vertices = (qh_vertex_t *)malloc(sizeof(qh_vertex_t) * n);
-	for (size_t i = 0; i < n; i++)
-	{
-		vertices[i].x = local_hull_points[i].x;
-		vertices[i].y = local_hull_points[i].y;
-		vertices[i].z = local_hull_points[i].z;
-	}
-
-	// Build a convex hull using quickhull algorithm and add the hull triangles
-	qh_mesh_t mesh = qh_quickhull3d(vertices, n);
-	unordered_set<Vector3D> unique_extra_points;
-	for (size_t i = 0; i < mesh.nindices; i += 3)
-	{
-		Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
-		Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
-		Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-		triangles.push_back({a, b, c});
-
-		if ((a - root->pos).norm() < root->radius + 0.001)
-		{
-			unique_extra_points.insert(a);
-		}
-		if ((b - root->pos).norm() < root->radius + 0.001)
-		{
-			unique_extra_points.insert(b);
-		}
-		if ((c - root->pos).norm() < root->radius + 0.001)
-		{
-			unique_extra_points.insert(c);
-		}
-	}
-	qh_free_mesh(mesh);
-
-	for (const Vector3D &unique_extra_point : unique_extra_points)
-	{
-		all_points.push_back(unique_extra_point);
-	}
-}
-
-void BMesh::__stitch_faces()
-{
-	// label vertices in triangles and quadrangles
-	// id starts from 0
-	unordered_map<Vector3D, size_t> ids;
-	unordered_map<Vector3D, size_t> fringe_ids;
-	// label fringe points first in groups of 4
-	// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
-
-	// This is just for checking fringe
-	for (const Vector3D &point : fringe_points)
-	{
-		if (fringe_ids.count(point) == 0)
-		{
-			fringe_ids[point] = fringe_ids.size();
-		}
-	}
-
-	// label quadrangle vertices
-	for (const Quadrangle &quadrangle : quadrangles)
-	{
-		if (ids.count(quadrangle.a) == 0)
-		{
-			ids[quadrangle.a] = ids.size();
-			vertices.push_back(quadrangle.a);
-		}
-		if (ids.count(quadrangle.b) == 0)
-		{
-			ids[quadrangle.b] = ids.size();
-			vertices.push_back(quadrangle.b);
-		}
-		if (ids.count(quadrangle.c) == 0)
-		{
-			ids[quadrangle.c] = ids.size();
-			vertices.push_back(quadrangle.c);
-		}
-		if (ids.count(quadrangle.d) == 0)
-		{
-			ids[quadrangle.d] = ids.size();
-			vertices.push_back(quadrangle.d);
-		}
-		unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
-		if (distinct_ids.size() == 4)
-		{
-			polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
-		}
-	}
-	// label triangle vertices
-	for (Triangle &triangle : triangles)
-	{
-		{
-			Vector3D closest;
-			float closest_dist = 100;
-			for (const Vector3D &vert : all_points)
+			if (child->limb)
 			{
-				if ((vert - triangle.a).norm() < closest_dist)
+				for (const Vector3D &point : child->limb->get_first_four_points())
 				{
-					closest_dist = (vert - triangle.a).norm();
-					closest = vert;
+					fringe_points.push_back(point);
+					local_hull_points.push_back(point);
+					all_points.push_back(point);
 				}
 			}
-			triangle.a = closest;
 		}
+		// Add something related to current joint node
+		// 6 uniform nodes across the joint node sphere
+		for (int phi_deg = 0; phi_deg < 180; phi_deg += 90)
 		{
-			Vector3D closest;
-			float closest_dist = 100;
-			for (const Vector3D &vert : all_points)
+			for (int theta_deg = 0; theta_deg < 360; theta_deg += 90)
 			{
-				if ((vert - triangle.b).norm() < closest_dist)
+				Vector3D extra_point = root->pos;
+				double phi = phi_deg * PI / 180, theta = theta_deg * PI / 180;
+				double x = root->radius * cos(phi) * sin(theta);
+				double y = root->radius * sin(phi) * sin(theta);
+				double z = root->radius * cos(theta);
+				extra_point = extra_point + Vector3D(x, y, z);
+				local_hull_points.push_back(extra_point);
+			}
+		}
+
+		// QuickHull algorithm
+		size_t n = local_hull_points.size();
+		qh_vertex_t *vertices = (qh_vertex_t *)malloc(sizeof(qh_vertex_t) * n);
+		for (size_t i = 0; i < n; i++)
+		{
+			vertices[i].x = local_hull_points[i].x;
+			vertices[i].y = local_hull_points[i].y;
+			vertices[i].z = local_hull_points[i].z;
+		}
+
+		// Build a convex hull using quickhull algorithm and add the hull triangles
+		qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+		unordered_set<Vector3D> unique_extra_points;
+		for (size_t i = 0; i < mesh.nindices; i += 3)
+		{
+			Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+			Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
+			Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
+			triangles.push_back({a, b, c});
+
+			if ((a - root->pos).norm() < root->radius + 0.001)
+			{
+				unique_extra_points.insert(a);
+			}
+			if ((b - root->pos).norm() < root->radius + 0.001)
+			{
+				unique_extra_points.insert(b);
+			}
+			if ((c - root->pos).norm() < root->radius + 0.001)
+			{
+				unique_extra_points.insert(c);
+			}
+		}
+		qh_free_mesh(mesh);
+
+		for (const Vector3D &unique_extra_point : unique_extra_points)
+		{
+			all_points.push_back(unique_extra_point);
+		}
+	}
+
+	void BMesh::__stitch_faces()
+	{
+		// label vertices in triangles and quadrangles
+		// id starts from 0
+		unordered_map<Vector3D, size_t> ids;
+		unordered_map<Vector3D, size_t> fringe_ids;
+		// label fringe points first in groups of 4
+		// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
+
+		// This is just for checking fringe
+		for (const Vector3D &point : fringe_points)
+		{
+			if (fringe_ids.count(point) == 0)
+			{
+				fringe_ids[point] = fringe_ids.size();
+			}
+		}
+
+		// label quadrangle vertices
+		for (const Quadrangle &quadrangle : quadrangles)
+		{
+			if (ids.count(quadrangle.a) == 0)
+			{
+				ids[quadrangle.a] = ids.size();
+				vertices.push_back(quadrangle.a);
+			}
+			if (ids.count(quadrangle.b) == 0)
+			{
+				ids[quadrangle.b] = ids.size();
+				vertices.push_back(quadrangle.b);
+			}
+			if (ids.count(quadrangle.c) == 0)
+			{
+				ids[quadrangle.c] = ids.size();
+				vertices.push_back(quadrangle.c);
+			}
+			if (ids.count(quadrangle.d) == 0)
+			{
+				ids[quadrangle.d] = ids.size();
+				vertices.push_back(quadrangle.d);
+			}
+			unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
+			if (distinct_ids.size() == 4)
+			{
+				polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
+			}
+		}
+		// label triangle vertices
+		for (Triangle &triangle : triangles)
+		{
+			{
+				Vector3D closest;
+				float closest_dist = 100;
+				for (const Vector3D &vert : all_points)
 				{
-					closest_dist = (vert - triangle.b).norm();
-					closest = vert;
-				}
-			}
-			triangle.b = closest;
-		}
-		{
-			Vector3D closest;
-			float closest_dist = 100;
-			for (const Vector3D &vert : all_points)
-			{
-				if ((vert - triangle.c).norm() < closest_dist)
-				{
-					closest_dist = (vert - triangle.c).norm();
-					closest = vert;
-				}
-			}
-			triangle.c = closest;
-		}
-
-		// Check if the triangle is still valid
-		if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
-		{
-			continue;
-		}
-
-		// Add triangle if either it has a point that is not in fringe
-		// or if all 3 points are not in the same face
-		if ((fringe_ids.count(triangle.a) == 0) ||
-			(fringe_ids.count(triangle.b) == 0) ||
-			(fringe_ids.count(triangle.c) == 0))
-		{
-			if (ids.count(triangle.a) == 0)
-			{
-				ids[triangle.a] = ids.size();
-				vertices.push_back(triangle.a);
-			}
-			if (ids.count(triangle.b) == 0)
-			{
-				ids[triangle.b] = ids.size();
-				vertices.push_back(triangle.b);
-			}
-			if (ids.count(triangle.c) == 0)
-			{
-				ids[triangle.c] = ids.size();
-				vertices.push_back(triangle.c);
-			}
-
-			size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-			polygons.push_back({ida, idb, idc});
-		}
-		else
-		{
-
-			size_t fringe_ida = fringe_ids[triangle.a];
-			size_t fringe_idb = fringe_ids[triangle.b];
-			size_t fringe_idc = fringe_ids[triangle.c];
-
-			size_t fringe_maxid = max(max(fringe_ida, fringe_idb), fringe_idc);
-			size_t fringe_minid = min(min(fringe_ida, fringe_idb), fringe_idc);
-
-			unordered_set<size_t> distinct_ids = {fringe_ida, fringe_idb, fringe_idc};
-
-			if (distinct_ids.size() == 3)
-			{
-				// Quickhull will generate faces cover the limb fringe vertices
-				// We dont want those to be added to mesh
-				// Do this by:
-				// any_fringe_vertex_id divided by 4 is the group number
-				// if the triangle's 3 vertices are in the same group,
-				// then we don't want to add this to mesh cuz it's covering the fringe
-
-				if ((fringe_maxid / 4) != (fringe_minid / 4))
-				{
-					if (ids.count(triangle.a) == 0)
+					if ((vert - triangle.a).norm() < closest_dist)
 					{
-						ids[triangle.a] = ids.size();
-						vertices.push_back(triangle.a);
+						closest_dist = (vert - triangle.a).norm();
+						closest = vert;
 					}
-					if (ids.count(triangle.b) == 0)
+				}
+				triangle.a = closest;
+			}
+			{
+				Vector3D closest;
+				float closest_dist = 100;
+				for (const Vector3D &vert : all_points)
+				{
+					if ((vert - triangle.b).norm() < closest_dist)
 					{
-						ids[triangle.b] = ids.size();
-						vertices.push_back(triangle.b);
+						closest_dist = (vert - triangle.b).norm();
+						closest = vert;
 					}
-					if (ids.count(triangle.c) == 0)
+				}
+				triangle.b = closest;
+			}
+			{
+				Vector3D closest;
+				float closest_dist = 100;
+				for (const Vector3D &vert : all_points)
+				{
+					if ((vert - triangle.c).norm() < closest_dist)
 					{
-						ids[triangle.c] = ids.size();
-						vertices.push_back(triangle.c);
+						closest_dist = (vert - triangle.c).norm();
+						closest = vert;
 					}
+				}
+				triangle.c = closest;
+			}
 
-					size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-					polygons.push_back({ida, idb, idc});
+			// Check if the triangle is still valid
+			if ((triangle.a == triangle.b) || (triangle.b == triangle.c) || (triangle.c == triangle.a))
+			{
+				continue;
+			}
+
+			// Add triangle if either it has a point that is not in fringe
+			// or if all 3 points are not in the same face
+			if ((fringe_ids.count(triangle.a) == 0) ||
+				(fringe_ids.count(triangle.b) == 0) ||
+				(fringe_ids.count(triangle.c) == 0))
+			{
+				if (ids.count(triangle.a) == 0)
+				{
+					ids[triangle.a] = ids.size();
+					vertices.push_back(triangle.a);
+				}
+				if (ids.count(triangle.b) == 0)
+				{
+					ids[triangle.b] = ids.size();
+					vertices.push_back(triangle.b);
+				}
+				if (ids.count(triangle.c) == 0)
+				{
+					ids[triangle.c] = ids.size();
+					vertices.push_back(triangle.c);
+				}
+
+				size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+				polygons.push_back({ida, idb, idc});
+			}
+			else
+			{
+
+				size_t fringe_ida = fringe_ids[triangle.a];
+				size_t fringe_idb = fringe_ids[triangle.b];
+				size_t fringe_idc = fringe_ids[triangle.c];
+
+				size_t fringe_maxid = max(max(fringe_ida, fringe_idb), fringe_idc);
+				size_t fringe_minid = min(min(fringe_ida, fringe_idb), fringe_idc);
+
+				unordered_set<size_t> distinct_ids = {fringe_ida, fringe_idb, fringe_idc};
+
+				if (distinct_ids.size() == 3)
+				{
+					// Quickhull will generate faces cover the limb fringe vertices
+					// We dont want those to be added to mesh
+					// Do this by:
+					// any_fringe_vertex_id divided by 4 is the group number
+					// if the triangle's 3 vertices are in the same group,
+					// then we don't want to add this to mesh cuz it's covering the fringe
+
+					if ((fringe_maxid / 4) != (fringe_minid / 4))
+					{
+						if (ids.count(triangle.a) == 0)
+						{
+							ids[triangle.a] = ids.size();
+							vertices.push_back(triangle.a);
+						}
+						if (ids.count(triangle.b) == 0)
+						{
+							ids[triangle.b] = ids.size();
+							vertices.push_back(triangle.b);
+						}
+						if (ids.count(triangle.c) == 0)
+						{
+							ids[triangle.c] = ids.size();
+							vertices.push_back(triangle.c);
+						}
+
+						size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
+						polygons.push_back({ida, idb, idc});
+					}
 				}
 			}
 		}
-	}
 
-	// build halfedgeMesh
-	if (mesh != nullptr)
-	{
-		delete mesh;
-	}
-	mesh = new HalfedgeMesh();
-	int result = mesh->build(polygons, vertices);
-	if (result == 0)
-	{
-		shader_method = mesh_faces_no_indices;
-		std::cout << "HalfedgeMesh building succeeded." << std::endl;
-	}
-	else
-	{
+		// build halfedgeMesh
 		if (mesh != nullptr)
 		{
 			delete mesh;
-			mesh = nullptr;
 		}
-		shader_method = polygons_no_indices;
-		std::cout << "HalfedgeMesh building failed, using polygons instead." << std::endl;
+		mesh = new HalfedgeMesh();
+		int result = mesh->build(polygons, vertices);
+		if (result == 0)
+		{
+			shader_method = mesh_faces_no_indices;
+			std::cout << "HalfedgeMesh building succeeded." << std::endl;
+		}
+		else
+		{
+			if (mesh != nullptr)
+			{
+				delete mesh;
+				mesh = nullptr;
+			}
+			shader_method = polygons_no_indices;
+			std::cout << "HalfedgeMesh building failed, using polygons instead." << std::endl;
+		}
 	}
-}
 
-void BMesh::print_skeleton()
-{
-	__print_skeleton(root);
-}
-
-void BMesh::__print_skeleton(SkeletalNode *root)
-{
-	if (!root)
-		return;
-	cout << "Current node radius " << root->radius << endl;
-	for (SkeletalNode *child : *(root->children))
+	void BMesh::print_skeleton()
 	{
-		__print_skeleton(child);
+		__print_skeleton(root);
 	}
-}
+
+	void BMesh::__print_skeleton(SkeletalNode *root)
+	{
+		if (!root)
+			return;
+		cout << "Current node radius " << root->radius << endl;
+		for (SkeletalNode *child : *(root->children))
+		{
+			__print_skeleton(child);
+		}
+	}
+}; // END_NAMESPACE BALLE
