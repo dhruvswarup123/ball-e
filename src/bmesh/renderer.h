@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <nanogui/nanogui.h>
 #include "../misc/sphere_drawing.h"
@@ -29,4 +30,4 @@ namespace Balle
         int __get_num_bones(SkeletalNode *root);
     };
 
-};
+}; // END_NAMESPACE BALLE

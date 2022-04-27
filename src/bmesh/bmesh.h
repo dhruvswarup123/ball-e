@@ -50,24 +50,24 @@ namespace Balle
 		/******************************
 		 * Structual Manipulation     *
 		 ******************************/
-		void select_next_skeletal_node(SkeletalNode*& selected);
-		void select_parent_skeletal_node(SkeletalNode*& selected);
-		void select_child_skeletal_node(SkeletalNode*& selected);
-		SkeletalNode* create_skeletal_node_after(SkeletalNode* parent);
+		void select_next_skeletal_node(SkeletalNode *&selected);
+		void select_parent_skeletal_node(SkeletalNode *&selected);
+		void select_child_skeletal_node(SkeletalNode *&selected);
+		SkeletalNode *create_skeletal_node_after(SkeletalNode *parent);
 
 		void interpolate_spheres();
 		bool delete_node(SkeletalNode *node);
-		unordered_set<SkeletalNode*> get_all_node();
+		unordered_set<SkeletalNode *> get_all_node();
 
 		/******************************
 		 * Rendering Functions        *
 		 ******************************/
-		//Rendering Class
+		// Rendering Class
 		void draw_skeleton(GLShader &shader);
 		void draw_polygon_faces(GLShader &shader);
 		void draw_mesh_faces(GLShader &shader);
-		void draw_polygon_wireframe(GLShader& shader);
-		void draw_mesh_wireframe(GLShader& shader);
+		void draw_polygon_wireframe(GLShader &shader);
+		void draw_mesh_wireframe(GLShader &shader);
 		/******************************
 		 * Debugging Function         *
 		 ******************************/
@@ -88,20 +88,18 @@ namespace Balle
 		void __update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limbmesh, bool isleaf);
 		void __add_limb_faces(SkeletalNode *root);
 		void __stitch_faces();
-		
 
 		/******************************
 		 * Catmull-Clark              *
 		 ******************************/
 		void __catmull_clark(HalfedgeMesh &mesh);
-		void __remesh(HalfedgeMesh& mesh);
+		void __remesh(HalfedgeMesh &mesh);
 
 		/******************************
 		 * Debugging                  *
 		 ******************************/
 		void __print_skeleton(SkeletalNode *root);
-		
-		
+
 		/******************************
 		 * Member Variables           *
 		 ******************************/
@@ -125,6 +123,6 @@ namespace Balle
 		vector<Vector3D> fringe_points;
 		vector<Vector3D> all_points;
 		unordered_set<Vector3D> unique_extra_points;
-	};
-};
+	}; // END_STRUCT BMESH
+};	   // END_NAMESPACE BALLE
 #endif

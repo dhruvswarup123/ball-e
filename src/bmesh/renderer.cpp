@@ -1,4 +1,5 @@
 #include "renderer.h"
+
 namespace Balle
 {
     void Renderer::draw_skeleton(GLShader &shader, SkeletalNode *root)
@@ -367,4 +368,4 @@ namespace Balle
 
         return size;
     }
-}
+}; // END_NAMESPACE BALLE

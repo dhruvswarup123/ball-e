@@ -45,4 +45,4 @@ namespace Balle
 		// Limb primitives that surrounds this skeletal node
 		Limb *limb = nullptr;
 	};
-};
+}; // END_NAMESPACE BALLE
