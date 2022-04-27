@@ -523,7 +523,7 @@ void BMesh::draw_mesh_wireframe(GLShader &shader)
 
 void BMesh::generate_bmesh()
 {
-	interpolate_spheres();
+	// interpolate_spheres();
 	__joint_iterate(root);
 	__stitch_faces();
 }
@@ -534,8 +534,12 @@ void BMesh::generate_bmesh()
 
 void BMesh::subdivision()
 {
+	if (mesh == nullptr)
+	{
+		std::cout << "ERROR: Subdividing a nullptr" << std::endl;
+		return;
+	}
 	__catmull_clark(*mesh);
-	std::cout << "after updating the mesh by cc subdivision " << std::endl;
 }
 
 Vector3D get_face_point(const FaceIter f)
