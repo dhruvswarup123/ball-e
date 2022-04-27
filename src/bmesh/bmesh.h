@@ -9,10 +9,12 @@
 #include "../mesh/halfEdgeMesh.h"
 #include "skeletalNode.h"
 #include "primitives.h"
+#include "../json.hpp"
 
 using namespace std;
 using namespace nanogui;
 using namespace CGL;
+using json = nlohmann::json;
 
 namespace Balle
 {
@@ -58,6 +60,9 @@ namespace Balle
 		bool delete_node(SkeletalNode *node);
 		vector<SkeletalNode*> get_all_node();
 
+		void save_to_file(const string& filename);
+		bool load_from_file(const string& filename);
+
 		/******************************
 		 * Rendering Functions        *
 		 ******************************/
@@ -67,6 +72,7 @@ namespace Balle
 		void draw_mesh_faces(GLShader &shader);
 		void draw_polygon_wireframe(GLShader& shader);
 		void draw_mesh_wireframe(GLShader& shader);
+
 		/******************************
 		 * Debugging Function         *
 		 ******************************/
@@ -78,6 +84,8 @@ namespace Balle
 		 ******************************/
 		void __interpspheres_helper(SkeletalNode *root, int divs);
 		void __delete_interpolation_helper(SkeletalNode *root);
+		void __skeleton_to_json(json& j);
+		SkeletalNode* __json_to_skeleton(const json& j);
 
 		/******************************
 		 * Sweeping and stitching     *

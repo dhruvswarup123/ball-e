@@ -8,10 +8,12 @@
 
 #include "camera.h"
 #include "cloth.h"
+#include <ctime>
 #include "collision/plane.h"
 #include "collision/sphere.h"
 #include "misc/camera_info.h"
 #include "misc/file_utils.h"
+
 // Needed to generate stb_image binaries. Should only define in exactly one source file importing stb_image.h.
 #define STB_IMAGE_IMPLEMENTATION
 #include "misc/stb_image.h"
@@ -667,6 +669,7 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 	}
 }
 
+
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 									  int mods)
 {
@@ -707,6 +710,23 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'S':
 			// Extrude the currently sel sphere
 			// scale_node();
+			if (ctrl_down) {
+				// Time source https://stackoverflow.com/a/16358264/13292618
+				time_t rawtime;
+				struct tm* timeinfo;
+				char buffer[80];
+
+				time(&rawtime);
+				timeinfo = localtime(&rawtime);
+
+				strftime(buffer, sizeof(buffer), "%d-%m-%Y_%H-%M-%S", timeinfo);
+				std::string str(buffer);
+
+				str = "spheres_" + str + ".balle";
+
+				cout << "Saving the config to " + str << endl;
+				bmesh->save_to_file(str);
+			}
 			break;
 		case 'N':
 		case 'n':
