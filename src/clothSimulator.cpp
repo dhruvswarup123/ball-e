@@ -700,6 +700,9 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'E':
 			// Extrude the currently sel sphere
 			extrude_node();
+			if (ctrl_down) {
+				export_bmesh();
+			}
 			break;
 		case 'g':
 		case 'G':
@@ -775,47 +778,50 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 				load_bmesh_from_file();
 			}
 			break;
+
 		}
 	}
 
 	return true;
 }
 
+void ClothSimulator::export_bmesh() {
+	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
+		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices))) {
+		cout << "ERROR: Export Failed - No mesh to export." << endl;
+		return;
+	}
+
+	std::string filename;
+
+	filename = nanogui::file_dialog({ {"fbx", "filmbox"} }, true);
+	if (filename.length() == 0) {
+		return;
+	}
+
+	size_t pos = filename.rfind('.', filename.length());
+	if (pos == -1) {
+		filename += ".fbx";
+	}
+
+	bmesh->export_to_file(filename);
+}
+
 void ClothSimulator::save_bmesh_to_file()
 {
 	std::string filename;
-	Balle::SaveType saveas;
 
-	if ((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
-		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)) 
-	{
-		filename = nanogui::file_dialog({ {"fbx", "filmbox"} }, true);
-		if (filename.length() == 0) {
-			return;
-		}
-
-		size_t pos = filename.rfind('.', filename.length());
-		if (pos == -1) {
-			filename += ".fbx";
-		}
-
-		saveas = Balle::SaveType::fbx;
+	filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+	if (filename.length() == 0) {
+		return;
 	}
-	else {
-		filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
-		if (filename.length() == 0) {
-			return;
-		}
 
-		size_t pos = filename.rfind('.', filename.length());
-		if (pos == -1) {
-			filename += ".balle";
-		}
-
-		saveas = Balle::SaveType::balle;
+	size_t pos = filename.rfind('.', filename.length());
+	if (pos == -1) {
+		filename += ".balle";
 	}
 	
-	bmesh->save_to_file(filename, saveas);
+	bmesh->save_to_file(filename);
 
 	// Time source https://stackoverflow.com/a/16358264/13292618
 	/*time_t rawtime;

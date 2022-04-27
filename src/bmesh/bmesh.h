@@ -64,7 +64,8 @@ namespace Balle
 		bool delete_node(SkeletalNode *node);
 		unordered_set<SkeletalNode *> get_all_node();
 
-		void save_to_file(const string& filename, SaveType saveas);
+		void export_to_file(const string& filename);
+		void save_to_file(const string& filename);
 		bool load_from_file(const string& filename);
 
 		/******************************

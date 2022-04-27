@@ -26,8 +26,8 @@ namespace Balle
 		// SkeletalNode *arml = new SkeletalNode(Vector3D(-1.5, 0.5, 0) / 3., 0.021, chest);
 		// SkeletalNode *armr = new SkeletalNode(Vector3D(1.5, 0.5, 0) / 3., 0.022, chest);
 		// SkeletalNode *head = new SkeletalNode(Vector3D(0, 1.6, 0) / 3., 0.03, chest);
-		SkeletalNode *footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
-		SkeletalNode *footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
+		SkeletalNode* footL = new SkeletalNode(Vector3D(-0.9, -1, 0) / 3., 0.011, root);
+		SkeletalNode* footR = new SkeletalNode(Vector3D(0.9, -1, 0) / 3., 0.012, root);
 
 		// root->children->push_back(chest);
 		root->children->push_back(footL);
@@ -67,28 +67,28 @@ namespace Balle
 	 * Render                     *
 	 ******************************/
 
-	void BMesh::draw_skeleton(GLShader &shader)
+	void BMesh::draw_skeleton(GLShader& shader)
 	{
 		Balle::Renderer renderer;
 		renderer.draw_skeleton(shader, root);
 	}
-	void BMesh::draw_polygon_faces(GLShader &shader)
+	void BMesh::draw_polygon_faces(GLShader& shader)
 	{
 		Balle::Renderer renderer;
 		renderer.draw_polygon_faces(shader, quadrangles, triangles, polygons, vertices);
 	}
 
-	void BMesh::draw_mesh_faces(GLShader &shader)
+	void BMesh::draw_mesh_faces(GLShader& shader)
 	{
 		Balle::Renderer renderer;
 		renderer.draw_mesh_faces(shader, mesh);
 	}
-	void BMesh::draw_polygon_wireframe(GLShader &shader)
+	void BMesh::draw_polygon_wireframe(GLShader& shader)
 	{
 		Balle::Renderer renderer;
 		renderer.draw_polygon_wireframe(shader, quadrangles, triangles, root, vertices);
 	}
-	void BMesh::draw_mesh_wireframe(GLShader &shader)
+	void BMesh::draw_mesh_wireframe(GLShader& shader)
 	{
 		Balle::Renderer renderer;
 		renderer.draw_mesh_wireframe(shader, mesh, root);
@@ -96,7 +96,7 @@ namespace Balle
 	/******************************
 	 * Structural Manipulation    *
 	 ******************************/
-	void BMesh::select_next_skeletal_node(SkeletalNode *&selected)
+	void BMesh::select_next_skeletal_node(SkeletalNode*& selected)
 	{
 		if (selected == nullptr)
 		{
@@ -124,7 +124,7 @@ namespace Balle
 		}
 	}
 
-	void BMesh::select_parent_skeletal_node(SkeletalNode *&selected)
+	void BMesh::select_parent_skeletal_node(SkeletalNode*& selected)
 	{
 		if (selected == nullptr)
 		{
@@ -144,7 +144,7 @@ namespace Balle
 		}
 	}
 
-	void BMesh::select_child_skeletal_node(SkeletalNode *&selected)
+	void BMesh::select_child_skeletal_node(SkeletalNode*& selected)
 	{
 		if (selected == nullptr)
 		{
@@ -162,15 +162,15 @@ namespace Balle
 		}
 	}
 
-	SkeletalNode *BMesh::create_skeletal_node_after(SkeletalNode *parent)
+	SkeletalNode* BMesh::create_skeletal_node_after(SkeletalNode* parent)
 	{
-		SkeletalNode *temp = new Balle::SkeletalNode(parent->pos, parent->radius, parent);
+		SkeletalNode* temp = new Balle::SkeletalNode(parent->pos, parent->radius, parent);
 		parent->children->push_back(temp);
 		all_nodes.emplace(temp);
 		return temp;
 	}
 
-	bool BMesh::delete_node(SkeletalNode *node)
+	bool BMesh::delete_node(SkeletalNode* node)
 	{
 		if (node == root)
 		{
@@ -178,8 +178,8 @@ namespace Balle
 			return false;
 		}
 
-		SkeletalNode *cur = node;
-		vector<SkeletalNode *> node_children(*node->children);
+		SkeletalNode* cur = node;
+		vector<SkeletalNode*> node_children(*node->children);
 		do
 		{
 			// First remove the node from the master list
@@ -188,9 +188,9 @@ namespace Balle
 				all_nodes.erase(cur);
 			}
 			// Second remove the node from the parent list
-			SkeletalNode *parent = cur->parent;
+			SkeletalNode* parent = cur->parent;
 			size_t idx = 0;
-			for (SkeletalNode *temp : *(parent->children))
+			for (SkeletalNode* temp : *(parent->children))
 			{
 				if (temp == cur)
 				{
@@ -199,7 +199,7 @@ namespace Balle
 				idx += 1;
 			}
 			parent->children->erase(parent->children->begin() + idx);
-			
+
 			// Delete cur
 			delete cur;
 			cur = parent;
@@ -218,7 +218,7 @@ namespace Balle
 		__interpspheres_helper(root, 1);
 	}
 
-	void BMesh::__delete_interpolation_helper(SkeletalNode *root)
+	void BMesh::__delete_interpolation_helper(SkeletalNode* root)
 	{
 		if (root == nullptr || root->interpolated)
 		{
@@ -227,14 +227,14 @@ namespace Balle
 			return;
 		}
 
-		vector<SkeletalNode *> *new_children = new vector<SkeletalNode *>();
+		vector<SkeletalNode*>* new_children = new vector<SkeletalNode*>();
 
-		for (SkeletalNode *child : *(root->children))
+		for (SkeletalNode* child : *(root->children))
 		{
-			SkeletalNode *cur = child;
+			SkeletalNode* cur = child;
 			while (cur != nullptr && cur->interpolated)
 			{
-				SkeletalNode *next = (*cur->children)[0];
+				SkeletalNode* next = (*cur->children)[0];
 				delete cur;
 				cur = next;
 			}
@@ -249,14 +249,18 @@ namespace Balle
 		root->children = new_children;
 	}
 
-	unordered_set<SkeletalNode *> BMesh::get_all_node()
+	unordered_set<SkeletalNode*> BMesh::get_all_node()
 	{
 		return all_nodes;
 	}
 
-void BMesh::save_to_file(const string& filename, SaveType saveas) {
-	
-	if (saveas == SaveType::balle) {
+	void BMesh::export_to_file(const string& filename) {
+		cout << "Exporting..." << endl;
+	}
+
+
+	void BMesh::save_to_file(const string& filename) {
+
 		// Load all info into json
 		json j;
 		__skeleton_to_json(j);
@@ -267,153 +271,148 @@ void BMesh::save_to_file(const string& filename, SaveType saveas) {
 		file << std::setw(4) << j << std::endl;
 		file.close();
 	}
-	else if (saveas == SaveType::fbx) {
-		cout << "fbx" << endl;
+
+	bool BMesh::load_from_file(const string& filename) {
+		ifstream file(filename);
+		if (!file.good())
+		{
+			return false;
+		}
+		json j;
+		file >> j;
+		file.close();
+
+		__json_to_skeleton(j);
+
+		return true;
 	}
 
-}
+	void BMesh::__skeleton_to_json(json& j) {
 
-bool BMesh::load_from_file(const string& filename) {
-	ifstream file(filename);
-	if (!file.good())
-	{
-		return false;
-	}
-	json j;
-	file >> j;
-	file.close();
+		/*
+		* {
+		*
+		*	"count": count,
+		*	"spheres" : {
+		*		index :
+		*			"index": index,
+		*			"parent": parent_idx,
+		*			"radius": radius,
+		*			"pos": [posx, posy, posz],
+		*			"children": [indices]
+		*		},
+		*	}
+		* }
+		 */
 
-	__json_to_skeleton(j);
+		 // REMOVE INTERPOLATED NODES 
+		__delete_interpolation_helper(root);
 
-	return true;
-}
+		j["count"] = all_nodes.size();
+		unordered_map<SkeletalNode*, int> spheres_to_index;
 
-void BMesh::__skeleton_to_json(json& j) {
+		int i = 0;
 
-	/*
-	* {
-	*
-	*	"count": count,
-	*	"spheres" : {
-	*		index :
-	*			"index": index,
-	*			"parent": parent_idx,
-	*			"radius": radius,
-	*			"pos": [posx, posy, posz],
-	*			"children": [indices]
-	*		},
-	*	}
-	* }
-	 */
+		for (auto s : all_nodes) {
+			spheres_to_index[s] = i;
 
-	// REMOVE INTERPOLATED NODES 
-	__delete_interpolation_helper(root);
+			j["spheres"][i]["index"] = i; // Just for debugging
+			j["spheres"][i]["radius"] = s->radius;
+			j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
 
-	j["count"] = all_nodes.size();
-	unordered_map<SkeletalNode *, int> spheres_to_index;
-
-	int i = 0;
-
-	for (auto s: all_nodes) {
-		spheres_to_index[s] = i;
-
-		j["spheres"][i]["index"] = i; // Just for debugging
-		j["spheres"][i]["radius"] = s->radius;
-		j["spheres"][i]["pos"] = vector<double>({ s->pos.x, s->pos.y, s->pos.z });
-
-		i++;
-	}
-
-	for (auto s : all_nodes) {
-		vector<int> children;
-		for (SkeletalNode* child : *s->children) {
-			children.push_back(spheres_to_index[child]);
+			i++;
 		}
 
-		j["spheres"][spheres_to_index[s]]["children"] = children;
-		if (s->parent == NULL) {
-			j["spheres"][spheres_to_index[s]]["parent"] = -1;
+		for (auto s : all_nodes) {
+			vector<int> children;
+			for (SkeletalNode* child : *s->children) {
+				children.push_back(spheres_to_index[child]);
+			}
+
+			j["spheres"][spheres_to_index[s]]["children"] = children;
+			if (s->parent == NULL) {
+				j["spheres"][spheres_to_index[s]]["parent"] = -1;
+			}
+			else {
+				j["spheres"][spheres_to_index[s]]["parent"] = spheres_to_index[s->parent];
+			}
 		}
-		else {
-			j["spheres"][spheres_to_index[s]]["parent"] = spheres_to_index[s->parent];
-		}
-	}
-}
-
-bool BMesh::__json_to_skeleton(const json& j) {
-
-	int count = -1;
-
-	if (j.find("count") != j.end()) {
-		count = j["count"];
-		cout << "count " << typeid(count).name() << " " << count << endl;
-	}
-	else {
-		return false;
 	}
 
-	if (j.find("spheres") == j.end()) {
-		return false;
-	}
+	bool BMesh::__json_to_skeleton(const json& j) {
 
-	// Delet all the spheres
-	__avada_kedavra();
-	all_nodes.clear();
+		int count = -1;
 
-
-	unordered_map<int, SkeletalNode*> index_to_spheres;
-
-	// For each sphere
-	for (auto s : j["spheres"]) {
-		Vector3D pos;
-		pos.x = s["pos"][0];
-		pos.y = s["pos"][1];
-		pos.z = s["pos"][2];
-
-		double radius = s["radius"];
-		int i = s["index"];
-
-		SkeletalNode* temp = new SkeletalNode(pos, radius, NULL);
-		all_nodes.insert(temp);
-		index_to_spheres[i] = temp;
-	}
-
-	for (auto s : j["spheres"]) {
-		int i = s["index"];
-		int i_parent = s["parent"];
-		SkeletalNode* temp = index_to_spheres[i];
-
-		if (i_parent == -1) {
-			temp->parent = NULL;
-			root = temp;
+		if (j.find("count") != j.end()) {
+			count = j["count"];
+			cout << "count " << typeid(count).name() << " " << count << endl;
 		}
 		else {
-			temp->parent = index_to_spheres[i_parent];
+			return false;
 		}
 
-		for (int i_child : s["children"]) {
-			temp->children->push_back(index_to_spheres[i_child]);
+		if (j.find("spheres") == j.end()) {
+			return false;
 		}
+
+		// Delet all the spheres
+		__avada_kedavra();
+		all_nodes.clear();
+
+
+		unordered_map<int, SkeletalNode*> index_to_spheres;
+
+		// For each sphere
+		for (auto s : j["spheres"]) {
+			Vector3D pos;
+			pos.x = s["pos"][0];
+			pos.y = s["pos"][1];
+			pos.z = s["pos"][2];
+
+			double radius = s["radius"];
+			int i = s["index"];
+
+			SkeletalNode* temp = new SkeletalNode(pos, radius, NULL);
+			all_nodes.insert(temp);
+			index_to_spheres[i] = temp;
+		}
+
+		for (auto s : j["spheres"]) {
+			int i = s["index"];
+			int i_parent = s["parent"];
+			SkeletalNode* temp = index_to_spheres[i];
+
+			if (i_parent == -1) {
+				temp->parent = NULL;
+				root = temp;
+			}
+			else {
+				temp->parent = index_to_spheres[i_parent];
+			}
+
+			for (int i_child : s["children"]) {
+				temp->children->push_back(index_to_spheres[i_child]);
+			}
+		}
+
+		return true;
 	}
 
-	return true;
-}
+	void BMesh::__avada_kedavra() {
+		/*vector<SkeletalNode*> temp;
 
-void BMesh::__avada_kedavra() {
-	/*vector<SkeletalNode*> temp;
+		for (SkeletalNode * i : all_nodes_vector) {
+			temp.push_back(i);
+		}
 
-	for (SkeletalNode * i : all_nodes_vector) {
-		temp.push_back(i);
+		for (int i = 0; i < temp.size(); i++) {
+			delete_node(temp[i]);
+		}*/
 	}
 
-	for (int i = 0; i < temp.size(); i++) {
-		delete_node(temp[i]);
-	}*/
-}
-
-/******************************
- * Sweeping and stitching     *
- ******************************/
+	/******************************
+	 * Sweeping and stitching     *
+	 ******************************/
 
 	void BMesh::generate_bmesh()
 	{
@@ -442,8 +441,8 @@ void BMesh::__avada_kedavra() {
 
 	Vector3D get_face_point(const FaceIter f)
 	{
-		Vector3D fp{Vector3D(0, 0, 0)};
-		int num_vertices{0};
+		Vector3D fp{ Vector3D(0, 0, 0) };
+		int num_vertices{ 0 };
 
 		HalfedgeCIter h_start = f->halfedge();
 		HalfedgeCIter h = f->halfedge();
@@ -460,7 +459,7 @@ void BMesh::__avada_kedavra() {
 
 	Vector3D get_edge_point(const EdgeIter e)
 	{
-		Vector3D ep{Vector3D(0, 0, 0)};
+		Vector3D ep{ Vector3D(0, 0, 0) };
 
 		HalfedgeCIter h0 = e->halfedge();
 		HalfedgeCIter h1 = h0->twin();
@@ -476,8 +475,8 @@ void BMesh::__avada_kedavra() {
 
 	Vector3D get_new_vertex(const VertexIter v)
 	{
-		Vector3D vp{Vector3D(0, 0, 0)};
-		int num_edges{0};
+		Vector3D vp{ Vector3D(0, 0, 0) };
+		int num_edges{ 0 };
 		HalfedgeCIter h_start = v->halfedge();
 		HalfedgeCIter h = v->halfedge();
 
@@ -495,7 +494,7 @@ void BMesh::__avada_kedavra() {
 		return vp;
 	}
 
-	void generate_new_quads(const FaceIter f, vector<Quadrangle> &quadangles)
+	void generate_new_quads(const FaceIter f, vector<Quadrangle>& quadangles)
 	{
 		Vector3D v0 = f->newPosition;
 		HalfedgeIter h_start = f->halfedge();
@@ -516,7 +515,7 @@ void BMesh::__avada_kedavra() {
 	}
 
 	void connect_new_mesh(vector<Quadrangle> quadrangles, vector<vector<size_t>> polygons,
-						  vector<Vector3D> vertices, HalfedgeMesh &mesh)
+		vector<Vector3D> vertices, HalfedgeMesh& mesh)
 	{
 		polygons.clear();
 		vertices.clear();
@@ -524,7 +523,7 @@ void BMesh::__avada_kedavra() {
 		unordered_map<Vector3D, size_t> ids;
 
 		// label quadrangle vertices
-		for (const Quadrangle &quadrangle : quadrangles)
+		for (const Quadrangle& quadrangle : quadrangles)
 		{
 			if (ids.count(quadrangle.a) == 0)
 			{
@@ -546,17 +545,17 @@ void BMesh::__avada_kedavra() {
 				ids[quadrangle.d] = ids.size();
 				vertices.push_back(quadrangle.d);
 			}
-			unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
+			unordered_set<size_t> distinct_ids = { ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d] };
 			if (distinct_ids.size() == 4)
 			{
-				polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
+				polygons.push_back({ ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d] });
 			}
 		}
 
 		mesh.build(polygons, vertices);
 	}
 
-	void BMesh::__catmull_clark(HalfedgeMesh &mesh)
+	void BMesh::__catmull_clark(HalfedgeMesh& mesh)
 	{
 		//  1. Add new face point
 		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
@@ -592,7 +591,7 @@ void BMesh::__avada_kedavra() {
 		std::cout << "call subdivision, finish connecting new mesh" << std::endl;
 	}
 
-	void BMesh::__remesh(HalfedgeMesh &mesh)
+	void BMesh::__remesh(HalfedgeMesh& mesh)
 	{
 		// Edge split operation
 		vector<EdgeIter> edges;
@@ -744,7 +743,7 @@ void BMesh::__avada_kedavra() {
 	 * PRIVATE                    *
 	 ******************************/
 
-	void edge_interpolate(const SkeletalNode &n1, const SkeletalNode &n2, float *rad, float *x)
+	void edge_interpolate(const SkeletalNode& n1, const SkeletalNode& n2, float* rad, float* x)
 	{
 		// Interpolate a sphere touching n1
 
@@ -756,7 +755,7 @@ void BMesh::__avada_kedavra() {
 		//	*pos = n1.pos + x * (n2.pos - n1.pos).unit();
 	}
 
-	void BMesh::__interpspheres_helper(SkeletalNode *root, int divs)
+	void BMesh::__interpspheres_helper(SkeletalNode* root, int divs)
 	{
 
 		if (root == nullptr)
@@ -765,8 +764,8 @@ void BMesh::__avada_kedavra() {
 		}
 
 		// Iterate through each child node
-		vector<SkeletalNode *> *original_children = new vector<SkeletalNode *>();
-		for (SkeletalNode *child : *(root->children))
+		vector<SkeletalNode*>* original_children = new vector<SkeletalNode*>();
+		for (SkeletalNode* child : *(root->children))
 		{
 			original_children->push_back(child);
 		}
@@ -775,7 +774,7 @@ void BMesh::__avada_kedavra() {
 		float x = 0;
 
 		// Get the smallest interpolation between joint, to parents and children
-		for (SkeletalNode *child : *(original_children))
+		for (SkeletalNode* child : *(original_children))
 		{
 			float temp_rad, temp_x;
 
@@ -800,13 +799,13 @@ void BMesh::__avada_kedavra() {
 			}
 
 			// Now interpolate to the parent
-			SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
+			SkeletalNode* interp_sphere = new SkeletalNode(root->pos + x * (root->parent->pos - root->pos).unit(), radius, root->parent);
 			interp_sphere->interpolated = true;
 
-			SkeletalNode *temp_parent = root->parent;
+			SkeletalNode* temp_parent = root->parent;
 
 			int i = 0;
-			for (SkeletalNode *temp : *(root->parent->children))
+			for (SkeletalNode* temp : *(root->parent->children))
 			{
 				if (temp == root)
 				{
@@ -822,11 +821,11 @@ void BMesh::__avada_kedavra() {
 			all_nodes.emplace(interp_sphere);
 		}
 
-		for (SkeletalNode *child : *(original_children))
+		for (SkeletalNode* child : *(original_children))
 		{
 			// Remove the child from the current parents list of children
 			int i = 0;
-			for (SkeletalNode *temp : *(root->children))
+			for (SkeletalNode* temp : *(root->children))
 			{
 				if (temp == child)
 				{
@@ -837,7 +836,7 @@ void BMesh::__avada_kedavra() {
 			}
 
 			// Between the parent and each child, create new spheres
-			SkeletalNode *prev = root;
+			SkeletalNode* prev = root;
 
 			// Distance or radius step size between the interpolated spheres
 			Vector3D pos_step = (child->pos - root->pos) / (divs + 1.);
@@ -852,7 +851,7 @@ void BMesh::__avada_kedavra() {
 
 				// Create the interp sphere
 				// SkeletalNode *interp_sphere = new SkeletalNode(new_position, new_radius, prev);
-				SkeletalNode *interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
+				SkeletalNode* interp_sphere = new SkeletalNode(root->pos + x * (child->pos - root->pos).unit(), radius, prev);
 				interp_sphere->interpolated = true;
 
 				// Add the interp sphere to the struct
@@ -872,7 +871,7 @@ void BMesh::__avada_kedavra() {
 		}
 	}
 
-	void BMesh::__update_limb(SkeletalNode *root, SkeletalNode *child, bool add_root, Limb *limb, bool isleaf)
+	void BMesh::__update_limb(SkeletalNode* root, SkeletalNode* child, bool add_root, Limb* limb, bool isleaf)
 	{
 		Vector3D root_center = root->pos;
 		double root_radius = root->radius;
@@ -892,7 +891,7 @@ void BMesh::__avada_kedavra() {
 		}
 
 		// y = Z x x;
-		Vector3D localy = cross({0, 0, 1}, localx).unit();
+		Vector3D localy = cross({ 0, 0, 1 }, localx).unit();
 		Vector3D localz = cross(localx, localy).unit();
 
 		if (add_root)
@@ -922,7 +921,7 @@ void BMesh::__avada_kedavra() {
 		}
 	}
 
-	void BMesh::__joint_iterate(SkeletalNode *root)
+	void BMesh::__joint_iterate(SkeletalNode* root)
 	{
 		if (root == nullptr)
 		{
@@ -934,12 +933,12 @@ void BMesh::__avada_kedavra() {
 		double root_radius = root->radius;
 
 		// Because this is a joint node, iterate through all children
-		for (SkeletalNode *child : *(root->children))
+		for (SkeletalNode* child : *(root->children))
 		{
 			// cout << "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv" << endl;
 			// cout << "Joint node: " << root->radius << endl;
 			// Create a new limb for this child
-			Limb *childlimb = new Limb(); // Add the sweeping stuff here
+			Limb* childlimb = new Limb(); // Add the sweeping stuff here
 			bool first = true;
 
 			if (child->children->size() == 0)
@@ -951,8 +950,8 @@ void BMesh::__avada_kedavra() {
 			}
 			else if (child->children->size() == 1)
 			{ // limb node
-				SkeletalNode *cur = child;
-				SkeletalNode *last;
+				SkeletalNode* cur = child;
+				SkeletalNode* last;
 				while (cur->children->size() == 1)
 				{
 					cur->limb = childlimb;
@@ -984,7 +983,7 @@ void BMesh::__avada_kedavra() {
 		__add_limb_faces(root);
 	}
 
-	void BMesh::__add_limb_faces(SkeletalNode *root)
+	void BMesh::__add_limb_faces(SkeletalNode* root)
 	{
 		if (root == nullptr)
 		{
@@ -997,11 +996,11 @@ void BMesh::__avada_kedavra() {
 
 		// Add child Limb quadrangles
 		// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-		for (SkeletalNode *child : *(root->children))
+		for (SkeletalNode* child : *(root->children))
 		{
 			if (child->limb)
 			{
-				for (const Quadrangle &quadrangle : child->limb->quadrangles)
+				for (const Quadrangle& quadrangle : child->limb->quadrangles)
 				{
 					quadrangles.push_back(quadrangle);
 				}
@@ -1013,7 +1012,7 @@ void BMesh::__avada_kedavra() {
 
 		if (root->parent && root->parent->limb)
 		{
-			for (const Vector3D &point : root->parent->limb->get_last_four_points())
+			for (const Vector3D& point : root->parent->limb->get_last_four_points())
 			{
 				fringe_points.push_back(point);
 				local_hull_points.push_back(point);
@@ -1021,11 +1020,11 @@ void BMesh::__avada_kedavra() {
 			}
 		}
 		// Also, the first 4 mesh vertices of child skeletal node are fringe vertices
-		for (SkeletalNode *child : *(root->children))
+		for (SkeletalNode* child : *(root->children))
 		{
 			if (child->limb)
 			{
-				for (const Vector3D &point : child->limb->get_first_four_points())
+				for (const Vector3D& point : child->limb->get_first_four_points())
 				{
 					fringe_points.push_back(point);
 					local_hull_points.push_back(point);
@@ -1051,7 +1050,7 @@ void BMesh::__avada_kedavra() {
 
 		// QuickHull algorithm
 		size_t n = local_hull_points.size();
-		qh_vertex_t *vertices = (qh_vertex_t *)malloc(sizeof(qh_vertex_t) * n);
+		qh_vertex_t* vertices = (qh_vertex_t*)malloc(sizeof(qh_vertex_t) * n);
 		for (size_t i = 0; i < n; i++)
 		{
 			vertices[i].x = local_hull_points[i].x;
@@ -1067,7 +1066,7 @@ void BMesh::__avada_kedavra() {
 			Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
 			Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
 			Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
-			triangles.push_back({a, b, c});
+			triangles.push_back({ a, b, c });
 
 			if ((a - root->pos).norm() < root->radius + 0.001)
 			{
@@ -1084,7 +1083,7 @@ void BMesh::__avada_kedavra() {
 		}
 		qh_free_mesh(mesh);
 
-		for (const Vector3D &unique_extra_point : unique_extra_points)
+		for (const Vector3D& unique_extra_point : unique_extra_points)
 		{
 			all_points.push_back(unique_extra_point);
 		}
@@ -1100,7 +1099,7 @@ void BMesh::__avada_kedavra() {
 		// (0, 1, 2, 3), (4, 5, 6, 7), 8 etc.
 
 		// This is just for checking fringe
-		for (const Vector3D &point : fringe_points)
+		for (const Vector3D& point : fringe_points)
 		{
 			if (fringe_ids.count(point) == 0)
 			{
@@ -1109,7 +1108,7 @@ void BMesh::__avada_kedavra() {
 		}
 
 		// label quadrangle vertices
-		for (const Quadrangle &quadrangle : quadrangles)
+		for (const Quadrangle& quadrangle : quadrangles)
 		{
 			if (ids.count(quadrangle.a) == 0)
 			{
@@ -1131,19 +1130,19 @@ void BMesh::__avada_kedavra() {
 				ids[quadrangle.d] = ids.size();
 				vertices.push_back(quadrangle.d);
 			}
-			unordered_set<size_t> distinct_ids = {ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]};
+			unordered_set<size_t> distinct_ids = { ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d] };
 			if (distinct_ids.size() == 4)
 			{
-				polygons.push_back({ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d]});
+				polygons.push_back({ ids[quadrangle.a], ids[quadrangle.b], ids[quadrangle.c], ids[quadrangle.d] });
 			}
 		}
 		// label triangle vertices
-		for (Triangle &triangle : triangles)
+		for (Triangle& triangle : triangles)
 		{
 			{
 				Vector3D closest;
 				float closest_dist = 100;
-				for (const Vector3D &vert : all_points)
+				for (const Vector3D& vert : all_points)
 				{
 					if ((vert - triangle.a).norm() < closest_dist)
 					{
@@ -1156,7 +1155,7 @@ void BMesh::__avada_kedavra() {
 			{
 				Vector3D closest;
 				float closest_dist = 100;
-				for (const Vector3D &vert : all_points)
+				for (const Vector3D& vert : all_points)
 				{
 					if ((vert - triangle.b).norm() < closest_dist)
 					{
@@ -1169,7 +1168,7 @@ void BMesh::__avada_kedavra() {
 			{
 				Vector3D closest;
 				float closest_dist = 100;
-				for (const Vector3D &vert : all_points)
+				for (const Vector3D& vert : all_points)
 				{
 					if ((vert - triangle.c).norm() < closest_dist)
 					{
@@ -1209,7 +1208,7 @@ void BMesh::__avada_kedavra() {
 				}
 
 				size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-				polygons.push_back({ida, idb, idc});
+				polygons.push_back({ ida, idb, idc });
 			}
 			else
 			{
@@ -1221,7 +1220,7 @@ void BMesh::__avada_kedavra() {
 				size_t fringe_maxid = max(max(fringe_ida, fringe_idb), fringe_idc);
 				size_t fringe_minid = min(min(fringe_ida, fringe_idb), fringe_idc);
 
-				unordered_set<size_t> distinct_ids = {fringe_ida, fringe_idb, fringe_idc};
+				unordered_set<size_t> distinct_ids = { fringe_ida, fringe_idb, fringe_idc };
 
 				if (distinct_ids.size() == 3)
 				{
@@ -1251,7 +1250,7 @@ void BMesh::__avada_kedavra() {
 						}
 
 						size_t ida = ids[triangle.a], idb = ids[triangle.b], idc = ids[triangle.c];
-						polygons.push_back({ida, idb, idc});
+						polygons.push_back({ ida, idb, idc });
 					}
 				}
 			}
@@ -1286,12 +1285,12 @@ void BMesh::__avada_kedavra() {
 		__print_skeleton(root);
 	}
 
-	void BMesh::__print_skeleton(SkeletalNode *root)
+	void BMesh::__print_skeleton(SkeletalNode* root)
 	{
 		if (!root)
 			return;
 		cout << "Current node radius " << root->radius << endl;
-		for (SkeletalNode *child : *(root->children))
+		for (SkeletalNode* child : *(root->children))
 		{
 			__print_skeleton(child);
 		}
