@@ -5,8 +5,6 @@
 #include <memory>
 
 #include "camera.h"
-#include "cloth.h"
-#include "collision/collisionObject.h"
 #include "bmesh/bmesh.h"
 
 using namespace nanogui;
@@ -33,11 +31,6 @@ public:
   ~ClothSimulator();
 
   void init();
-
-  void loadCloth(Cloth *cloth);
-  void loadClothParameters(ClothParameters *cp);
-  void loadCollisionObjects(vector<CollisionObject *> *objects);
-  virtual bool isAlive();
   virtual void drawContents();
 
   // Screen events
@@ -52,11 +45,8 @@ public:
 private:
   virtual void initGUI(Screen *screen);
   void drawWireframe(GLShader &shader);
-  void drawNormals(GLShader &shader);
-  void drawPhong(GLShader &shader);
 
   void load_shaders();
-  void load_textures();
 
   // File management
 
@@ -77,10 +67,6 @@ private:
   CGL::Vector3D gravity = CGL::Vector3D(0, -9.8, 0);
   nanogui::Color color = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-  Cloth *cloth;
-  ClothParameters *cp;
-  vector<CollisionObject *> *collision_objects;
-
   Balle::BMesh *bmesh;
   Label *shader_method_label;
 
@@ -91,17 +77,6 @@ private:
   vector<UserShader> shaders;
   vector<std::string> shaders_combobox_names;
 
-  // OpenGL textures
-
-  Vector3D m_gl_texture_1_size;
-  Vector3D m_gl_texture_2_size;
-  Vector3D m_gl_texture_3_size;
-  Vector3D m_gl_texture_4_size;
-  GLuint m_gl_texture_1;
-  GLuint m_gl_texture_2;
-  GLuint m_gl_texture_3;
-  GLuint m_gl_texture_4;
-  GLuint m_gl_cubemap_tex;
 
   // OpenGL customizable inputs
 
@@ -129,7 +104,6 @@ private:
   void mouseRightDragged(double x, double y);
   void mouseMoved(double x, double y);
   void sceneIntersect(double x, double y);
-  bool sphereSelectionTest(double x, double y, Vector3D center, double radius, float &w);
 
   // Mouse flags
 
