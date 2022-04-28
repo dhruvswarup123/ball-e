@@ -193,6 +193,8 @@ void ClothSimulator::drawContents()
 	shader.setUniform("u_view_projection", viewProjection);
 	Vector3D cam_pos;
 
+	
+
 	// Update shader method label
 	switch (bmesh->shader_method)
 	{
@@ -230,8 +232,74 @@ void ClothSimulator::drawContents()
 
 void ClothSimulator::drawWireframe(GLShader &shader)
 {
+	/*int grid_num_blocks = 10;
+	float grid_width = 5;
+	float grid_block_width = grid_width / grid_num_blocks;
+
+	int total_points = (grid_num_blocks+1) * 2 * 2; 
+	MatrixXf positions(3, total_points);
+	MatrixXf normals(3, total_points);
+
+	for (int i = 0; i < grid_num_blocks + 1; i++)
+	{
+		positions.col(i * 2) << -grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
+		positions.col(i * 2 + 1) << +grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
+
+		normals.col(i * 2) << 0., 0., 0.;
+		normals.col(i * 2 + 1) << 0., 0., 0.;
+	}
+
+	for (int i = 0; i < grid_num_blocks + 1; i++)
+	{	
+		int ind = i + grid_num_blocks + 1;
+		positions.col(ind * 2) << -grid_width / 2. + i * grid_block_width, 0., -grid_width / 2.;
+		positions.col(ind * 2 + 1) << -grid_width / 2. + i * grid_block_width, 0., +grid_width / 2.;
+
+		normals.col(ind * 2) << 0., 0., 0.;
+		normals.col(ind * 2 + 1) << 0., 0., 0.;
+	}
+
+	shader.setUniform("u_balls", true, false);
+	shader.uploadAttrib("in_position", positions, false);
+	shader.uploadAttrib("in_normal", normals, false);
+
+	shader.drawArray(GL_LINES, 0, total_points+2);*/
+
 	if (bmesh->shader_method == Balle::Method::not_ready)
 	{
+		int grid_num_blocks = 10;
+		float grid_width = 5;
+		float grid_block_width = grid_width / grid_num_blocks;
+
+		int total_points = (grid_num_blocks + 1) * 2 * 2;
+		MatrixXf positions(3, total_points);
+		MatrixXf normals(3, total_points);
+
+		for (int i = 0; i < grid_num_blocks + 1; i++)
+		{
+			positions.col(i * 2) << -grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
+			positions.col(i * 2 + 1) << +grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
+
+			normals.col(i * 2) << 0., 0., 0.;
+			normals.col(i * 2 + 1) << 0., 0., 0.;
+		}
+
+		for (int i = 0; i < grid_num_blocks + 1; i++)
+		{
+			int ind = i + grid_num_blocks + 1;
+			positions.col(ind * 2) << -grid_width / 2. + i * grid_block_width, 0., -grid_width / 2.;
+			positions.col(ind * 2 + 1) << -grid_width / 2. + i * grid_block_width, 0., +grid_width / 2.;
+
+			normals.col(ind * 2) << 0., 0., 0.;
+			normals.col(ind * 2 + 1) << 0., 0., 0.;
+		}
+
+		shader.setUniform("u_balls", true, false);
+		shader.uploadAttrib("in_position", positions, false);
+		shader.uploadAttrib("in_normal", normals, false);
+
+		shader.drawArray(GL_LINES, 0, total_points + 2);
+
 		bmesh->draw_skeleton(shader);
 	}
 	else if (bmesh->shader_method == Balle::Method::polygons_no_indices)
@@ -250,6 +318,10 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	{ // METHOD 4: Draw the Wireframe not using indices (WORKING)
 		bmesh->draw_mesh_wireframe(shader);
 	}
+
+
+	
+	
 }
 
 
@@ -821,6 +893,27 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 
 void ClothSimulator::initGUI(Screen *screen)
 {
+	/*
+	* Things required in the GUI:
+	* 1. SkeletalNode controls. 
+	*	For grab, scale, extrude: 
+	*	a. Have a button that enables each of these, and that automatically resets when action is completed
+	*	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) )
+	*	c. Maybe hover to show keybind. 
+	*	d. Reset mesh to many default shapes? Have a list of prebuilt shapes
+	* 
+	*	For Interpolation:
+	*	a. Button to maybe refresh?
+	* 
+	* 2. Mesh Controls: 
+	*	a. Slider for number of subdivs, apply subdiv automatically
+	*	b. Switching between wireframe, and normal mode
+	*	c. Text output/ Small output window showing terminal output/ warnings/errors/ 
+	* 
+	* 3. Misc:
+	*	a. Button to reset camera views
+	*/
+
 	Window *window;
 
 	window = new Window(screen, "                Shader Method                ");
