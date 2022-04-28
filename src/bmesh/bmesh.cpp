@@ -256,6 +256,32 @@ namespace Balle
 
 	void BMesh::export_to_file(const string& filename) {
 		cout << "Exporting..." << endl;
+		ofstream file;
+		file.open(filename);
+
+		unordered_map<Vector3D, int> vert_to_ind;
+		int i = 1;
+		for (VertexIter v = mesh->verticesBegin(); v != mesh->verticesEnd(); v++) {
+			file << "v" << " " << v->position.x << " " << v->position.y << " " << v->position.z << endl;
+			vert_to_ind[v->position] = i++;
+		}
+
+		file << "g all_faces" << endl;
+
+		for (FaceIter f = mesh->facesBegin(); f != mesh->facesEnd(); f++) {
+			file << "f";
+
+			HalfedgeIter h = f->halfedge();
+			do {
+				file << " " << vert_to_ind[h->vertex()->position];
+				h = h->next();
+			}
+			while (h != f->halfedge());
+
+			file << endl;
+		}
+
+		file.close();
 	}
 
 
@@ -757,7 +783,6 @@ namespace Balle
 
 	void BMesh::__interpspheres_helper(SkeletalNode* root, int divs)
 	{
-
 		if (root == nullptr)
 		{
 			return;

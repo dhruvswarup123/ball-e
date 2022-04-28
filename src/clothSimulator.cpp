@@ -794,14 +794,14 @@ void ClothSimulator::export_bmesh() {
 
 	std::string filename;
 
-	filename = nanogui::file_dialog({ {"fbx", "filmbox"} }, true);
+	filename = nanogui::file_dialog({ {"obj", "obj"} }, true);
 	if (filename.length() == 0) {
 		return;
 	}
 
 	size_t pos = filename.rfind('.', filename.length());
 	if (pos == -1) {
-		filename += ".fbx";
+		filename += ".obj";
 	}
 
 	bmesh->export_to_file(filename);
