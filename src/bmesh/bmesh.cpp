@@ -275,8 +275,7 @@ namespace Balle
 			do {
 				file << " " << vert_to_ind[h->vertex()->position];
 				h = h->next();
-			}
-			while (h != f->halfedge());
+			} while (h != f->halfedge());
 
 			file << endl;
 		}
@@ -908,7 +907,6 @@ namespace Balle
 		if ((root->children->size() == 1) && (root->parent != nullptr))
 		{
 			localx = ((root_center - root->parent->pos) + (child_center - root_center)).unit();
-		//	localx = (child_center - root_center).unit();
 		}
 		else
 		{
