@@ -217,14 +217,6 @@ int main(int argc, char **argv)
     std::cout << "Loading files starting from: " << project_root << std::endl;
   }
 
-  if (!file_specified)
-  { // No arguments, default initialization
-    std::stringstream def_fname;
-    def_fname << project_root;
-    def_fname << "/scene/pinned2.json";
-    file_to_load_from = def_fname.str();
-  }
-
   glfwSetErrorCallback(error_callback);
 
   createGLContexts();
