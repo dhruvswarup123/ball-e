@@ -5,7 +5,6 @@
 #include <memory>
 
 #include "camera.h"
-#include "collision/collisionObject.h"
 #include "bmesh/bmesh.h"
 
 using namespace nanogui;
@@ -68,8 +67,6 @@ private:
   CGL::Vector3D gravity = CGL::Vector3D(0, -9.8, 0);
   nanogui::Color color = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
-  vector<CollisionObject *> *collision_objects;
-
   Balle::BMesh *bmesh;
   Label *shader_method_label;
 
@@ -80,17 +77,6 @@ private:
   vector<UserShader> shaders;
   vector<std::string> shaders_combobox_names;
 
-  // OpenGL textures
-
-  Vector3D m_gl_texture_1_size;
-  Vector3D m_gl_texture_2_size;
-  Vector3D m_gl_texture_3_size;
-  Vector3D m_gl_texture_4_size;
-  GLuint m_gl_texture_1;
-  GLuint m_gl_texture_2;
-  GLuint m_gl_texture_3;
-  GLuint m_gl_texture_4;
-  GLuint m_gl_cubemap_tex;
 
   // OpenGL customizable inputs
 

@@ -8,8 +8,6 @@
 
 #include "camera.h"
 #include <ctime>
-#include "collision/plane.h"
-#include "collision/sphere.h"
 #include "misc/camera_info.h"
 #include "misc/file_utils.h"
 

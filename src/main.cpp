@@ -13,8 +13,6 @@
 #include <stdlib.h> // atoi for getopt inputs
 
 #include "CGL/CGL.h"
-#include "collision/plane.h"
-#include "collision/sphere.h"
 #include "clothSimulator.h"
 #include "json.hpp"
 #include "misc/file_utils.h"
@@ -201,8 +199,6 @@ int main(int argc, char **argv)
   std::string project_root;
   bool found_project_root = find_project_root(search_paths, project_root);
 
-  vector<CollisionObject *> objects;
-
   int c;
 
   int sphere_num_lat = 40;
@@ -210,54 +206,6 @@ int main(int argc, char **argv)
 
   std::string file_to_load_from;
   bool file_specified = false;
-
-  while ((c = getopt(argc, argv, "f:r:a:o:")) != -1)
-  {
-    switch (c)
-    {
-    case 'f':
-    {
-      file_to_load_from = optarg;
-      file_specified = true;
-      break;
-    }
-    case 'r':
-    {
-      project_root = optarg;
-      if (!is_valid_project_root(project_root))
-      {
-        std::cout << "Warn: Could not find required file \"shaders/Default.vert\" in specified project root: " << project_root << std::endl;
-      }
-      found_project_root = true;
-      break;
-    }
-    case 'a':
-    {
-      int arg_int = atoi(optarg);
-      if (arg_int < 1)
-      {
-        arg_int = 1;
-      }
-      sphere_num_lat = arg_int;
-      break;
-    }
-    case 'o':
-    {
-      int arg_int = atoi(optarg);
-      if (arg_int < 1)
-      {
-        arg_int = 1;
-      }
-      sphere_num_lon = arg_int;
-      break;
-    }
-    default:
-    {
-      usageError(argv[0]);
-      break;
-    }
-    }
-  }
 
   if (!found_project_root)
   {
