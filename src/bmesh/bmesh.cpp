@@ -457,10 +457,9 @@ namespace Balle
 			return false;
 		}
 
-		// Delet all the spheres
+		// Delete all the spheres
 		__avada_kedavra();
-		all_nodes.clear();
-		return true;
+		//all_nodes.clear();
 
 		unordered_map<int, SkeletalNode *> index_to_spheres;
 
