@@ -951,6 +951,61 @@ namespace Balle
 			// This should not be possible cause im calling this func only on joint nodes
 			throw runtime_error("ERROR: joint node is null");
 		}
+		if ((root->parent == nullptr) && (root->children->size() == 0)) { // Main  root only: just make a sphere
+			// Add something related to current joint node
+		// 6 uniform nodes across the joint node sphere
+
+			vector<Vector3D> local_hull_points;
+
+			for (int phi_deg = 0; phi_deg < 180; phi_deg += 90)
+			{
+				for (int theta_deg = 0; theta_deg < 360; theta_deg += 90)
+				{
+					Vector3D extra_point = root->pos;
+					float rad = root->radius * 1.5;
+					double phi = phi_deg * PI / 180, theta = theta_deg * PI / 180;
+					double x = rad * cos(phi) * sin(theta);
+					double y = rad * sin(phi) * sin(theta);
+					double z = rad * cos(theta);
+					extra_point = extra_point + Vector3D(x, y, z);
+					local_hull_points.push_back(extra_point);
+				}
+			}
+
+			// QuickHull algorithm
+			size_t n = local_hull_points.size();
+			qh_vertex_t* vertices = (qh_vertex_t*)malloc(sizeof(qh_vertex_t) * n);
+			for (size_t i = 0; i < n; i++)
+			{
+				vertices[i].x = local_hull_points[i].x;
+				vertices[i].y = local_hull_points[i].y;
+				vertices[i].z = local_hull_points[i].z;
+			}
+
+			// Build a convex hull using quickhull algorithm and add the hull triangles
+			qh_mesh_t mesh = qh_quickhull3d(vertices, n);
+			unordered_set<Vector3D> unique_extra_points;
+			for (size_t i = 0; i < mesh.nindices; i += 3)
+			{
+				Vector3D a(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z);
+				Vector3D b(mesh.vertices[i + 1].x, mesh.vertices[i + 1].y, mesh.vertices[i + 1].z);
+				Vector3D c(mesh.vertices[i + 2].x, mesh.vertices[i + 2].y, mesh.vertices[i + 2].z);
+				triangles.push_back({ a, b, c });
+
+				unique_extra_points.insert(a);
+				unique_extra_points.insert(b);
+				unique_extra_points.insert(c);
+			}
+			qh_free_mesh(mesh);
+
+			for (const Vector3D& unique_extra_point : unique_extra_points)
+			{
+				all_points.push_back(unique_extra_point);
+			}
+
+			return;
+		}
+
 		// cout << "current root address = " << root << endl;
 		Vector3D root_center = root->pos;
 		double root_radius = root->radius;
