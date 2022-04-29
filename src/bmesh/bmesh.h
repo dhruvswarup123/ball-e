@@ -92,6 +92,7 @@ namespace Balle
 		void __skeleton_to_json(json& j);
 		bool __json_to_skeleton(const json& j);
 		void __avada_kedavra();
+		void __reroot(SkeletalNode *target, SkeletalNode* parent);
 
 		/******************************
 		 * Sweeping and stitching     *

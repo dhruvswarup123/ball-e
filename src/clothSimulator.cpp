@@ -5,6 +5,7 @@
 #include <nanogui/nanogui.h>
 
 #include "clothSimulator.h"
+#include "logger.h"
 
 #include "camera.h"
 #include <ctime>
@@ -109,7 +110,6 @@ ClothSimulator::~ClothSimulator()
 	{
 		shader.nanogui_shader->free();
 	}
-
 }
 
 /**
@@ -193,8 +193,6 @@ void ClothSimulator::drawContents()
 	shader.setUniform("u_view_projection", viewProjection);
 	Vector3D cam_pos;
 
-	
-
 	// Update shader method label
 	switch (bmesh->shader_method)
 	{
@@ -218,6 +216,7 @@ void ClothSimulator::drawContents()
 	switch (active_shader.type_hint)
 	{
 	case WIREFRAME:
+	default:
 		color[0] = 0.;
 		cam_pos = camera.position();
 		shader.setUniform("u_cam_pos", Vector3f(cam_pos.x, cam_pos.y, cam_pos.z), false);
@@ -236,7 +235,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	float grid_width = 5;
 	float grid_block_width = grid_width / grid_num_blocks;
 
-	int total_points = (grid_num_blocks+1) * 2 * 2; 
+	int total_points = (grid_num_blocks+1) * 2 * 2;
 	MatrixXf positions(3, total_points);
 	MatrixXf normals(3, total_points);
 
@@ -250,7 +249,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	}
 
 	for (int i = 0; i < grid_num_blocks + 1; i++)
-	{	
+	{
 		int ind = i + grid_num_blocks + 1;
 		positions.col(ind * 2) << -grid_width / 2. + i * grid_block_width, 0., -grid_width / 2.;
 		positions.col(ind * 2 + 1) << -grid_width / 2. + i * grid_block_width, 0., +grid_width / 2.;
@@ -318,12 +317,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	{ // METHOD 4: Draw the Wireframe not using indices (WORKING)
 		bmesh->draw_mesh_wireframe(shader);
 	}
-
-
-	
-	
 }
-
 
 // ----------------------------------------------------------------------------
 // CAMERA CALCULATIONS
@@ -515,7 +509,6 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 	}
 }
 
-
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 									  int mods)
 {
@@ -545,9 +538,13 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'e':
 		case 'E':
 			// Extrude the currently sel sphere
-			extrude_node();
-			if (ctrl_down) {
+			if (ctrl_down)
+			{
 				export_bmesh();
+			}
+			else
+			{
+				extrude_node();
 			}
 			break;
 		case 'g':
@@ -559,7 +556,8 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 		case 'S':
 			// Extrude the currently sel sphere
 			// scale_node();
-			if (ctrl_down) {
+			if (ctrl_down)
+			{
 				save_bmesh_to_file();
 			}
 			break;
@@ -620,33 +618,37 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 			break;
 		case 'L':
 		case 'l':
-			if (ctrl_down) {
+			if (ctrl_down)
+			{
 				load_bmesh_from_file();
 			}
 			break;
-
 		}
 	}
 
 	return true;
 }
 
-void ClothSimulator::export_bmesh() {
+void ClothSimulator::export_bmesh()
+{
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
-		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices))) {
+		  (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
+	{
 		cout << "ERROR: Export Failed - No mesh to export." << endl;
 		return;
 	}
 
 	std::string filename;
 
-	filename = nanogui::file_dialog({ {"obj", "obj"} }, true);
-	if (filename.length() == 0) {
+	filename = nanogui::file_dialog({{"obj", "obj"}}, true);
+	if (filename.length() == 0)
+	{
 		return;
 	}
 
 	size_t pos = filename.rfind('.', filename.length());
-	if (pos == -1) {
+	if (pos == -1)
+	{
 		filename += ".obj";
 	}
 
@@ -657,16 +659,18 @@ void ClothSimulator::save_bmesh_to_file()
 {
 	std::string filename;
 
-	filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
-	if (filename.length() == 0) {
+	filename = nanogui::file_dialog({{"balle", "balle"}}, true);
+	if (filename.length() == 0)
+	{
 		return;
 	}
 
 	size_t pos = filename.rfind('.', filename.length());
-	if (pos == -1) {
+	if (pos == -1)
+	{
 		filename += ".balle";
 	}
-	
+
 	bmesh->save_to_file(filename);
 
 	// Time source https://stackoverflow.com/a/16358264/13292618
@@ -685,8 +689,8 @@ void ClothSimulator::save_bmesh_to_file()
 }
 
 void ClothSimulator::load_bmesh_from_file()
-{	
-	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
+{
+	std::string filename = nanogui::file_dialog({{"balle", "balle"}}, false);
 	bmesh->load_from_file(filename);
 }
 
@@ -753,7 +757,7 @@ void ClothSimulator::delete_node()
 	{
 
 		// delete it  and set selected to nullptr
-		cout << "Deleting" << endl;
+		Logger::info("Deleting");
 		if (bmesh->delete_node(selected))
 		{
 			selected = nullptr;
@@ -763,7 +767,7 @@ void ClothSimulator::delete_node()
 
 void ClothSimulator::extrude_node()
 {
-	if (selected == nullptr || selected->interpolated)
+	if ((selected == nullptr && bmesh->get_all_node().size() > 0) || (selected != nullptr && selected->interpolated))
 	{
 		return;
 	}
@@ -771,14 +775,17 @@ void ClothSimulator::extrude_node()
 	if (gui_state == GUI_STATES::IDLE)
 	{
 		Balle::SkeletalNode *temp = bmesh->create_skeletal_node_after(selected);
-		cout << "Created a new node" << endl;
-		Vector3D offset(0.05, 0.05, 0.05);
-		if (temp->parent->parent) {
-			offset = (temp->parent->pos - temp->parent->parent->pos).unit() * 0.08;
+		if (selected != nullptr)
+		{
+			Vector3D offset(0.05, 0.05, 0.05);
+			if (temp->parent->parent)
+			{
+				offset = (temp->parent->pos - temp->parent->parent->pos).unit() * 0.08;
+			}
+			temp->pos = selected->pos + offset;
+			selected->selected = false;
 		}
-		temp->pos = selected->pos + offset;
-		cout << temp->pos << endl;
-		selected->selected = false;
+		Logger::info("Created a new node");
 		selected = temp;
 		selected->selected = true;
 	}
@@ -870,7 +877,6 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	}
 }
 
-
 bool ClothSimulator::dropCallbackEvent(int count, const char **filenames)
 {
 	return true;
@@ -894,25 +900,25 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 void ClothSimulator::initGUI(Screen *screen)
 {
 	/*
-	* Things required in the GUI:
-	* 1. SkeletalNode controls. 
-	*	For grab, scale, extrude: 
-	*	a. Have a button that enables each of these, and that automatically resets when action is completed
-	*	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) )
-	*	c. Maybe hover to show keybind. 
-	*	d. Reset mesh to many default shapes? Have a list of prebuilt shapes
-	* 
-	*	For Interpolation:
-	*	a. Button to maybe refresh?
-	* 
-	* 2. Mesh Controls: 
-	*	a. Slider for number of subdivs, apply subdiv automatically
-	*	b. Switching between wireframe, and normal mode
-	*	c. Text output/ Small output window showing terminal output/ warnings/errors/ 
-	* 
-	* 3. Misc:
-	*	a. Button to reset camera views
-	*/
+	 * Things required in the GUI:
+	 * 1. SkeletalNode controls.
+	 *	For grab, scale, extrude:
+	 *	a. Have a button that enables each of these, and that automatically resets when action is completed
+	 *	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) )
+	 *	c. Maybe hover to show keybind.
+	 *	d. Reset mesh to many default shapes? Have a list of prebuilt shapes
+	 *
+	 *	For Interpolation:
+	 *	a. Button to maybe refresh?
+	 *
+	 * 2. Mesh Controls:
+	 *	a. Slider for number of subdivs, apply subdiv automatically
+	 *	b. Switching between wireframe, and normal mode
+	 *	c. Text output/ Small output window showing terminal output/ warnings/errors/
+	 *
+	 * 3. Misc:
+	 *	a. Button to reset camera views
+	 */
 
 	Window *window;
 
