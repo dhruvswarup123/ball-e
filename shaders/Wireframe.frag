@@ -13,6 +13,7 @@ uniform vec3 u_light_intensity;
 // We also get the uniform texture we want to use.
 uniform sampler2D u_texture_1;
 uniform bool u_balls;
+uniform bool u_solid;
 
 // These are the inputs which are the outputs of the vertex shader.
 in vec4 v_position;
@@ -27,28 +28,36 @@ out vec4 out_color;
 
 void main() {
 
-  if (u_balls == true){
-	  vec4 light_vector = normalize(vec4(u_light_pos, v_position.a) - v_position);
+	if (u_solid == true){
+		out_color = u_color;
+		out_color.a = 1;
+	}
+	else {
+		if (u_balls == true){
+		  vec4 light_vector = normalize(vec4(u_light_pos, v_position.a) - v_position);
 
-	  float r2 = pow(distance(vec4(u_light_pos, 0), v_position), 2);
+		  float r2 = pow(distance(vec4(u_light_pos, 0), v_position), 2);
 
-	  float max_temp = max(0, dot(normalize(v_normal), light_vector));
+		  float max_temp = max(0, dot(normalize(v_normal), light_vector));
 
-	  out_color = u_color * (vec4(u_light_intensity, 0) / r2) * max_temp;
+		  out_color = u_color * (vec4(u_light_intensity, 0) / r2) * max_temp;
    
-	  // (Placeholder code. You will want to replace it.)
-	  out_color.a = 1;
-  }
-  else {
-	  if (gl_FrontFacing == false){
-		out_color = (vec4(1, 1, 1, 0) - v_normal) / 2 * 0.3;
-		out_color.a = 1;
+		  // (Placeholder code. You will want to replace it.)
+		  out_color.a = 1;
 	  }
-	  else{
-		out_color = (vec4(1, 1, 1, 0) + v_normal) / 2;
-		out_color.a = 1;
+	  else {
+		  if (gl_FrontFacing == false){
+			out_color = (vec4(1, 1, 1, 0) - v_normal) / 2 * 0.3;
+			out_color.a = 1;
+		  }
+		  else{
+			out_color = (vec4(1, 1, 1, 0) + v_normal) / 2;
+			out_color.a = 1;
+		  }
 	  }
-  }
+	}
+
+  
 
   
   

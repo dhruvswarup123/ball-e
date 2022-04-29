@@ -45,7 +45,7 @@ public:
 private:
   virtual void initGUI(Screen *screen);
   void drawWireframe(GLShader &shader);
-
+  void drawGrid(GLShader& shader);
   void load_shaders();
 
   // File management

@@ -31,7 +31,7 @@ void ClothSimulator::load_shaders()
 
 	std::string std_vert_shader = m_project_root + "/shaders/Default.vert";
 
-	for (const std::string &shader_fname : shader_folder_contents)
+	for (const std::string& shader_fname : shader_folder_contents)
 	{
 		std::string file_extension;
 		std::string shader_name;
@@ -56,7 +56,7 @@ void ClothSimulator::load_shaders()
 
 		std::shared_ptr<GLShader> nanogui_shader = make_shared<GLShader>();
 		nanogui_shader->initFromFiles(shader_name, vert_shader,
-									  m_project_root + "/shaders/" + shader_fname);
+			m_project_root + "/shaders/" + shader_fname);
 
 		// Special filenames are treated a bit differently
 		ShaderTypeHint hint;
@@ -93,7 +93,7 @@ void ClothSimulator::load_shaders()
 	}
 }
 
-ClothSimulator::ClothSimulator(std::string project_root, Screen *screen)
+ClothSimulator::ClothSimulator(std::string project_root, Screen* screen)
 	: m_project_root(project_root)
 {
 	this->screen = screen;
@@ -137,7 +137,7 @@ void ClothSimulator::init()
 	Vector3D avg_pm_position(0, 0, 0);
 
 	CGL::Vector3D target(avg_pm_position.x, avg_pm_position.y / 2,
-						 avg_pm_position.z);
+		avg_pm_position.z);
 	CGL::Vector3D c_dir(0., 0., 0.);
 	canonical_view_distance = 0.9;
 	scroll_rate = canonical_view_distance / 10;
@@ -149,16 +149,16 @@ void ClothSimulator::init()
 	// canonicalCamera is a copy used for view resets
 
 	camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
-				 min_view_distance, max_view_distance);
+		min_view_distance, max_view_distance);
 	canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-						  view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 
 	canonicalCamera_xy.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-							 view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_xy.rotate_by(-PI / 2, 0);
 
 	canonicalCamera_yz.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-							 view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_yz.rotate_by(0, -PI / 2);
 
 	screen_w = default_window_size(0);
@@ -174,9 +174,9 @@ void ClothSimulator::drawContents()
 
 	// Bind the active shader
 
-	const UserShader &active_shader = shaders[active_shader_idx];
+	const UserShader& active_shader = shaders[active_shader_idx];
 
-	GLShader &shader = *active_shader.nanogui_shader;
+	GLShader& shader = *active_shader.nanogui_shader;
 	shader.bind();
 
 	// Prepare the camera projection matrix
@@ -229,13 +229,70 @@ void ClothSimulator::drawContents()
 	}
 }
 
-void ClothSimulator::drawWireframe(GLShader &shader)
-{
-	/*int grid_num_blocks = 10;
-	float grid_width = 5;
+void ClothSimulator::drawGrid(GLShader& shader) {
+	int grid_num_blocks = 40;
+	float grid_width = 20;
 	float grid_block_width = grid_width / grid_num_blocks;
 
-	int total_points = (grid_num_blocks+1) * 2 * 2;
+	MatrixXf positions_xy(3, 2);
+	MatrixXf normals_xy(3, 2);
+
+	// Draw the x axis
+	positions_xy.col(0) << -grid_width / 2., 0, 0;
+	positions_xy.col(1) << +grid_width / 2., 0, 0;
+
+	normals_xy.col(0) << 0., 0., 0.;
+	normals_xy.col(1) << 0., 0., 0.;
+
+	nanogui::Color colorx(1.0f, 0.25f, 0.25f, 1.0f);
+	shader.setUniform("u_color", colorx);
+	shader.setUniform("u_solid", true, false);
+
+	shader.setUniform("u_balls", true, false);
+	shader.uploadAttrib("in_position", positions_xy, false);
+	shader.uploadAttrib("in_normal", normals_xy, false);
+
+	shader.drawArray(GL_LINES, 0, 2);
+	shader.setUniform("u_solid", false, false);
+
+	// Draw the y axis
+	positions_xy.col(0) << 0, -grid_width / 2., 0;
+	positions_xy.col(1) << 0, +grid_width / 2., 0;
+
+	normals_xy.col(0) << 0., 0., 0.;
+	normals_xy.col(1) << 0., 0., 0.;
+
+	nanogui::Color colory(0.25f, 1.0f, 0.25f, 1.0f);
+	shader.setUniform("u_color", colory);
+	shader.setUniform("u_solid", true, false);
+
+	shader.setUniform("u_balls", true, false);
+	shader.uploadAttrib("in_position", positions_xy, false);
+	shader.uploadAttrib("in_normal", normals_xy, false);
+
+	shader.drawArray(GL_LINES, 0, 2);
+	shader.setUniform("u_solid", false, false);
+
+	// Draw the z axis
+	positions_xy.col(0) << 0, 0, -grid_width / 2.;
+	positions_xy.col(1) << 0, 0, +grid_width / 2.;
+
+	normals_xy.col(0) << 0., 0., 0.;
+	normals_xy.col(1) << 0., 0., 0.;
+
+	nanogui::Color colorz(0.25f, 0.25f, 1.0f, 1.0f);
+	shader.setUniform("u_color", colorz);
+	shader.setUniform("u_solid", true, false);
+
+	shader.setUniform("u_balls", true, false);
+	shader.uploadAttrib("in_position", positions_xy, false);
+	shader.uploadAttrib("in_normal", normals_xy, false);
+
+	shader.drawArray(GL_LINES, 0, 2);
+	shader.setUniform("u_solid", false, false);
+
+
+	int total_points = (grid_num_blocks + 1) * 2 * 2;
 	MatrixXf positions(3, total_points);
 	MatrixXf normals(3, total_points);
 
@@ -258,47 +315,27 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 		normals.col(ind * 2 + 1) << 0., 0., 0.;
 	}
 
+	nanogui::Color color(0.29f, 0.29f, 0.29f, 1.0f);
+	shader.setUniform("u_color", color);
+	shader.setUniform("u_solid", true, false);
+
 	shader.setUniform("u_balls", true, false);
 	shader.uploadAttrib("in_position", positions, false);
 	shader.uploadAttrib("in_normal", normals, false);
 
-	shader.drawArray(GL_LINES, 0, total_points+2);*/
+	shader.drawArray(GL_LINES, 0, total_points);
+	shader.setUniform("u_solid", false, false);
+
+
+
+}
+
+void ClothSimulator::drawWireframe(GLShader& shader)
+{
+	drawGrid(shader);
 
 	if (bmesh->shader_method == Balle::Method::not_ready)
 	{
-		int grid_num_blocks = 10;
-		float grid_width = 5;
-		float grid_block_width = grid_width / grid_num_blocks;
-
-		int total_points = (grid_num_blocks + 1) * 2 * 2;
-		MatrixXf positions(3, total_points);
-		MatrixXf normals(3, total_points);
-
-		for (int i = 0; i < grid_num_blocks + 1; i++)
-		{
-			positions.col(i * 2) << -grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
-			positions.col(i * 2 + 1) << +grid_width / 2., 0, -grid_width / 2. + i * grid_block_width;
-
-			normals.col(i * 2) << 0., 0., 0.;
-			normals.col(i * 2 + 1) << 0., 0., 0.;
-		}
-
-		for (int i = 0; i < grid_num_blocks + 1; i++)
-		{
-			int ind = i + grid_num_blocks + 1;
-			positions.col(ind * 2) << -grid_width / 2. + i * grid_block_width, 0., -grid_width / 2.;
-			positions.col(ind * 2 + 1) << -grid_width / 2. + i * grid_block_width, 0., +grid_width / 2.;
-
-			normals.col(ind * 2) << 0., 0., 0.;
-			normals.col(ind * 2 + 1) << 0., 0., 0.;
-		}
-
-		shader.setUniform("u_balls", true, false);
-		shader.uploadAttrib("in_position", positions, false);
-		shader.uploadAttrib("in_normal", normals, false);
-
-		shader.drawArray(GL_LINES, 0, total_points + 2);
-
 		bmesh->draw_skeleton(shader);
 	}
 	else if (bmesh->shader_method == Balle::Method::polygons_no_indices)
@@ -414,7 +451,7 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 }
 
 bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
-											  int modifiers)
+	int modifiers)
 {
 	switch (action)
 	{
@@ -510,7 +547,7 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 }
 
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
-									  int mods)
+	int mods)
 {
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
@@ -632,7 +669,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 void ClothSimulator::export_bmesh()
 {
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
-		  (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
+		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
 	{
 		cout << "ERROR: Export Failed - No mesh to export." << endl;
 		return;
@@ -640,7 +677,7 @@ void ClothSimulator::export_bmesh()
 
 	std::string filename;
 
-	filename = nanogui::file_dialog({{"obj", "obj"}}, true);
+	filename = nanogui::file_dialog({ {"obj", "obj"} }, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -659,7 +696,7 @@ void ClothSimulator::save_bmesh_to_file()
 {
 	std::string filename;
 
-	filename = nanogui::file_dialog({{"balle", "balle"}}, true);
+	filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -690,7 +727,7 @@ void ClothSimulator::save_bmesh_to_file()
 
 void ClothSimulator::load_bmesh_from_file()
 {
-	std::string filename = nanogui::file_dialog({{"balle", "balle"}}, false);
+	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
 	bmesh->load_from_file(filename);
 }
 
@@ -774,7 +811,7 @@ void ClothSimulator::extrude_node()
 
 	if (gui_state == GUI_STATES::IDLE)
 	{
-		Balle::SkeletalNode *temp = bmesh->create_skeletal_node_after(selected);
+		Balle::SkeletalNode* temp = bmesh->create_skeletal_node_after(selected);
 		if (selected != nullptr)
 		{
 			Vector3D offset(0.05, 0.05, 0.05);
@@ -839,7 +876,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	bool found = false;
 	// cout << "x/screen_w: " << x << "/" << screen_w << " y/screen_h: " << y << "/" << screen_h << endl;
 
-	for (Balle::SkeletalNode *node : bmesh->get_all_node())
+	for (Balle::SkeletalNode* node : bmesh->get_all_node())
 	{
 		Matrix4f view = getViewMatrix();
 		Matrix4f projection = getProjectionMatrix();
@@ -877,7 +914,7 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	}
 }
 
-bool ClothSimulator::dropCallbackEvent(int count, const char **filenames)
+bool ClothSimulator::dropCallbackEvent(int count, const char** filenames)
 {
 	return true;
 }
@@ -897,7 +934,7 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 	return true;
 }
 
-void ClothSimulator::initGUI(Screen *screen)
+void ClothSimulator::initGUI(Screen* screen)
 {
 	/*
 	 * Things required in the GUI:
@@ -920,7 +957,7 @@ void ClothSimulator::initGUI(Screen *screen)
 	 *	a. Button to reset camera views
 	 */
 
-	Window *window;
+	Window* window;
 
 	window = new Window(screen, "                Shader Method                ");
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
