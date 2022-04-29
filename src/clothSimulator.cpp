@@ -317,10 +317,7 @@ void ClothSimulator::drawWireframe(GLShader &shader)
 	else if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)
 	{ // METHOD 4: Draw the Wireframe not using indices (WORKING)
 		bmesh->draw_mesh_wireframe(shader);
-	}
-
-
-	
+	}	
 	
 }
 
@@ -916,11 +913,25 @@ void ClothSimulator::initGUI(Screen *screen)
 
 	Window *window;
 
-	window = new Window(screen, "                Shader Method                ");
+	window = new Window(screen, "                UI Function           ");
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	window->setLayout(new GroupLayout(15, 6, 14, 5));
 
-	shader_method_label = new Label(window, "Shader Method", "sans-bold");
+	shader_method_label = new Label(window, "、d", "sans-bold");
+	new Label(window, "Functions", "sans-bold");
+
+	{
+		Button*  extrude_but = new Button(window, "extrude");
+		extrude_but->setFlags(Button::ToggleButton);
+		//b->setPushed(cp->enable_structural_constraints);
+		extrude_but->setFontSize(14);
+		//b->setChangeCallback(
+		//	[this](bool state) { cp->enable_structural_constraints = state; });
+		Button* scale_but = new Button(window, "scale");
+		scale_but ->setFlags(Button::ToggleButton);
+		//b->setPushed(cp->enable_shearing_constraints);
+		scale_but ->setFontSize(14);
+	}
 	// sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
 
 	/*

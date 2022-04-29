@@ -26,6 +26,8 @@ set(CLOTHSIM_VIEWER_SOURCE
     # Bmesh
     bmesh/bmesh.cpp 
     bmesh/renderer.cpp
+
+    # UI
 )
 
 # Windows-only sources

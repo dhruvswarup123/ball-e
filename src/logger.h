@@ -2,7 +2,6 @@
 #define	LOGGER_H
 
 #include <iostream>
-#include <windows.h>
 using namespace std;
 
 struct Logger {
