@@ -16,6 +16,7 @@
 #include "clothSimulator.h"
 #include "json.hpp"
 #include "misc/file_utils.h"
+#include "logger.h"
 
 typedef uint32_t gid_t;
 
