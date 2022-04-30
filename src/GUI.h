@@ -27,6 +27,7 @@ enum GUI_STATES
 class GUI
 {
 public:
+	bool is_alive = true;
 	GUI(std::string project_root, Screen* screen);
 	~GUI();
 
@@ -68,7 +69,6 @@ private:
 	nanogui::Color color = nanogui::Color(1.0f, 1.0f, 1.0f, 1.0f);
 
 	Balle::BMesh* bmesh;
-	Label* shader_method_label;
 
 	// OpenGL attributes
 
@@ -127,8 +127,6 @@ private:
 	int screen_w;
 	int screen_h;
 
-	bool is_alive = true;
-
 	Balle::SkeletalNode* selected = NULL;
 	GUI_STATES gui_state = GUI_STATES::IDLE;
 
@@ -151,12 +149,19 @@ private:
 	float scale_mouse_y = 0;
 	float original_rad = 0;
 
-	// Stopre grabbing stuff
+	// Store grabbing stuff
 	float grab_mouse_x = 0;
 	float grab_mouse_y = 0;
 	Vector3D original_pos;
 
 	Vector2i default_window_size = Vector2i(1024, 800);
+
+	// nanogui stuff
+	Window* file_menu_window;
+	Button* file_menu_load_button;
+	Button* file_menu_save_button;
+	Window* shader_method_window;
+	Label* shader_method_label;
 };
 
 struct UserShader
