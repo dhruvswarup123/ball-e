@@ -114,6 +114,7 @@ private:
   // Keyboard flags
 
   bool ctrl_down = false;
+  bool grab_state = false;
 
   // Simulation flags
 

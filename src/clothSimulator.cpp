@@ -419,6 +419,9 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 											  int modifiers)
 {
+	// if(grab_state){
+	// 	return false;
+	// }
 	switch (action)
 	{
 	case GLFW_PRESS:
@@ -490,7 +493,7 @@ void ClothSimulator::mouseLeftDragged(double x, double y)
 {
 	float dx = x - mouse_x;
 	float dy = y - mouse_y;
-	if (selected == nullptr)
+	if (selected == nullptr && !grab_state)
 	{
 		camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
 	}
@@ -762,7 +765,7 @@ void ClothSimulator::extrude_node()
 {
 	if (selected == nullptr || selected->interpolated)
 	{
-		return;
+		return ;
 	}
 
 	if (gui_state == GUI_STATES::IDLE)
@@ -779,11 +782,12 @@ void ClothSimulator::extrude_node()
 		selected = temp;
 		selected->selected = true;
 	}
+	
 }
 
 void ClothSimulator::grab_node(double x, double y)
 {
-	if (selected == nullptr || selected->interpolated)
+	if (selected == nullptr || selected->interpolated||!grab_state)
 	{
 		return;
 	}
@@ -917,20 +921,28 @@ void ClothSimulator::initGUI(Screen *screen)
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	window->setLayout(new GroupLayout(15, 6, 14, 5));
 
-	shader_method_label = new Label(window, "、d", "sans-bold");
+	shader_method_label = new Label(window, "d", "sans-bold");
 	new Label(window, "Functions", "sans-bold");
 
 	{
-		Button*  extrude_but = new Button(window, "extrude");
+		Button*  extrude_but = new Button(window, "Extrude");
 		extrude_but->setFlags(Button::ToggleButton);
 		//b->setPushed(cp->enable_structural_constraints);
 		extrude_but->setFontSize(14);
-		//b->setChangeCallback(
-		//	[this](bool state) { cp->enable_structural_constraints = state; });
-		Button* scale_but = new Button(window, "scale");
-		scale_but ->setFlags(Button::ToggleButton);
+		extrude_but->setCallback([this] {extrude_node();});
+		// Button* scale_but = new Button(window, "scale");
+		// scale_but ->setFlags(Button::ToggleButton);
+		// //b->setPushed(cp->enable_shearing_constraints);
+		// scale_but ->setFontSize(14);
+		// scale_but ->setCallback([this] {extrude_node();});
+		Button* switch_but = new Button(window, "Grab node");
+		switch_but ->setFlags(Button::ToggleButton);
 		//b->setPushed(cp->enable_shearing_constraints);
-		scale_but ->setFontSize(14);
+		switch_but ->setFontSize(14);
+		switch_but->setChangeCallback([this](bool state) { 
+				grab_state = !grab_state;
+			});
+
 	}
 	// sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
 
