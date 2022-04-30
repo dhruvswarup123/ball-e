@@ -13,7 +13,7 @@ set(CLOTHSIM_VIEWER_SOURCE
     
     # Application
     main.cpp
-    clothSimulator.cpp
+    GUI.cpp
 
     # Miscellaneous
     # png.cpp

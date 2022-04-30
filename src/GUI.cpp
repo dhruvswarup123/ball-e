@@ -4,7 +4,7 @@
 #include <CGL/vector3D.h>
 #include <nanogui/nanogui.h>
 
-#include "clothSimulator.h"
+#include "GUI.h"
 #include "logger.h"
 
 #include "camera.h"
@@ -20,7 +20,7 @@
 using namespace nanogui;
 using namespace std;
 
-void ClothSimulator::load_shaders()
+void GUI::load_shaders()
 {
 	std::set<std::string> shader_folder_contents;
 	bool success = FileUtils::list_files_in_directory(m_project_root + "/shaders", shader_folder_contents);
@@ -93,7 +93,7 @@ void ClothSimulator::load_shaders()
 	}
 }
 
-ClothSimulator::ClothSimulator(std::string project_root, Screen* screen)
+GUI::GUI(std::string project_root, Screen* screen)
 	: m_project_root(project_root)
 {
 	this->screen = screen;
@@ -104,7 +104,7 @@ ClothSimulator::ClothSimulator(std::string project_root, Screen* screen)
 	glEnable(GL_DEPTH_TEST);
 }
 
-ClothSimulator::~ClothSimulator()
+GUI::~GUI()
 {
 	for (auto shader : shaders)
 	{
@@ -116,7 +116,7 @@ ClothSimulator::~ClothSimulator()
  * Initializes the cloth simulation and spawns a new thread to separate
  * rendering from simulation.
  */
-void ClothSimulator::init()
+void GUI::init()
 {
 	bmesh = new Balle::BMesh();
 
@@ -168,7 +168,7 @@ void ClothSimulator::init()
 	canonicalCamera.configure(camera_info, screen_w, screen_h);
 }
 
-void ClothSimulator::drawContents()
+void GUI::drawContents()
 {
 	glEnable(GL_DEPTH_TEST);
 
@@ -229,7 +229,7 @@ void ClothSimulator::drawContents()
 	}
 }
 
-void ClothSimulator::drawGrid(GLShader& shader) {
+void GUI::drawGrid(GLShader& shader) {
 	int grid_num_blocks = 40;
 	float grid_width = 20;
 	float grid_block_width = grid_width / grid_num_blocks;
@@ -357,7 +357,7 @@ void ClothSimulator::drawGrid(GLShader& shader) {
 
 }
 
-void ClothSimulator::drawWireframe(GLShader& shader)
+void GUI::drawWireframe(GLShader& shader)
 {
 	drawGrid(shader);
 
@@ -390,11 +390,11 @@ void ClothSimulator::drawWireframe(GLShader& shader)
 // functions that have to be recreated here.
 // ----------------------------------------------------------------------------
 
-void ClothSimulator::resetCamera() { camera.copy_placement(canonicalCamera); }
-void ClothSimulator::resetCamera_xy() { camera.copy_placement(canonicalCamera_xy); }
-void ClothSimulator::resetCamera_yz() { camera.copy_placement(canonicalCamera_yz); }
+void GUI::resetCamera() { camera.copy_placement(canonicalCamera); }
+void GUI::resetCamera_xy() { camera.copy_placement(canonicalCamera_xy); }
+void GUI::resetCamera_yz() { camera.copy_placement(canonicalCamera_yz); }
 
-Matrix4f ClothSimulator::getProjectionMatrix()
+Matrix4f GUI::getProjectionMatrix()
 {
 	Matrix4f perspective;
 	perspective.setZero();
@@ -416,7 +416,7 @@ Matrix4f ClothSimulator::getProjectionMatrix()
 	return perspective;
 }
 
-Matrix4f ClothSimulator::getViewMatrix()
+Matrix4f GUI::getViewMatrix()
 {
 	Matrix4f lookAt;
 	Matrix3f R;
@@ -449,7 +449,7 @@ Matrix4f ClothSimulator::getViewMatrix()
 // EVENT HANDLING
 // ----------------------------------------------------------------------------
 
-bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
+bool GUI::cursorPosCallbackEvent(double x, double y)
 {
 	if (left_down && !middle_down && !right_down)
 	{
@@ -477,7 +477,7 @@ bool ClothSimulator::cursorPosCallbackEvent(double x, double y)
 	return true;
 }
 
-bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
+bool GUI::mouseButtonCallbackEvent(int button, int action,
 	int modifiers)
 {
 	switch (action)
@@ -520,13 +520,13 @@ bool ClothSimulator::mouseButtonCallbackEvent(int button, int action,
 	return false;
 }
 
-void ClothSimulator::finish_grab_scale()
+void GUI::finish_grab_scale()
 {
 
 	gui_state = GUI_STATES::IDLE;
 }
 
-void ClothSimulator::reset_grab_scale()
+void GUI::reset_grab_scale()
 {
 	if (gui_state == GUI_STATES::GRABBING)
 	{
@@ -542,12 +542,12 @@ void ClothSimulator::reset_grab_scale()
 	}
 }
 
-void ClothSimulator::mouseMoved(double x, double y)
+void GUI::mouseMoved(double x, double y)
 {
 	y = screen_h - y;
 }
 
-void ClothSimulator::mouseLeftDragged(double x, double y)
+void GUI::mouseLeftDragged(double x, double y)
 {
 	float dx = x - mouse_x;
 	float dy = y - mouse_y;
@@ -561,7 +561,7 @@ void ClothSimulator::mouseLeftDragged(double x, double y)
 	}
 }
 
-void ClothSimulator::mouseRightDragged(double x, double y)
+void GUI::mouseRightDragged(double x, double y)
 {
 	if (selected == nullptr)
 	{
@@ -573,7 +573,7 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 	}
 }
 
-bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
+bool GUI::keyCallbackEvent(int key, int scancode, int action,
 	int mods)
 {
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
@@ -693,7 +693,7 @@ bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 	return true;
 }
 
-void ClothSimulator::export_bmesh()
+void GUI::export_bmesh()
 {
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
 		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
@@ -719,7 +719,7 @@ void ClothSimulator::export_bmesh()
 	bmesh->export_to_file(filename);
 }
 
-void ClothSimulator::save_bmesh_to_file()
+void GUI::save_bmesh_to_file()
 {
 	std::string filename;
 
@@ -752,28 +752,28 @@ void ClothSimulator::save_bmesh_to_file()
 	bmesh->save_to_file(str);*/
 }
 
-void ClothSimulator::load_bmesh_from_file()
+void GUI::load_bmesh_from_file()
 {
 	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
 	bmesh->load_from_file(filename);
 }
 
-void ClothSimulator::select_next()
+void GUI::select_next()
 {
 	bmesh->select_next_skeletal_node(selected);
 }
 
-void ClothSimulator::select_parent()
+void GUI::select_parent()
 {
 	bmesh->select_parent_skeletal_node(selected);
 }
 
-void ClothSimulator::select_child()
+void GUI::select_child()
 {
 	bmesh->select_child_skeletal_node(selected);
 }
 
-void ClothSimulator::scale_node(double x, double y)
+void GUI::scale_node(double x, double y)
 {
 	if (selected == nullptr || selected->interpolated)
 	{
@@ -811,7 +811,7 @@ void ClothSimulator::scale_node(double x, double y)
 	}
 }
 
-void ClothSimulator::delete_node()
+void GUI::delete_node()
 {
 	if (selected == nullptr)
 	{
@@ -829,7 +829,7 @@ void ClothSimulator::delete_node()
 	}
 }
 
-void ClothSimulator::extrude_node()
+void GUI::extrude_node()
 {
 	if ((selected == nullptr && bmesh->get_all_node().size() > 0) || (selected != nullptr && selected->interpolated))
 	{
@@ -855,7 +855,7 @@ void ClothSimulator::extrude_node()
 	}
 }
 
-void ClothSimulator::grab_node(double x, double y)
+void GUI::grab_node(double x, double y)
 {
 	if (selected == nullptr || selected->interpolated)
 	{
@@ -891,12 +891,12 @@ void ClothSimulator::grab_node(double x, double y)
 	}
 }
 
-void ClothSimulator::interpolate_spheres()
+void GUI::interpolate_spheres()
 {
 	bmesh->interpolate_spheres();
 }
 
-void ClothSimulator::sceneIntersect(double x, double y)
+void GUI::sceneIntersect(double x, double y)
 {
 	// Go over each sphere, and check if it intersects
 	// TODO: NO support for layered spheres, NO support for random radius
@@ -941,18 +941,18 @@ void ClothSimulator::sceneIntersect(double x, double y)
 	}
 }
 
-bool ClothSimulator::dropCallbackEvent(int count, const char** filenames)
+bool GUI::dropCallbackEvent(int count, const char** filenames)
 {
 	return true;
 }
 
-bool ClothSimulator::scrollCallbackEvent(double x, double y)
+bool GUI::scrollCallbackEvent(double x, double y)
 {
 	camera.move_forward(y * scroll_rate);
 	return true;
 }
 
-bool ClothSimulator::resizeCallbackEvent(int width, int height)
+bool GUI::resizeCallbackEvent(int width, int height)
 {
 	screen_w = width;
 	screen_h = height;
@@ -961,7 +961,7 @@ bool ClothSimulator::resizeCallbackEvent(int width, int height)
 	return true;
 }
 
-void ClothSimulator::initGUI(Screen* screen)
+void GUI::initGUI(Screen* screen)
 {
 	/*
 	 * Things required in the GUI:

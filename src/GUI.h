@@ -24,11 +24,11 @@ enum GUI_STATES
   SCALING
 };
 
-class ClothSimulator
+class GUI
 {
 public:
-  ClothSimulator(std::string project_root, Screen *screen);
-  ~ClothSimulator();
+  GUI(std::string project_root, Screen *screen);
+  ~GUI();
 
   void init();
   virtual void drawContents();

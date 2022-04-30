@@ -13,7 +13,7 @@
 #include <stdlib.h> // atoi for getopt inputs
 
 #include "CGL/CGL.h"
-#include "clothSimulator.h"
+#include "GUI.h"
 #include "json.hpp"
 #include "misc/file_utils.h"
 #include "logger.h"
@@ -33,7 +33,7 @@ const string CLOTH = "cloth";
 
 const unordered_set<string> VALID_KEYS = {SPHERE, PLANE, CLOTH};
 
-ClothSimulator *app = nullptr;
+GUI *app = nullptr;
 GLFWwindow *window = nullptr;
 Screen *screen = nullptr;
 
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
   createGLContexts();
 
   // Initialize the ClothSimulator object
-  app = new ClothSimulator(project_root, screen);
+  app = new GUI(project_root, screen);
   app->init();
 
   // Call this after all the widgets have been defined
