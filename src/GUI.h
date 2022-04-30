@@ -73,9 +73,14 @@ private:
 	// OpenGL attributes
 
 	int active_shader_idx = 0;
+	int active_camera_idx = 0;
+	int active_display_idx = 0;
 
 	vector<UserShader> shaders;
 	vector<std::string> shaders_combobox_names;
+	vector<std::string> cameraview_names{"Front View","Side View", "Top View"};
+	vector<std::string> display_names{"Halfedge Mesh","Wireframe"};
+
 
 
 	// OpenGL customizable inputs
@@ -105,14 +110,16 @@ private:
 	void mouseMoved(double x, double y);
 	void sceneIntersect(double x, double y);
 
-	// Mouse flags
+	bool grab_state;
 
+	// Mouse flags
+	bool mouse_enable = true;
 	bool left_down = false;
 	bool right_down = false;
 	bool middle_down = false;
 
 	// Keyboard flags
-
+	bool keyboard_enable = true;
 	bool ctrl_down = false;
 
 	// Simulation flags
