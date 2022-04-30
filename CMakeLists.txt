@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(ClothSim)
+project(Balle)
 
 #-------------------------------------------------------------------------------
 # Build options
@@ -222,4 +222,4 @@ if(BUILD_DOCS)
 endif()
 
 # Install settings
-set(CMAKE_INSTALL_PREFIX "${ClothSim_SOURCE_DIR}/")
+set(CMAKE_INSTALL_PREFIX "${Balle_SOURCE_DIR}/")

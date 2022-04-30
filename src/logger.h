@@ -12,19 +12,19 @@ struct Logger {
 	~Logger() = default;
 
 	// Warnings
-	void warn(const string& s) {
+	static void warn(const string& s) {
 		cout << "[warning] ";
 		cout << s << endl;
 	}
 
 	// Errors
-	void error(const string& s) {
+	static void error(const string& s) {
 		cout << "[!!! ERROR !!!] ";
 		cout << s << endl;
 	}
 
 	// Any general info / debugging
-	void info(const string& s) {
+	static void info(const string& s) {
 		cout << "[info] ";
 		cout << s << endl;
 	}
