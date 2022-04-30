@@ -729,6 +729,8 @@ namespace Balle
 				mesh.splitEdge(e);
 			}
 		}
+
+		Logger::info("remesh: finish split, split edge number " + to_string(edges.size()));
 	}
 
 	void BMesh::__remesh_collapse(HalfedgeMesh &mesh){
@@ -764,17 +766,21 @@ namespace Balle
 				mesh.collapseEdge(e);
 			}
 		}
-		Logger::info("remesh: finish collapse: ");
+		// Logger::info("remesh: finish collapse: ");
+
+		int n{0};
 		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
 		{
 			if (e->isDeleted)
 			{
 				mesh.deleteEdge(e);
-				Logger::warn("remesh: !! Deleted edge !!");
+				n++;
+				// Logger::warn("remesh: !! Deleted edge !!");
 			}
 		}
 
-		Logger::info("remesh: deleted");
+		// Logger::info("remesh: deleted");
+		Logger::info("remesh: finish collapse, deleted edge number " + to_string(n));
 	}
 
 	void BMesh::__remesh_flip(HalfedgeMesh &mesh){
@@ -816,6 +822,8 @@ namespace Balle
 				mesh.flipEdge(e);
 			}
 		}
+
+		Logger::info("remesh: finish flip, flip edge number " + to_string(edges.size()));
 	}
 
 	void BMesh::__remesh_average(HalfedgeMesh &mesh){
@@ -848,6 +856,8 @@ namespace Balle
 		{
 			v->position = v->newPosition;
 		}
+
+		Logger::info("remesh: finish vertex average");
 	}
 
 	
