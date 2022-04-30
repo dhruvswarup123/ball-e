@@ -25,14 +25,6 @@ using namespace nanogui;
 
 using json = nlohmann::json;
 
-#define msg(s) cerr << "[ClothSim] " << s << endl;
-
-const string SPHERE = "sphere";
-const string PLANE = "plane";
-const string CLOTH = "cloth";
-
-const unordered_set<string> VALID_KEYS = {SPHERE, PLANE, CLOTH};
-
 GUI *app = nullptr;
 GLFWwindow *window = nullptr;
 Screen *screen = nullptr;
