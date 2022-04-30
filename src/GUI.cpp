@@ -31,7 +31,7 @@ void GUI::load_shaders()
 
 	std::string std_vert_shader = m_project_root + "/shaders/Default.vert";
 
-	for (const std::string& shader_fname : shader_folder_contents)
+	for (const std::string &shader_fname : shader_folder_contents)
 	{
 		std::string file_extension;
 		std::string shader_name;
@@ -56,7 +56,7 @@ void GUI::load_shaders()
 
 		std::shared_ptr<GLShader> nanogui_shader = make_shared<GLShader>();
 		nanogui_shader->initFromFiles(shader_name, vert_shader,
-			m_project_root + "/shaders/" + shader_fname);
+									  m_project_root + "/shaders/" + shader_fname);
 
 		// Special filenames are treated a bit differently
 		ShaderTypeHint hint;
@@ -93,7 +93,7 @@ void GUI::load_shaders()
 	}
 }
 
-GUI::GUI(std::string project_root, Screen* screen)
+GUI::GUI(std::string project_root, Screen *screen)
 	: m_project_root(project_root)
 {
 	this->screen = screen;
@@ -112,14 +112,17 @@ GUI::~GUI()
 	}
 }
 
-
 void GUI::init()
 {
 	bmesh = new Balle::BMesh();
 
 	// Initialize GUI
 	screen->setSize(default_window_size);
-	initGUI(screen);
+	if (!gui_init)
+	{
+		initGUI(screen);
+		gui_init = true;
+	}
 
 	// Initialize camera
 
@@ -134,7 +137,7 @@ void GUI::init()
 	Vector3D avg_pm_position(0, 0, 0);
 
 	CGL::Vector3D target(avg_pm_position.x, avg_pm_position.y / 2,
-		avg_pm_position.z);
+						 avg_pm_position.z);
 	CGL::Vector3D c_dir(0., 0., 0.);
 	canonical_view_distance = 0.9;
 	scroll_rate = canonical_view_distance / 10;
@@ -146,16 +149,16 @@ void GUI::init()
 	// canonicalCamera is a copy used for view resets
 
 	camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
-		min_view_distance, max_view_distance);
+				 min_view_distance, max_view_distance);
 	canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+						  view_distance, min_view_distance, max_view_distance);
 
 	canonicalCamera_xy.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+							 view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_xy.rotate_by(-PI / 2, 0);
 
 	canonicalCamera_yz.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-		view_distance, min_view_distance, max_view_distance);
+							 view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_yz.rotate_by(0, -PI / 2);
 
 	screen_w = default_window_size(0);
@@ -171,9 +174,9 @@ void GUI::drawContents()
 
 	// Bind the active shader
 
-	const UserShader& active_shader = shaders[active_shader_idx];
+	const UserShader &active_shader = shaders[active_shader_idx];
 
-	GLShader& shader = *active_shader.nanogui_shader;
+	GLShader &shader = *active_shader.nanogui_shader;
 	shader.bind();
 
 	// Prepare the camera projection matrix
@@ -226,7 +229,8 @@ void GUI::drawContents()
 	}
 }
 
-void GUI::drawGrid(GLShader& shader) {
+void GUI::drawGrid(GLShader &shader)
+{
 	int grid_num_blocks = 40;
 	float grid_width = 20;
 	float grid_block_width = grid_width / grid_num_blocks;
@@ -349,12 +353,9 @@ void GUI::drawGrid(GLShader& shader) {
 
 	shader.drawArray(GL_LINES, 0, total_points);
 	shader.setUniform("u_solid", false, false);
-
-
-
 }
 
-void GUI::drawWireframe(GLShader& shader)
+void GUI::drawWireframe(GLShader &shader)
 {
 	drawGrid(shader);
 
@@ -475,7 +476,7 @@ bool GUI::cursorPosCallbackEvent(double x, double y)
 }
 
 bool GUI::mouseButtonCallbackEvent(int button, int action,
-	int modifiers)
+								   int modifiers)
 {
 	switch (action)
 	{
@@ -571,7 +572,7 @@ void GUI::mouseRightDragged(double x, double y)
 }
 
 bool GUI::keyCallbackEvent(int key, int scancode, int action,
-	int mods)
+						   int mods)
 {
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
@@ -647,6 +648,11 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 			{
 				bmesh->clear_mesh();
 			}
+			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices || bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices) {
+				file_menu_export_obj_button->setEnabled(true);
+			} else {
+				file_menu_export_obj_button->setEnabled(false);
+			}
 			break;
 		case 'W':
 		case 'w':
@@ -675,6 +681,7 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 		case 'R':
 		case 'r':
 			bmesh->clear_mesh();
+			delete bmesh;
 			init();
 			break;
 		case 'L':
@@ -693,15 +700,15 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 void GUI::export_bmesh()
 {
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
-		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
+		  (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
 	{
-		cout << "ERROR: Export Failed - No mesh to export." << endl;
+		Logger::error("Export Failed - No mesh to export.");
 		return;
 	}
 
 	std::string filename;
 
-	filename = nanogui::file_dialog({ {"obj", "obj"} }, true);
+	filename = nanogui::file_dialog({{"obj", "obj"}}, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -720,7 +727,7 @@ void GUI::save_bmesh_to_file()
 {
 	std::string filename;
 
-	filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
+	filename = nanogui::file_dialog({{"balle", "balle"}}, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -751,7 +758,7 @@ void GUI::save_bmesh_to_file()
 
 void GUI::load_bmesh_from_file()
 {
-	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
+	std::string filename = nanogui::file_dialog({{"balle", "balle"}}, false);
 	bmesh->load_from_file(filename);
 }
 
@@ -835,7 +842,7 @@ void GUI::extrude_node()
 
 	if (gui_state == GUI_STATES::IDLE)
 	{
-		Balle::SkeletalNode* temp = bmesh->create_skeletal_node_after(selected);
+		Balle::SkeletalNode *temp = bmesh->create_skeletal_node_after(selected);
 		if (selected != nullptr)
 		{
 			Vector3D offset(0.05, 0.05, 0.05);
@@ -901,7 +908,7 @@ void GUI::sceneIntersect(double x, double y)
 	bool found = false;
 	// cout << "x/screen_w: " << x << "/" << screen_w << " y/screen_h: " << y << "/" << screen_h << endl;
 
-	for (Balle::SkeletalNode* node : bmesh->get_all_node())
+	for (Balle::SkeletalNode *node : bmesh->get_all_node())
 	{
 		Matrix4f view = getViewMatrix();
 		Matrix4f projection = getProjectionMatrix();
@@ -939,7 +946,7 @@ void GUI::sceneIntersect(double x, double y)
 	}
 }
 
-bool GUI::dropCallbackEvent(int count, const char** filenames)
+bool GUI::dropCallbackEvent(int count, const char **filenames)
 {
 	return true;
 }
@@ -959,7 +966,7 @@ bool GUI::resizeCallbackEvent(int width, int height)
 	return true;
 }
 
-void GUI::initGUI(Screen* screen)
+void GUI::initGUI(Screen *screen)
 {
 	/*
 	 * Things required in the GUI:
@@ -985,17 +992,21 @@ void GUI::initGUI(Screen* screen)
 	shader_method_window = new Window(screen, "                Shader Method                ");
 	shader_method_window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	shader_method_window->setLayout(new GroupLayout(15, 6, 14, 5));
-
 	shader_method_label = new Label(shader_method_window, "Shader Method", "sans-bold");
 
 	file_menu_window = new Window(screen, "File");
 	file_menu_window->setPosition(Vector2i(15, 15));
 	file_menu_window->setSize(Vector2i(200, 200));
-	shader_method_window->setLayout(new GridLayout(nanogui::Orientation::Vertical, 2));
+	file_menu_window->setLayout(new GridLayout(nanogui::Orientation::Vertical, 3));
 	file_menu_load_button = new Button(file_menu_window, "Load .balle file");
-	file_menu_load_button->setCallback([this](){ this->load_bmesh_from_file();});
+	file_menu_load_button->setCallback([this]()
+									   { this->load_bmesh_from_file(); });
 	file_menu_save_button = new Button(file_menu_window, "Save .balle file");
-	file_menu_save_button->setCallback([this](){ this->save_bmesh_to_file();});
+	file_menu_save_button->setCallback([this]()
+									   { this->save_bmesh_to_file(); });
+	file_menu_export_obj_button = new Button(file_menu_window, "Export .obj file");
+	file_menu_export_obj_button->setCallback([this]()
+											 { this->export_bmesh(); });
 	// sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
 
 	/*
