@@ -460,7 +460,6 @@ namespace Balle
 		// Delet all the spheres
 		__avada_kedavra();
 		all_nodes.clear();
-		return true;
 
 		unordered_map<int, SkeletalNode *> index_to_spheres;
 

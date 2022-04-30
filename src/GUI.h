@@ -157,9 +157,11 @@ private:
 	Vector2i default_window_size = Vector2i(1024, 800);
 
 	// nanogui stuff
+	bool gui_init = false;
 	Window* file_menu_window;
 	Button* file_menu_load_button;
 	Button* file_menu_save_button;
+	Button* file_menu_export_obj_button;
 	Window* shader_method_window;
 	Label* shader_method_label;
 };
