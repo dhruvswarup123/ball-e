@@ -766,20 +766,31 @@ namespace Balle
 				mesh.collapseEdge(e);
 			}
 		}
-		// Logger::info("remesh: finish collapse: ");
 
-		int n{0};
+		int k{ 0 };
 		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
 		{
 			if (e->isDeleted)
 			{
-				mesh.deleteEdge(e);
-				n++;
-				// Logger::warn("remesh: !! Deleted edge !!");
+				k++;
 			}
 		}
+		Logger::info("k " + to_string(k));
 
-		// Logger::info("remesh: deleted");
+		int n{0};
+
+		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); )
+		{
+			if (e->isDeleted)
+			{   
+				n++;
+				e = mesh.ReturnDeleteEdge(e);
+			}
+			else {
+				e++;
+			}
+		}
+		
 		Logger::info("remesh: finish collapse, deleted edge number " + to_string(n));
 	}
 
