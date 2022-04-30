@@ -543,7 +543,7 @@ namespace Balle
 
 	void BMesh::remesh()
 	{
-		__remesh(*mesh);
+		//__remesh(*mesh);
 	}
 
 	Vector3D get_face_point(const FaceIter f)
