@@ -552,7 +552,7 @@ void GUI::mouseLeftDragged(double x, double y)
 {
 	float dx = x - mouse_x;
 	float dy = y - mouse_y;
-	if (selected == nullptr && !grab_state)
+	if (selected == nullptr)
 	{
 		camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
 	}
@@ -578,7 +578,7 @@ void GUI::mouseRightDragged(double x, double y)
 bool GUI::keyCallbackEvent(int key, int scancode, int action,
 						   int mods)
 {
-	if(!keyboard_enable) return false;
+	//if(!keyboard_enable) return false;
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
 	if (action == GLFW_PRESS)
@@ -1008,20 +1008,24 @@ void GUI::initGUI(Screen *screen)
 		extrude_but->setFlags(Button::ToggleButton);
 		extrude_but->setFontSize(14);
 		extrude_but->setCallback([this] {extrude_node();});
-		Button* switch_but = new Button(window, "Grab node");
+
+		// Grab breaks the normal movement
+		/*Button* switch_but = new Button(window, "Grab node");
 		switch_but ->setFlags(Button::ToggleButton);
 		switch_but ->setFontSize(14);
 		switch_but->setChangeCallback([this](bool state) { 
 				grab_state = !grab_state;
-			});
+			});*/
 	}
 	new Label(window, "Control Mode", "sans-bold");
 
 	{
-		CheckBox* keyboard_cb = new CheckBox(window, "Keyboard Control");
+		// Always enabled --- no harm
+		/*CheckBox* keyboard_cb = new CheckBox(window, "Keyboard Control");
 		keyboard_cb->setFontSize(14);
 		keyboard_cb->setChecked(true);
-		keyboard_cb->setCallback([this](bool state){keyboard_enable = !keyboard_enable;});
+		keyboard_cb->setCallback([this](bool state){keyboard_enable = !keyboard_enable;});*/
+
 		CheckBox* mouse_cb = new CheckBox(window, "Mouse Control");
 		mouse_cb->setFontSize(14);
 		mouse_cb->setChecked(true);
