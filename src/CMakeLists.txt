@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-# Cloth simulation source
-set(CLOTHSIM_VIEWER_SOURCE
-    # Cloth simulation objects
-    
+set(BALLE_VIEWER_SOURCE   
 
     # Halfedge Mesh
     mesh/halfEdgeMesh.cpp
@@ -30,7 +27,7 @@ set(CLOTHSIM_VIEWER_SOURCE
 
 # Windows-only sources
 if(WIN32)
-list(APPEND CLOTHSIM_VIEWER_SOURCE
+list(APPEND BALLE_VIEWER_SOURCE
     # For get-opt
     misc/getopt.c
 )
@@ -40,11 +37,6 @@ endif(WIN32)
 # Embed resources
 #-------------------------------------------------------------------------------
 
-# embed_resources(CLOTHSIM_SHADERS
-#   shaders/vert.glsl
-#   shaders/normalFrag.glsl
-#   shaders/wireframeFrag.glsl
-# )
 
 #-------------------------------------------------------------------------------
 # Set definitions
@@ -71,9 +63,9 @@ link_directories(
 #-------------------------------------------------------------------------------
 # Add executable
 #-------------------------------------------------------------------------------
-add_executable(clothsim ${CLOTHSIM_VIEWER_SOURCE})
+add_executable(balle ${BALLE_VIEWER_SOURCE})
 
-target_link_libraries(clothsim
+target_link_libraries(balle
     CGL ${CGL_LIBRARIES}
     nanogui ${NANOGUI_EXTRA_LIBS}
     ${FREETYPE_LIBRARIES}
@@ -84,7 +76,7 @@ target_link_libraries(clothsim
 # Platform-specific configurations for target
 #-------------------------------------------------------------------------------
 if(APPLE)
-  set_property( TARGET clothsim APPEND_STRING PROPERTY COMPILE_FLAGS
+  set_property( TARGET balle APPEND_STRING PROPERTY COMPILE_FLAGS
                 "-Wno-deprecated-declarations -Wno-c++11-extensions")
 endif(APPLE)
 
@@ -92,4 +84,4 @@ endif(APPLE)
 set(EXECUTABLE_OUTPUT_PATH ..)
 
 # Install to project root
-install(TARGETS clothsim DESTINATION ${ClothSim_SOURCE_DIR})
+install(TARGETS balle DESTINATION ${Balle_SOURCE_DIR})

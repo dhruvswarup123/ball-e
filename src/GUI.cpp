@@ -112,10 +112,7 @@ GUI::~GUI()
 	}
 }
 
-/**
- * Initializes the cloth simulation and spawns a new thread to separate
- * rendering from simulation.
- */
+
 void GUI::init()
 {
 	bmesh = new Balle::BMesh();

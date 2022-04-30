@@ -214,7 +214,6 @@ int main(int argc, char **argv)
 
   createGLContexts();
 
-  // Initialize the ClothSimulator object
   app = new GUI(project_root, screen);
   app->init();
 

@@ -1,5 +1,5 @@
-#ifndef CGL_CLOTH_SIMULATOR_H
-#define CGL_CLOTH_SIMULATOR_H
+#ifndef CGL_GUI_H
+#define CGL_GUI_H
 
 #include <nanogui/nanogui.h>
 #include <memory>
@@ -171,4 +171,4 @@ struct UserShader
   ShaderTypeHint type_hint;
 };
 
-#endif // CGL_CLOTH_SIM_H
+#endif // CGL_GUI_H
