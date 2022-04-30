@@ -237,60 +237,87 @@ void ClothSimulator::drawGrid(GLShader& shader) {
 	MatrixXf positions_xy(3, 2);
 	MatrixXf normals_xy(3, 2);
 
+	// Reset the buffers
+	Matrix4f view = getViewMatrix();
+	Matrix4f projection = getProjectionMatrix();
+	Matrix4f viewProjection = projection * view;
+	Matrix4f temp;
+	temp << 0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0;
+
+	viewProjection += temp;
+
+	shader.setUniform("u_view_projection", viewProjection);
+
+	float scale_axes = 1;
+
 	// Draw the x axis
-	positions_xy.col(0) << -grid_width / 2., 0, 0;
-	positions_xy.col(1) << +grid_width / 2., 0, 0;
+	{
+		positions_xy.col(0) << -grid_width * scale_axes / 2., 0, 0;
+		positions_xy.col(1) << +grid_width * scale_axes / 2., 0, 0;
 
-	normals_xy.col(0) << 0., 0., 0.;
-	normals_xy.col(1) << 0., 0., 0.;
+		normals_xy.col(0) << 0., 0., 0.;
+		normals_xy.col(1) << 0., 0., 0.;
 
-	nanogui::Color colorx(1.0f, 0.25f, 0.25f, 1.0f);
-	shader.setUniform("u_color", colorx);
-	shader.setUniform("u_solid", true, false);
+		nanogui::Color colorx(1.0f, 0.25f, 0.25f, 1.0f);
+		shader.setUniform("u_color", colorx);
+		shader.setUniform("u_solid", true, false);
 
-	shader.setUniform("u_balls", true, false);
-	shader.uploadAttrib("in_position", positions_xy, false);
-	shader.uploadAttrib("in_normal", normals_xy, false);
+		shader.setUniform("u_balls", true, false);
+		shader.uploadAttrib("in_position", positions_xy, false);
+		shader.uploadAttrib("in_normal", normals_xy, false);
 
-	shader.drawArray(GL_LINES, 0, 2);
-	shader.setUniform("u_solid", false, false);
+		shader.drawArray(GL_LINES, 0, 2);
+		shader.setUniform("u_solid", false, false);
+	}
 
 	// Draw the y axis
-	positions_xy.col(0) << 0, -grid_width / 2., 0;
-	positions_xy.col(1) << 0, +grid_width / 2., 0;
+	{
+		positions_xy.col(0) << 0, -grid_width * scale_axes / 2., 0;
+		positions_xy.col(1) << 0, +grid_width * scale_axes / 2., 0;
 
-	normals_xy.col(0) << 0., 0., 0.;
-	normals_xy.col(1) << 0., 0., 0.;
+		normals_xy.col(0) << 0., 0., 0.;
+		normals_xy.col(1) << 0., 0., 0.;
 
-	nanogui::Color colory(0.25f, 1.0f, 0.25f, 1.0f);
-	shader.setUniform("u_color", colory);
-	shader.setUniform("u_solid", true, false);
+		nanogui::Color colory(0.25f, 1.0f, 0.25f, 1.0f);
+		shader.setUniform("u_color", colory);
+		shader.setUniform("u_solid", true, false);
 
-	shader.setUniform("u_balls", true, false);
-	shader.uploadAttrib("in_position", positions_xy, false);
-	shader.uploadAttrib("in_normal", normals_xy, false);
+		shader.setUniform("u_balls", true, false);
+		shader.uploadAttrib("in_position", positions_xy, false);
+		shader.uploadAttrib("in_normal", normals_xy, false);
 
-	shader.drawArray(GL_LINES, 0, 2);
-	shader.setUniform("u_solid", false, false);
+		shader.drawArray(GL_LINES, 0, 2);
+		shader.setUniform("u_solid", false, false);
+	}
 
 	// Draw the z axis
-	positions_xy.col(0) << 0, 0, -grid_width / 2.;
-	positions_xy.col(1) << 0, 0, +grid_width / 2.;
+	{
+		positions_xy.col(0) << 0, 0, -grid_width * scale_axes / 2.;
+		positions_xy.col(1) << 0, 0, +grid_width * scale_axes / 2.;
 
-	normals_xy.col(0) << 0., 0., 0.;
-	normals_xy.col(1) << 0., 0., 0.;
+		normals_xy.col(0) << 0., 0., 0.;
+		normals_xy.col(1) << 0., 0., 0.;
 
-	nanogui::Color colorz(0.25f, 0.25f, 1.0f, 1.0f);
-	shader.setUniform("u_color", colorz);
-	shader.setUniform("u_solid", true, false);
+		nanogui::Color colorz(0.25f, 0.25f, 1.0f, 1.0f);
+		shader.setUniform("u_color", colorz);
+		shader.setUniform("u_solid", true, false);
 
-	shader.setUniform("u_balls", true, false);
-	shader.uploadAttrib("in_position", positions_xy, false);
-	shader.uploadAttrib("in_normal", normals_xy, false);
+		shader.setUniform("u_balls", true, false);
+		shader.uploadAttrib("in_position", positions_xy, false);
+		shader.uploadAttrib("in_normal", normals_xy, false);
 
-	shader.drawArray(GL_LINES, 0, 2);
-	shader.setUniform("u_solid", false, false);
+		shader.drawArray(GL_LINES, 0, 2);
+		shader.setUniform("u_solid", false, false);
+	}
 
+	// Reset the buffers
+	view = getViewMatrix();
+	projection = getProjectionMatrix();
+	viewProjection = projection * view;
+	shader.setUniform("u_view_projection", viewProjection);
 
 	int total_points = (grid_num_blocks + 1) * 2 * 2;
 	MatrixXf positions(3, total_points);
