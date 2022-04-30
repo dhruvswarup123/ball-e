@@ -51,6 +51,10 @@ namespace Balle
 		void generate_bmesh();
 		void subdivision();
 		void remesh();
+		void remesh_flip() { __remesh_flip(*mesh); };
+		void remesh_collapse() { __remesh_collapse(*mesh); };
+		void remesh_split() { __remesh_split(*mesh); };
+		void remesh_average() { __remesh_average(*mesh); };
 
 		/******************************
 		 * Structual Manipulation     *
@@ -108,6 +112,11 @@ namespace Balle
 		 ******************************/
 		void __catmull_clark(HalfedgeMesh& mesh);
 		void __remesh(HalfedgeMesh& mesh);
+
+		void __remesh_split(HalfedgeMesh& mesh);
+		void __remesh_collapse(HalfedgeMesh& mesh);
+		void __remesh_flip(HalfedgeMesh& mesh);
+		void __remesh_average(HalfedgeMesh& mesh);
 
 		/******************************
 		 * Debugging                  *

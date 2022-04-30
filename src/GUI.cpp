@@ -597,6 +597,20 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 		case '7': // top view
 			resetCamera_xy();
 			break;
+
+		case '2':
+			bmesh->remesh_split();
+			break;
+		case '4':
+			bmesh->remesh_collapse();
+			break;
+		case '6':
+			bmesh->remesh_flip();
+			break;
+		case '8':
+			bmesh->remesh_average();
+			break;
+
 		case 'x':
 		case 'X':
 			// Delete the currently selected sphere

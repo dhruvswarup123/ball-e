@@ -540,6 +540,7 @@ namespace Balle
 		}
 		__catmull_clark(*mesh);
 	}
+
 	void BMesh::remesh()
 	{
 		__remesh(*mesh);
@@ -697,8 +698,7 @@ namespace Balle
 		Logger::info("CC division: call subdivision, finish connecting new mesh");
 	}
 
-	void BMesh::__remesh(HalfedgeMesh &mesh)
-	{
+	void BMesh::__remesh_split(HalfedgeMesh &mesh){
 		// Edge split operation
 		vector<EdgeIter> edges;
 
@@ -726,12 +726,15 @@ namespace Balle
 		{
 			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
 			{
-				// mesh.splitEdge(e);
+				mesh.splitEdge(e);
 			}
 		}
+	}
 
+	void BMesh::__remesh_collapse(HalfedgeMesh &mesh){
+		
 		// Edge collapse operation
-		edges.clear();
+		vector<EdgeIter> edges;
 
 		for (FaceIter f = mesh.facesBegin(); f != mesh.facesEnd(); f++)
 		{
@@ -766,16 +769,17 @@ namespace Balle
 		{
 			if (e->isDeleted)
 			{
-				// mesh.deleteEdge(e);
+				mesh.deleteEdge(e);
 				Logger::warn("remesh: !! Deleted edge !!");
 			}
 		}
 
 		Logger::info("remesh: deleted");
+	}
 
-		/*
+	void BMesh::__remesh_flip(HalfedgeMesh &mesh){
 		// Edge flip operation
-		edges.clear();
+		vector<EdgeIter> edges;
 
 		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
 		{
@@ -809,11 +813,12 @@ namespace Balle
 		for (EdgeIter e : edges)
 		{
 			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
-				// mesh.flipEdge(e);
+				mesh.flipEdge(e);
 			}
 		}
-		*/
+	}
 
+	void BMesh::__remesh_average(HalfedgeMesh &mesh){
 		// Vertex average
 		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
 		{
@@ -841,9 +846,11 @@ namespace Balle
 
 		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
 		{
-			// v->position = v->newPosition;
+			v->position = v->newPosition;
 		}
 	}
+
+	
 
 	/******************************
 	 * PRIVATE                    *
