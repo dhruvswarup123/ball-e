@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
 	setGLFWCallbacks();
 
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window) && app->is_alive)
 	{
 		glfwPollEvents();
 

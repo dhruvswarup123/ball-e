@@ -881,6 +881,7 @@ void GUI::grab_node(double x, double y)
 		Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
 		Vector4f original_screenpos = viewProjection * original_worldpos;
 		Vector4f movebyvec(x - grab_mouse_x, -(y - grab_mouse_y), 0, 0);
+		movebyvec /= screen->pixelRatio();
 
 		Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
 		Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
@@ -981,13 +982,20 @@ void GUI::initGUI(Screen* screen)
 	 *	a. Button to reset camera views
 	 */
 
-	Window* window;
+	shader_method_window = new Window(screen, "                Shader Method                ");
+	shader_method_window->setPosition(Vector2i(default_window_size(0) - 245, 15));
+	shader_method_window->setLayout(new GroupLayout(15, 6, 14, 5));
 
-	window = new Window(screen, "                Shader Method                ");
-	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
-	window->setLayout(new GroupLayout(15, 6, 14, 5));
+	shader_method_label = new Label(shader_method_window, "Shader Method", "sans-bold");
 
-	shader_method_label = new Label(window, "Shader Method", "sans-bold");
+	file_menu_window = new Window(screen, "File");
+	file_menu_window->setPosition(Vector2i(15, 15));
+	file_menu_window->setSize(Vector2i(200, 200));
+	shader_method_window->setLayout(new GridLayout(nanogui::Orientation::Vertical, 2));
+	file_menu_load_button = new Button(file_menu_window, "Load .balle file");
+	file_menu_load_button->setCallback([this](){ this->load_bmesh_from_file();});
+	file_menu_save_button = new Button(file_menu_window, "Save .balle file");
+	file_menu_save_button->setCallback([this](){ this->save_bmesh_to_file();});
 	// sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
 
 	/*
