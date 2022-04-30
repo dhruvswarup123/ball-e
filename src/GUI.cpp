@@ -240,9 +240,9 @@ void GUI::drawGrid(GLShader& shader) {
 	Matrix4f viewProjection = projection * view;
 	Matrix4f temp;
 	temp << 0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0,
-			0, 0, 0, 0;
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0;
 
 	viewProjection += temp;
 
