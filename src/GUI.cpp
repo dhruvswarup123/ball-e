@@ -1022,28 +1022,14 @@ void GUI::initGUI(Screen* screen)
 		extrude_but->setFontSize(14);
 		extrude_but->setCallback([this] {extrude_node(); });
 
-		// Grab breaks the normal movement
-		/*Button* switch_but = new Button(window, "Grab node");
-		switch_but ->setFlags(Button::ToggleButton);
-		switch_but ->setFontSize(14);
-		switch_but->setChangeCallback([this](bool state) {
-				grab_state = !grab_state;
-			});*/
 	}
 	new Label(window, "Control Mode", "sans-bold");
 
 	{
-		// Always enabled --- no harm
-		/*CheckBox* keyboard_cb = new CheckBox(window, "Keyboard Control");
-		keyboard_cb->setFontSize(14);
-		keyboard_cb->setChecked(true);
-		keyboard_cb->setCallback([this](bool state){keyboard_enable = !keyboard_enable;});*/
-
 		CheckBox* mouse_cb = new CheckBox(window, "Mouse Grab/Scale");
 		mouse_cb->setFontSize(14);
 		mouse_cb->setChecked(true);
 		mouse_cb->setCallback([this](bool state) {mouse_enable = !mouse_enable; });
-
 	}
 	new Label(window, "Camera View", "sans-bold");
 
