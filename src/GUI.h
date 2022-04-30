@@ -144,8 +144,10 @@ private:
 	void finish_grab_scale();
 	void delete_node();
 	void extrude_node();
-	void grab_node(double x, double y);
-	void scale_node(double x, double y);
+	void grab_node();
+	void grab_node_action();
+	void scale_node_action();
+	void scale_node();
 	void select_next();
 	void select_parent();
 	void select_child();

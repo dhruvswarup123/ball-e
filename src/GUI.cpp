@@ -31,7 +31,7 @@ void GUI::load_shaders()
 
 	std::string std_vert_shader = m_project_root + "/shaders/Default.vert";
 
-	for (const std::string &shader_fname : shader_folder_contents)
+	for (const std::string& shader_fname : shader_folder_contents)
 	{
 		std::string file_extension;
 		std::string shader_name;
@@ -56,7 +56,7 @@ void GUI::load_shaders()
 
 		std::shared_ptr<GLShader> nanogui_shader = make_shared<GLShader>();
 		nanogui_shader->initFromFiles(shader_name, vert_shader,
-									  m_project_root + "/shaders/" + shader_fname);
+			m_project_root + "/shaders/" + shader_fname);
 
 		// Special filenames are treated a bit differently
 		ShaderTypeHint hint;
@@ -93,7 +93,7 @@ void GUI::load_shaders()
 	}
 }
 
-GUI::GUI(std::string project_root, Screen *screen)
+GUI::GUI(std::string project_root, Screen* screen)
 	: m_project_root(project_root)
 {
 	this->screen = screen;
@@ -137,7 +137,7 @@ void GUI::init()
 	Vector3D avg_pm_position(0, 0, 0);
 
 	CGL::Vector3D target(avg_pm_position.x, avg_pm_position.y / 2,
-						 avg_pm_position.z);
+		avg_pm_position.z);
 	CGL::Vector3D c_dir(0., 0., 0.);
 	canonical_view_distance = 0.9;
 	scroll_rate = canonical_view_distance / 10;
@@ -149,16 +149,16 @@ void GUI::init()
 	// canonicalCamera is a copy used for view resets
 
 	camera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z), view_distance,
-				 min_view_distance, max_view_distance);
+		min_view_distance, max_view_distance);
 	canonicalCamera.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-						  view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 
 	canonicalCamera_xy.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-							 view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_xy.rotate_by(-PI / 2, 0);
 
 	canonicalCamera_yz.place(target, acos(c_dir.y), atan2(c_dir.x, c_dir.z),
-							 view_distance, min_view_distance, max_view_distance);
+		view_distance, min_view_distance, max_view_distance);
 	canonicalCamera_yz.rotate_by(0, -PI / 2);
 
 	screen_w = default_window_size(0);
@@ -174,9 +174,9 @@ void GUI::drawContents()
 
 	// Bind the active shader
 
-	const UserShader &active_shader = shaders[active_shader_idx];
+	const UserShader& active_shader = shaders[active_shader_idx];
 
-	GLShader &shader = *active_shader.nanogui_shader;
+	GLShader& shader = *active_shader.nanogui_shader;
 	shader.bind();
 
 	// Prepare the camera projection matrix
@@ -229,7 +229,7 @@ void GUI::drawContents()
 	}
 }
 
-void GUI::drawGrid(GLShader &shader)
+void GUI::drawGrid(GLShader& shader)
 {
 	int grid_num_blocks = 40;
 	float grid_width = 20;
@@ -355,7 +355,7 @@ void GUI::drawGrid(GLShader &shader)
 	shader.setUniform("u_solid", false, false);
 }
 
-void GUI::drawWireframe(GLShader &shader)
+void GUI::drawWireframe(GLShader& shader)
 {
 	drawGrid(shader);
 
@@ -464,9 +464,17 @@ bool GUI::cursorPosCallbackEvent(double x, double y)
 	{
 		mouseRightDragged(x, y);
 	}
-	else if (!left_down && !middle_down && !right_down)
-	{
+	else if (!left_down && !middle_down && !right_down) {
 		mouseMoved(x, y);
+
+		// Nothing was clicked
+		// check and perform grabbing if needed
+		if (gui_state == GUI_STATES::SCALING) {
+			scale_node_action();
+		}
+		else if (gui_state == GUI_STATES::GRABBING) {
+			grab_node_action();
+		}
 	}
 
 	mouse_x = x;
@@ -475,12 +483,25 @@ bool GUI::cursorPosCallbackEvent(double x, double y)
 	return true;
 }
 
+void GUI::scale_node_action() {
+	double scaleval = sqrt(pow(scale_mouse_x - mouse_x, 2) + pow(scale_mouse_y - mouse_y, 2)) * 0.002;
+
+	if (mouse_x > scale_mouse_x) { // Scale up
+		selected->radius = original_rad + scaleval;
+	}
+	else {
+		if (original_rad - scaleval > 0.01) {
+			selected->radius = original_rad - scaleval;
+		}
+		else {
+			selected->radius = 0.01;
+		}
+	}
+}
+
 bool GUI::mouseButtonCallbackEvent(int button, int action,
-								   int modifiers)
+	int modifiers)
 {
-	// if(grab_state){
-	// 	return false;
-	// }
 	switch (action)
 	{
 	case GLFW_PRESS:
@@ -488,13 +509,24 @@ bool GUI::mouseButtonCallbackEvent(int button, int action,
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			// Find point here.
-			left_down = true;
 			sceneIntersect(mouse_x, mouse_y);
+			if (selected != nullptr) {
+				grab_mouse_x = mouse_x;
+				grab_mouse_y = mouse_y;
+				original_pos = selected->pos;
+			}
+			left_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = true;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
+			if (selected != nullptr) {
+				scale_mouse_x = mouse_x;
+				scale_mouse_y = mouse_y;
+				original_rad = selected->radius;
+			}
+			//reset_grab_scale();
 			right_down = true;
 			break;
 		}
@@ -505,14 +537,14 @@ bool GUI::mouseButtonCallbackEvent(int button, int action,
 		{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			left_down = false;
-			finish_grab_scale();
+			//finish_grab_scale();
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			middle_down = false;
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			right_down = false;
-			finish_grab_scale();
+			//finish_grab_scale();
 			break;
 		}
 		return true;
@@ -523,7 +555,6 @@ bool GUI::mouseButtonCallbackEvent(int button, int action,
 
 void GUI::finish_grab_scale()
 {
-
 	gui_state = GUI_STATES::IDLE;
 }
 
@@ -552,31 +583,46 @@ void GUI::mouseLeftDragged(double x, double y)
 {
 	float dx = x - mouse_x;
 	float dy = y - mouse_y;
-	if (selected == nullptr)
-	{
+
+	if (selected == nullptr) {
 		camera.rotate_by(-dy * (PI / screen_h), -dx * (PI / screen_w));
+
 	}
-	else
-	{
-		if(mouse_enable) grab_node(x, y);
+	else if (mouse_enable) {
+		grab_node_action();
 	}
 }
 
+void GUI::grab_node_action() {
+	Matrix4f view = getViewMatrix();
+	Matrix4f projection = getProjectionMatrix();
+	Matrix4f viewProjection = projection * view; // World to screen
+
+	// Get the original position of the sphere
+	Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
+
+	Vector4f original_screenpos = viewProjection * original_worldpos;
+
+	Vector4f movebyvec(mouse_x - grab_mouse_x, -(mouse_y - grab_mouse_y), 0, 0);
+
+	Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
+	Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
+	selected->pos = sphere_pos_world_v3d;
+}
+
+
 void GUI::mouseRightDragged(double x, double y)
 {
-	if (selected == nullptr)
-	{
+	if (selected == nullptr) {
 		camera.move_by(mouse_x - x, y - mouse_y, canonical_view_distance);
 	}
-	else
-	{
-		
-		if(mouse_enable) scale_node(x, y);
+	else if (mouse_enable){
+		scale_node_action();
 	}
 }
 
 bool GUI::keyCallbackEvent(int key, int scancode, int action,
-						   int mods)
+	int mods)
 {
 	//if(!keyboard_enable) return false;
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
@@ -617,12 +663,12 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 		case 'g':
 		case 'G':
 			// Extrude the currently sel sphere
-			// grab_node();
+			grab_node();
 			break;
 		case 's':
 		case 'S':
 			// Extrude the currently sel sphere
-			// scale_node();
+			scale_node();
 			if (ctrl_down)
 			{
 				save_bmesh_to_file();
@@ -653,11 +699,14 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 			{
 				bmesh->clear_mesh();
 			}
+
 			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices || bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices) {
 				file_menu_export_obj_button->setEnabled(true);
-			} else {
+			}
+			else {
 				file_menu_export_obj_button->setEnabled(false);
 			}
+
 			break;
 		case 'W':
 		case 'w':
@@ -705,7 +754,7 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 void GUI::export_bmesh()
 {
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
-		  (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
+		(bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
 	{
 		Logger::error("Export Failed - No mesh to export.");
 		return;
@@ -713,7 +762,7 @@ void GUI::export_bmesh()
 
 	std::string filename;
 
-	filename = nanogui::file_dialog({{"obj", "obj"}}, true);
+	filename = nanogui::file_dialog({ {"obj", "obj"} }, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -732,7 +781,7 @@ void GUI::save_bmesh_to_file()
 {
 	std::string filename;
 
-	filename = nanogui::file_dialog({{"balle", "balle"}}, true);
+	filename = nanogui::file_dialog({ {"balle", "balle"} }, true);
 	if (filename.length() == 0)
 	{
 		return;
@@ -763,7 +812,7 @@ void GUI::save_bmesh_to_file()
 
 void GUI::load_bmesh_from_file()
 {
-	std::string filename = nanogui::file_dialog({{"balle", "balle"}}, false);
+	std::string filename = nanogui::file_dialog({ {"balle", "balle"} }, false);
 	bmesh->load_from_file(filename);
 }
 
@@ -782,41 +831,17 @@ void GUI::select_child()
 	bmesh->select_child_skeletal_node(selected);
 }
 
-void GUI::scale_node(double x, double y)
-{
-	if (selected == nullptr || selected->interpolated)
-	{
+void GUI::scale_node() {
+	if (selected == NULL) {
 		return;
 	}
-
-	if (gui_state == GUI_STATES::IDLE)
-	{
+	else if (gui_state == GUI_STATES::IDLE) {
 		scale_mouse_x = mouse_x;
 		scale_mouse_y = mouse_y;
 		original_rad = selected->radius;
 		gui_state = GUI_STATES::SCALING;
 
 		cout << "Scaling" << endl;
-	}
-	else
-	{
-		double scaleval = sqrt(pow(scale_mouse_x - x, 2) + pow(scale_mouse_y - y, 2)) * 0.002;
-
-		if (mouse_x > scale_mouse_x)
-		{ // Scale up
-			selected->radius = original_rad + scaleval;
-		}
-		else
-		{
-			if (original_rad - scaleval > 0.01)
-			{
-				selected->radius = original_rad - scaleval;
-			}
-			else
-			{
-				selected->radius = 0.01;
-			}
-		}
 	}
 }
 
@@ -842,12 +867,12 @@ void GUI::extrude_node()
 {
 	if ((selected == nullptr && bmesh->get_all_node().size() > 0) || (selected != nullptr && selected->interpolated))
 	{
-		return ;
+		return;
 	}
 
 	if (gui_state == GUI_STATES::IDLE)
 	{
-		Balle::SkeletalNode *temp = bmesh->create_skeletal_node_after(selected);
+		Balle::SkeletalNode* temp = bmesh->create_skeletal_node_after(selected);
 		if (selected != nullptr)
 		{
 			Vector3D offset(0.05, 0.05, 0.05);
@@ -862,43 +887,24 @@ void GUI::extrude_node()
 		selected = temp;
 		selected->selected = true;
 	}
-	
+
 }
 
-void GUI::grab_node(double x, double y)
-{
-	if (selected == nullptr || selected->interpolated||!grab_state)
-	{
+void GUI::grab_node() {
+	if (selected == NULL) {
 		return;
 	}
-
-	if (gui_state == GUI_STATES::IDLE)
-	{
-		gui_state = GUI_STATES::GRABBING;
+	else {
+		cout << "Grabbed" << endl;
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
 		original_pos = selected->pos;
-		// cout << "gbms: " << grab_mouse_x << " " << grab_mouse_y << endl;
-	}
-	else if (gui_state == GUI_STATES::GRABBING)
-	{
+
+		gui_state = GUI_STATES::GRABBING;
+
 		// do grab stuff
 		// set state to grabbing
 		// remove grab state in the callback func
-		// First change the point to camera coordanates
-		Matrix4f view = getViewMatrix();
-		Matrix4f projection = getProjectionMatrix();
-		Matrix4f viewProjection = projection * view; // World to screen
-
-		// Get the original position of the sphere
-		Vector4f original_worldpos(original_pos.x, original_pos.y, original_pos.z, 1.);
-		Vector4f original_screenpos = viewProjection * original_worldpos;
-		Vector4f movebyvec(x - grab_mouse_x, -(y - grab_mouse_y), 0, 0);
-		movebyvec /= screen->pixelRatio();
-
-		Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
-		Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
-		selected->pos = sphere_pos_world_v3d;
 	}
 }
 
@@ -911,10 +917,16 @@ void GUI::sceneIntersect(double x, double y)
 {
 	// Go over each sphere, and check if it intersects
 	// TODO: NO support for layered spheres, NO support for random radius
-	bool found = false;
 	// cout << "x/screen_w: " << x << "/" << screen_w << " y/screen_h: " << y << "/" << screen_h << endl;
 
-	for (Balle::SkeletalNode *node : bmesh->get_all_node())
+	if (gui_state == GUI_STATES::GRABBING || gui_state == GUI_STATES::SCALING) {
+		gui_state = GUI_STATES::IDLE;
+		cout << "Done grabbing. Cant move it anymore" << endl;
+		return;
+	}
+	bool found = false;
+
+	for (Balle::SkeletalNode* node : bmesh->get_all_node())
 	{
 		Matrix4f view = getViewMatrix();
 		Matrix4f projection = getProjectionMatrix();
@@ -940,6 +952,7 @@ void GUI::sceneIntersect(double x, double y)
 
 			selected = node; // remove this
 			selected->selected = true;
+
 			found = true;
 			break;
 		}
@@ -952,7 +965,7 @@ void GUI::sceneIntersect(double x, double y)
 	}
 }
 
-bool GUI::dropCallbackEvent(int count, const char **filenames)
+bool GUI::dropCallbackEvent(int count, const char** filenames)
 {
 	return true;
 }
@@ -972,30 +985,30 @@ bool GUI::resizeCallbackEvent(int width, int height)
 	return true;
 }
 
-void GUI::initGUI(Screen *screen)
+void GUI::initGUI(Screen* screen)
 {
 	/*
 	* Things required in the GUI:
-	* 1. SkeletalNode controls. 
-	*	For grab, scale, extrude: 
+	* 1. SkeletalNode controls.
+	*	For grab, scale, extrude:
 	*	a. Have a button that enables each of these, and that automatically resets when action is completed --done
 	*	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) ) --done
-	*	c. Maybe hover to show keybind. 
+	*	c. Maybe hover to show keybind.
 	*	d. Reset mesh to many default shapes? Have a list of prebuilt shapes --urgent
-	* 
+	*
 	*	For Interpolation:
 	*	a. Button to maybe refresh?
-	* 
-	* 2. Mesh Controls: 
+	*
+	* 2. Mesh Controls:
 	*	a. Slider for number of subdivs, apply subdiv automatically --working on this
 	*	b. Switching between wireframe, and normal mode
-	*	c. Text output/ Small output window showing terminal output/ warnings/errors/ 
-	* 
+	*	c. Text output/ Small output window showing terminal output/ warnings/errors/
+	*
 	* 3. Misc:
 	*	a. Button to reset camera views -- done
 	*/
 
-	Window *window;
+	Window* window;
 
 	window = new Window(screen, "                UI Function           ");
 	window->setPosition(Vector2i(default_window_size(0) - 245, 15));
@@ -1004,16 +1017,16 @@ void GUI::initGUI(Screen *screen)
 	new Label(window, "Functions", "sans-bold");
 
 	{
-		Button*  extrude_but = new Button(window, "Extrude");
+		Button* extrude_but = new Button(window, "Extrude");
 		extrude_but->setFlags(Button::ToggleButton);
 		extrude_but->setFontSize(14);
-		extrude_but->setCallback([this] {extrude_node();});
+		extrude_but->setCallback([this] {extrude_node(); });
 
 		// Grab breaks the normal movement
 		/*Button* switch_but = new Button(window, "Grab node");
 		switch_but ->setFlags(Button::ToggleButton);
 		switch_but ->setFontSize(14);
-		switch_but->setChangeCallback([this](bool state) { 
+		switch_but->setChangeCallback([this](bool state) {
 				grab_state = !grab_state;
 			});*/
 	}
@@ -1026,10 +1039,10 @@ void GUI::initGUI(Screen *screen)
 		keyboard_cb->setChecked(true);
 		keyboard_cb->setCallback([this](bool state){keyboard_enable = !keyboard_enable;});*/
 
-		CheckBox* mouse_cb = new CheckBox(window, "Mouse Control");
+		CheckBox* mouse_cb = new CheckBox(window, "Mouse Grab/Scale");
 		mouse_cb->setFontSize(14);
 		mouse_cb->setChecked(true);
-		mouse_cb->setCallback([this](bool state){mouse_enable = !mouse_enable;});
+		mouse_cb->setCallback([this](bool state) {mouse_enable = !mouse_enable; });
 
 	}
 	new Label(window, "Camera View", "sans-bold");
@@ -1041,32 +1054,33 @@ void GUI::initGUI(Screen *screen)
 		//cb->setCallback(
 		//	[this, screen](int idx) { active_camera_idx = idx; });
 		cb->setSelectedIndex(active_camera_idx);
-		cb->setCallback([this](int id){
-			if(id == 0){
+		cb->setCallback([this](int id) {
+			if (id == 0) {
 				resetCamera();
 			}
-			else if(id == 1){
+			else if (id == 1) {
 				resetCamera_yz();
 
-			}else{
+			}
+			else {
 				resetCamera_xy();
 			}
-		});
+			});
 
 	}
 	new Label(window, "Import/Export File", "sans-bold");
 	{
 		file_menu_load_button = new Button(window, "Load .balle file");
 		file_menu_load_button->setCallback([this]()
-										{ this->load_bmesh_from_file(); });
-		file_menu_load_button->setFontSize(14);								
+			{ this->load_bmesh_from_file(); });
+		file_menu_load_button->setFontSize(14);
 		file_menu_save_button = new Button(window, "Save .balle file");
 		file_menu_save_button->setCallback([this]()
-										{ this->save_bmesh_to_file(); });
-		file_menu_save_button->setFontSize(14);									
+			{ this->save_bmesh_to_file(); });
+		file_menu_save_button->setFontSize(14);
 		file_menu_export_obj_button = new Button(window, "Export .obj file");
 		file_menu_export_obj_button->setCallback([this]()
-												{ this->export_bmesh(); });
+			{ this->export_bmesh(); });
 		file_menu_export_obj_button->setFontSize(14);
 	}
 	new Label(window, "Mesh Display", "sans-bold");
@@ -1075,11 +1089,23 @@ void GUI::initGUI(Screen *screen)
 		cb->setSide(Popup::Left);
 		cb->setFontSize(14);
 		cb->setSelectedIndex(active_display_idx);
-		cb->setCallback([this](int id){
-			if (id == 0){
-				bmesh->shader_method = Balle::Method::mesh_faces_no_indices;
-			}else if(id == 1){
-				bmesh->shader_method = Balle::Method::mesh_wireframe_no_indices;
+		cb->setCallback([this](int id) {
+
+			if (id == 0) {
+				if (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices) {
+					bmesh->shader_method = Balle::Method::mesh_faces_no_indices;
+				}
+				else if (bmesh->shader_method == Balle::Method::polygons_wirefame_no_indices) {
+					bmesh->shader_method = Balle::Method::polygons_no_indices;
+				}
+			}
+			else if (id == 1) {
+				if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices) {
+					bmesh->shader_method = Balle::Method::mesh_wireframe_no_indices;
+				}
+				else if (bmesh->shader_method == Balle::Method::polygons_no_indices) {
+					bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
+				}
 			}
 		});
 
@@ -1087,7 +1113,7 @@ void GUI::initGUI(Screen *screen)
 	// shader_method_window = new Window(screen, "                Shader Method                ");
 	// shader_method_window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	// shader_method_window->setLayout(new GroupLayout(15, 6, 14, 5));
-	
+
 
 	// file_menu_window = new Window(screen, "File");
 	// file_menu_window->setPosition(Vector2i(15, 15));
