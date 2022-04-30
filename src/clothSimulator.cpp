@@ -499,7 +499,7 @@ void ClothSimulator::mouseLeftDragged(double x, double y)
 	}
 	else
 	{
-		grab_node(x, y);
+		if(mouse_enable) grab_node(x, y);
 	}
 }
 
@@ -511,7 +511,8 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 	}
 	else
 	{
-		scale_node(x, y);
+		
+		if(mouse_enable) scale_node(x, y);
 	}
 }
 
@@ -519,6 +520,7 @@ void ClothSimulator::mouseRightDragged(double x, double y)
 bool ClothSimulator::keyCallbackEvent(int key, int scancode, int action,
 									  int mods)
 {
+	if(!keyboard_enable) return false;
 	ctrl_down = (bool)(mods & GLFW_MOD_CONTROL);
 
 	if (action == GLFW_PRESS)
@@ -898,8 +900,8 @@ void ClothSimulator::initGUI(Screen *screen)
 	* Things required in the GUI:
 	* 1. SkeletalNode controls. 
 	*	For grab, scale, extrude: 
-	*	a. Have a button that enables each of these, and that automatically resets when action is completed
-	*	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) )
+	*	a. Have a button that enables each of these, and that automatically resets when action is completed --done
+	*	b. Have a checkbox to enable/disable mouse/keyboard based control for s, g. (I preferred that lol :) ) --done
 	*	c. Maybe hover to show keybind. 
 	*	d. Reset mesh to many default shapes? Have a list of prebuilt shapes
 	* 
@@ -907,12 +909,12 @@ void ClothSimulator::initGUI(Screen *screen)
 	*	a. Button to maybe refresh?
 	* 
 	* 2. Mesh Controls: 
-	*	a. Slider for number of subdivs, apply subdiv automatically
+	*	a. Slider for number of subdivs, apply subdiv automatically --working on this
 	*	b. Switching between wireframe, and normal mode
-	*	c. Text output/ Small output window showing terminal output/ warnings/errors/ 
+	*	c. Text output/ Small output window showing terminal output/ warnings/errors/  --working on this
 	* 
 	* 3. Misc:
-	*	a. Button to reset camera views
+	*	a. Button to reset camera views -- done
 	*/
 
 	Window *window;
@@ -927,21 +929,48 @@ void ClothSimulator::initGUI(Screen *screen)
 	{
 		Button*  extrude_but = new Button(window, "Extrude");
 		extrude_but->setFlags(Button::ToggleButton);
-		//b->setPushed(cp->enable_structural_constraints);
 		extrude_but->setFontSize(14);
 		extrude_but->setCallback([this] {extrude_node();});
-		// Button* scale_but = new Button(window, "scale");
-		// scale_but ->setFlags(Button::ToggleButton);
-		// //b->setPushed(cp->enable_shearing_constraints);
-		// scale_but ->setFontSize(14);
-		// scale_but ->setCallback([this] {extrude_node();});
 		Button* switch_but = new Button(window, "Grab node");
 		switch_but ->setFlags(Button::ToggleButton);
-		//b->setPushed(cp->enable_shearing_constraints);
 		switch_but ->setFontSize(14);
 		switch_but->setChangeCallback([this](bool state) { 
 				grab_state = !grab_state;
 			});
+	}
+	new Label(window, "Control Mode", "sans-bold");
+
+	{
+		CheckBox* keyboard_cb = new CheckBox(window, "Keyboard Control");
+		keyboard_cb->setFontSize(14);
+		keyboard_cb->setChecked(true);
+		keyboard_cb->setCallback([this](bool state){keyboard_enable = !keyboard_enable;});
+		CheckBox* mouse_cb = new CheckBox(window, "Mouse Control");
+		mouse_cb->setFontSize(14);
+		mouse_cb->setChecked(true);
+		mouse_cb->setCallback([this](bool state){mouse_enable = !mouse_enable;});
+
+	}
+	new Label(window, "Camera View", "sans-bold");
+
+	{
+		ComboBox* cb = new ComboBox(window, cameraview_names);
+		cb->setSide(Popup::Left);
+		cb->setFontSize(14);
+		cb->setCallback(
+			[this, screen](int idx) { active_camera_idx = idx; });
+		cb->setSelectedIndex(active_camera_idx);
+		cb->setCallback([this](int id){
+			if(id == 0){
+				resetCamera();
+			}
+			else if(id == 1){
+				resetCamera_yz();
+
+			}else{
+				resetCamera_xy();
+			}
+		});
 
 	}
 	// sshader_method_label->setLayout(new GroupLayout(15, 6, 14, 5));
