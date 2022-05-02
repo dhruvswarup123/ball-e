@@ -748,6 +748,12 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 			break;
 		case 'R':
 		case 'r':
+			if (ctrl_down)
+			{
+				bmesh->remesh();
+				break;
+			}
+			
 			bmesh->clear_mesh();
 			delete bmesh;
 			init();

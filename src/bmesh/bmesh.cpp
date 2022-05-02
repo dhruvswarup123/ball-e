@@ -543,7 +543,10 @@ namespace Balle
 
 	void BMesh::remesh()
 	{
-		//__remesh(*mesh);
+		__remesh_flip(*mesh);
+		__remesh_collapse(*mesh);
+		__remesh_split(*mesh);
+		__remesh_average(*mesh);
 	}
 
 	Vector3D get_face_point(const FaceIter f)
@@ -766,16 +769,6 @@ namespace Balle
 				mesh.collapseEdge(e);
 			}
 		}
-
-		int k{ 0 };
-		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
-		{
-			if (e->isDeleted)
-			{
-				k++;
-			}
-		}
-		Logger::info("k " + to_string(k));
 
 		int n{0};
 
