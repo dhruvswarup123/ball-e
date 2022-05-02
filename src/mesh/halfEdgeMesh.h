@@ -626,6 +626,8 @@ namespace CGL
         void deleteFace(FaceIter f) { faces.erase(f); }
         void deleteBoundary(FaceIter b) { boundaries.erase(b); }
 
+        EdgeIter ReturnDeleteEdge(EdgeIter e) { return edges.erase(e); }
+
         /* For a triangle mesh, you will implement the following
          * basic edge operations.  (Can you generalize to other
          * polygonal meshes?)

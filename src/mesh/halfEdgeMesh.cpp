@@ -733,7 +733,7 @@ namespace CGL {
          e1->isDeleted = true;
          e4->isDeleted = true;
          
-        std::cout << "finish collapse once " << std::endl;
+        //std::cout << "finish collapse once " << std::endl;
         return v0;
     }
 
