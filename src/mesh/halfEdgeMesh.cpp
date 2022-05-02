@@ -703,7 +703,7 @@ namespace CGL {
          v0->halfedge() = h7;
          v2->halfedge() = h8;
          v3->halfedge() = h6;
-         v0->position = (v0->position + v1->position);
+         v0->position = (v0->position + v1->position)/2.0;
 
          // Fix Edges
          e2->halfedge() = h8;
