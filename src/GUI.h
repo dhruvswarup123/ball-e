@@ -173,6 +173,10 @@ private:
 	Button* file_menu_export_obj_button;
 	Window* shader_method_window;
 	Label* shader_method_label;
+
+	// save frame
+	string get_frame_name(int index);
+	void write_screen_shot(int index);
 };
 
 struct UserShader

@@ -3,6 +3,7 @@
 
 #include <CGL/vector3D.h>
 #include <nanogui/nanogui.h>
+#include "CGL/lodepng.h"
 
 #include "GUI.h"
 #include "logger.h"
@@ -644,6 +645,10 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 			resetCamera_xy();
 			break;
 
+		case '0': // screen shot once
+			write_screen_shot(0);
+			break;
+
 		case '2':
 			bmesh->remesh_split();
 			break;
@@ -1116,6 +1121,7 @@ void GUI::initGUI(Screen* screen)
 		});
 
 	}
+	
 	// shader_method_window = new Window(screen, "                Shader Method                ");
 	// shader_method_window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	// shader_method_window->setLayout(new GroupLayout(15, 6, 14, 5));
@@ -1367,4 +1373,45 @@ void GUI::initGUI(Screen* screen)
 	}
 
 	*/
+
+
+	
 }
+
+string GUI::get_frame_name(int index){
+	string file_name;
+	string x = to_string(index);
+
+	for (int i=0; i<5 - x.size(); i++){
+		file_name.append("0"); }
+	file_name.append(x);
+	file_name.append(".png");
+	return file_name;
+}
+
+
+	void GUI::write_screen_shot(int index){
+	int width = screen_w;
+	int height = screen_h;
+
+	vector<unsigned char> windowPixels(4 * width * height);
+	glReadPixels(0, 0,
+		width,
+		height,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		&windowPixels[0]);
+
+		vector<unsigned char> flippedPixels(4 * width * height);
+		for (int row = 0; row < height; ++row)
+			memcpy(&flippedPixels[row * width * 4], &windowPixels[(height - row - 1) * width * 4], 4 * width);
+
+		string file_name = get_frame_name(index);
+		std::cout << "Writing file " << file_name << "...";
+		if (lodepng::encode(file_name, flippedPixels, width, height))
+			cerr << "Could not be written" << endl;
+		else
+			cout << "Success!" << endl;
+	}
+
+	
