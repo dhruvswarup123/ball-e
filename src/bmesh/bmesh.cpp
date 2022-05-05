@@ -1444,6 +1444,7 @@ namespace Balle
 		if (result == 0)
 		{
 			shader_method = mesh_faces_no_indices;
+			__catmull_clark(*mesh);
 			Logger::info("HalfedgeMesh building succeeded.");
 		}
 		else

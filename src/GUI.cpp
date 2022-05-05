@@ -498,6 +498,8 @@ void GUI::scale_node_action() {
 			selected->radius = 0.01;
 		}
 	}
+
+	interpolate_spheres();
 }
 
 bool GUI::mouseButtonCallbackEvent(int button, int action,
@@ -609,6 +611,8 @@ void GUI::grab_node_action() {
 	Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
 	Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
 	selected->pos = sphere_pos_world_v3d;
+
+	interpolate_spheres();
 }
 
 
@@ -710,6 +714,8 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 			interpolate_spheres();
 			break;
 		case ' ':
+			interpolate_spheres();
+
 			if (bmesh->shader_method == Balle::Method::not_ready)
 			{
 				bmesh->generate_bmesh();
@@ -911,6 +917,9 @@ void GUI::extrude_node()
 		Logger::info("Created a new node");
 		selected = temp;
 		selected->selected = true;
+
+		interpolate_spheres();
+
 	}
 
 }
