@@ -75,12 +75,18 @@ namespace Balle
 		/******************************
 		 * Rendering Functions        *
 		 ******************************/
-		 // Rendering Class
 		void draw_skeleton(GLShader& shader);
 		void draw_polygon_faces(GLShader& shader);
 		void draw_mesh_faces(GLShader& shader);
 		void draw_polygon_wireframe(GLShader& shader);
 		void draw_mesh_wireframe(GLShader& shader);
+
+		/******************************
+		 * Animation (Shake it!)      *
+		 ******************************/
+		void shake();
+		void tick();
+		void shake_nodes_position();
 
 		/******************************
 		 * Debugging Function         *
@@ -129,6 +135,7 @@ namespace Balle
 	public:
 		// Shader method
 		Method shader_method = not_ready;
+		Method previous_shader_method = not_ready;
 
 	private:
 		// Root of the tree structured skeletal nodes
@@ -146,6 +153,10 @@ namespace Balle
 		vector<Vector3D> fringe_points;
 		vector<Vector3D> all_points;
 		unordered_set<Vector3D> unique_extra_points;
+
+		// Animation
+		unsigned long long ts = 0ULL;
+		bool shaking = false;
 	}; // END_STRUCT BMESH
 };	   // END_NAMESPACE BALLE
 #endif

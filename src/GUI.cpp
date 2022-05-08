@@ -199,18 +199,23 @@ void GUI::drawContents()
 	{
 	case Balle::Method::mesh_faces_no_indices:
 		shader_method_label->setCaption("HalfedgeMesh faces");
+		file_menu_export_obj_button->setEnabled(true);
 		break;
 	case Balle::Method::mesh_wireframe_no_indices:
 		shader_method_label->setCaption("HalfedgeMesh wireframe");
+		file_menu_export_obj_button->setEnabled(true);
 		break;
 	case Balle::Method::polygons_no_indices:
 		shader_method_label->setCaption("Polygon faces");
+		file_menu_export_obj_button->setEnabled(false);
 		break;
 	case Balle::Method::polygons_wirefame_no_indices:
 		shader_method_label->setCaption("Polygon wireframe");
+		file_menu_export_obj_button->setEnabled(false);
 		break;
 	case Balle::Method::not_ready:
 		shader_method_label->setCaption("Skeleton");
+		file_menu_export_obj_button->setEnabled(false);
 		break;
 	}
 
@@ -228,6 +233,7 @@ void GUI::drawContents()
 		drawWireframe(shader);
 		break;
 	}
+	bmesh->tick();
 }
 
 void GUI::drawGrid(GLShader &shader)
@@ -359,7 +365,7 @@ void GUI::drawGrid(GLShader &shader)
 void GUI::drawWireframe(GLShader &shader)
 {
 	drawGrid(shader);
-
+	bmesh->shake_nodes_position();
 	if (bmesh->shader_method == Balle::Method::not_ready)
 	{
 		bmesh->draw_skeleton(shader);
@@ -576,6 +582,7 @@ void GUI::reset_grab_scale()
 	if (gui_state == GUI_STATES::GRABBING)
 	{
 		selected->pos = original_pos;
+		selected->equilibrium = original_pos;
 		cout << "Reset. Cant move it anymore" << endl;
 		gui_state = GUI_STATES::IDLE;
 	}
@@ -623,6 +630,7 @@ void GUI::grab_node_action()
 	Vector4f new_sphere_pos_world = viewProjection.inverse() * (original_screenpos + movebyvec * 0.01);
 	Vector3D sphere_pos_world_v3d(new_sphere_pos_world[0], new_sphere_pos_world[1], new_sphere_pos_world[2]);
 	selected->pos = sphere_pos_world_v3d;
+	selected->equilibrium = sphere_pos_world_v3d;
 
 	interpolate_spheres();
 }
@@ -860,6 +868,7 @@ void GUI::load_bmesh_from_file()
 {
 	std::string filename = nanogui::file_dialog({{"balle", "balle"}}, false);
 	bmesh->load_from_file(filename);
+	bmesh->clear_mesh();
 }
 
 void GUI::select_next()
@@ -934,6 +943,7 @@ void GUI::extrude_node()
 		}
 		Logger::info("Created a new node");
 		selected = temp;
+		temp->equilibrium = temp->pos;
 		selected->selected = true;
 
 		interpolate_spheres();
@@ -964,6 +974,11 @@ void GUI::grab_node()
 void GUI::interpolate_spheres()
 {
 	bmesh->interpolate_spheres();
+}
+
+void GUI::shake_it()
+{
+	bmesh->shake();
 }
 
 void GUI::sceneIntersect(double x, double y)
@@ -1148,6 +1163,10 @@ void GUI::initGUI(Screen *screen)
 					bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
 				}
 			} });
+
+		animation_menu_shake_it_button = new Button(window, "Shake it!");
+		animation_menu_shake_it_button->setCallback([this]()
+										   { this->shake_it(); });
 	}
 
 	// shader_method_window = new Window(screen, "                Shader Method                ");

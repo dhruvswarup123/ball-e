@@ -152,6 +152,7 @@ private:
 	void select_parent();
 	void select_child();
 	void interpolate_spheres();
+	void shake_it();
 
 	// Store scaling stuff
 	float scale_mouse_x = 0;
@@ -171,6 +172,7 @@ private:
 	Button* file_menu_load_button;
 	Button* file_menu_save_button;
 	Button* file_menu_export_obj_button;
+	Button* animation_menu_shake_it_button;
 	Window* shader_method_window;
 	Label* shader_method_label;
 

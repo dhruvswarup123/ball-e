@@ -62,6 +62,7 @@ namespace Balle
 		unique_extra_points.clear();
 
 		vertices.clear();
+		previous_shader_method = shader_method;
 		shader_method = Balle::Method::not_ready;
 	}
 	/******************************
@@ -94,6 +95,48 @@ namespace Balle
 		Balle::Renderer renderer;
 		renderer.draw_mesh_wireframe(shader, mesh, root);
 	}
+
+	void BMesh::tick()
+	{
+		ts++;
+	}
+
+	void BMesh::shake()
+	{
+		shaking = shaking ^ true;
+	}
+
+	void BMesh::shake_nodes_position()
+	{
+		if (!shaking)
+		{
+			return;
+		}
+		clear_mesh();
+		size_t idx = 0;
+		double t = (ts % 360) * PI / 360;
+		for (SkeletalNode *node_ptr : all_nodes)
+		{
+			if (node_ptr->interpolated)
+			{
+				continue;
+			}
+			size_t mode = idx % 3;
+			switch (mode)
+			{
+			case 0:
+				node_ptr->pos.x = sin(t) * 0.05 + node_ptr->equilibrium.x;
+			case 1:
+				node_ptr->pos.y = sin(t) * 0.05 + node_ptr->equilibrium.y;
+			case 2:
+			default:
+				node_ptr->pos.z = sin(t) * 0.05 + node_ptr->equilibrium.z;
+			}
+			idx++;
+		}
+		generate_bmesh();
+	}
+
 	/******************************
 	 * Structural Manipulation    *
 	 ******************************/
@@ -317,7 +360,7 @@ namespace Balle
 
 	void BMesh::export_to_file(const string &filename)
 	{
-		Logger::info("Saving as *** file...");
+		Logger::info("Saving as: " + filename);
 		ofstream file;
 		file.open(filename);
 
@@ -351,7 +394,7 @@ namespace Balle
 
 	void BMesh::save_to_file(const string &filename)
 	{
-		Logger::info("Saving as .balle file...");
+		Logger::info("Saving as: " + filename);
 		// Load all info into json
 		json j;
 		__skeleton_to_json(j);
@@ -522,7 +565,7 @@ namespace Balle
 
 	void BMesh::generate_bmesh()
 	{
-		// interpolate_spheres();
+		interpolate_spheres();
 		__joint_iterate(root);
 		__stitch_faces();
 	}
@@ -701,7 +744,8 @@ namespace Balle
 		Logger::info("CC division: call subdivision, finish connecting new mesh");
 	}
 
-	void BMesh::__remesh_split(HalfedgeMesh &mesh){
+	void BMesh::__remesh_split(HalfedgeMesh &mesh)
+	{
 		// Edge split operation
 		vector<EdgeIter> edges;
 
@@ -736,8 +780,9 @@ namespace Balle
 		Logger::info("remesh: finish split, split edge number " + to_string(edges.size()));
 	}
 
-	void BMesh::__remesh_collapse(HalfedgeMesh &mesh){
-		
+	void BMesh::__remesh_collapse(HalfedgeMesh &mesh)
+	{
+
 		// Edge collapse operation
 		vector<EdgeIter> edges;
 
@@ -772,29 +817,32 @@ namespace Balle
 
 		int n{0};
 
-		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); )
+		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd();)
 		{
 			if (e->isDeleted)
-			{   
+			{
 				n++;
 				e = mesh.ReturnDeleteEdge(e);
 			}
-			else {
+			else
+			{
 				e++;
 			}
 		}
-		
+
 		Logger::info("remesh: finish collapse, deleted edge number " + to_string(n));
 	}
 
-	void BMesh::__remesh_flip(HalfedgeMesh &mesh){
+	void BMesh::__remesh_flip(HalfedgeMesh &mesh)
+	{
 		// Edge flip operation
 		vector<EdgeIter> edges;
 
 		for (EdgeIter e = mesh.edgesBegin(); e != mesh.edgesEnd(); e++)
 		{
 			// Both triangles
-			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+			{
 				int a1, a2, b1, b2;
 				int degree_before, degree_after;
 
@@ -814,7 +862,8 @@ namespace Balle
 
 				degree_after = abs(a1 - 6) + abs(a2 - 6) + abs(b1 - 6) + abs(b2 - 6);
 
-				if (degree_after < degree_before) {
+				if (degree_after < degree_before)
+				{
 					edges.push_back(e);
 				}
 			}
@@ -822,7 +871,8 @@ namespace Balle
 
 		for (EdgeIter e : edges)
 		{
-			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3)) {
+			if ((e->halfedge()->face()->degree() == 3) && (e->halfedge()->twin()->face()->degree() == 3))
+			{
 				mesh.flipEdge(e);
 			}
 		}
@@ -830,7 +880,8 @@ namespace Balle
 		Logger::info("remesh: finish flip, flip edge number " + to_string(edges.size()));
 	}
 
-	void BMesh::__remesh_average(HalfedgeMesh &mesh){
+	void BMesh::__remesh_average(HalfedgeMesh &mesh)
+	{
 		// Vertex average
 		for (VertexIter v = mesh.verticesBegin(); v != mesh.verticesEnd(); v++)
 		{
@@ -863,8 +914,6 @@ namespace Balle
 
 		Logger::info("remesh: finish vertex average");
 	}
-
-	
 
 	/******************************
 	 * PRIVATE                    *
@@ -1443,7 +1492,12 @@ namespace Balle
 		int result = mesh->build(polygons, vertices);
 		if (result == 0)
 		{
-			shader_method = mesh_faces_no_indices;
+			if (previous_shader_method == mesh_faces_no_indices || previous_shader_method == mesh_wireframe_no_indices)
+			{
+				shader_method = previous_shader_method;
+			} else {
+				shader_method = mesh_faces_no_indices;
+			}
 			__catmull_clark(*mesh);
 			Logger::info("HalfedgeMesh building succeeded.");
 		}
