@@ -48,6 +48,7 @@ namespace Balle
 		 * Main Feature Function      *
 		 ******************************/
 		void clear_mesh();
+		void rebuild();
 		void generate_bmesh();
 		void subdivision();
 		void remesh();
@@ -144,6 +145,7 @@ namespace Balle
 
 		// Generated Halfedge Mesh
 		HalfedgeMesh* mesh = nullptr;
+		HalfedgeMesh* mesh_copy = nullptr;
 		vector<vector<size_t>> polygons;
 		vector<Vector3D> vertices;
 

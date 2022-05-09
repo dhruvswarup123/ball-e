@@ -46,7 +46,15 @@ namespace Balle
 		all_nodes.emplace(footL);
 		all_nodes.emplace(footR);
 	};
-
+	void BMesh::rebuild(){
+		if(mesh != nullptr){
+			delete mesh;
+		}
+		mesh = nullptr;
+		mesh = new HalfedgeMesh();
+		mesh->build(polygons, vertices);
+		__catmull_clark(*mesh);
+	}
 	void BMesh::clear_mesh()
 	{
 		if (mesh != nullptr)

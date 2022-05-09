@@ -779,6 +779,7 @@ bool GUI::keyCallbackEvent(int key, int scancode, int action,
 		case 'D': // subdivision
 		case 'd':
 			bmesh->subdivision();
+			subdiv_level++;
 			break;
 		case 'R':
 		case 'r':
@@ -1163,10 +1164,62 @@ void GUI::initGUI(Screen *screen)
 					bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
 				}
 			} });
-
 		animation_menu_shake_it_button = new Button(window, "Shake it!");
 		animation_menu_shake_it_button->setCallback([this]()
 										   { this->shake_it(); });
+	}
+	new Label(window, "Subdivision", "sans-bold");
+	{
+		Widget *panel = new Widget(window);
+		panel->setLayout(new BoxLayout(Orientation::Horizontal,
+									   Alignment::Middle, 0, 20));
+
+		Slider *slider = new Slider(panel);
+		slider->setValue(0.0f);
+		slider->setFixedWidth(100);
+
+		TextBox *textBox = new TextBox(panel);
+		textBox->setFixedSize(Vector2i(60, 25));
+		textBox->setValue("0");
+		cout << "shader_method is " << bmesh->shader_method << endl;
+
+		slider->setCallback([this, textBox](float value)
+							{
+			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices){
+			
+            textBox->setValue(std::to_string((int) (value * 100/20)));
+			if ((int) (value * 100/20) >= subdiv_level ){
+				for(int i = 0 ; i < (int) (value * 100/20) -  subdiv_level; i++){
+					bmesh->subdivision();
+					subdiv_level++;
+				}
+			}else{
+				bmesh->rebuild();
+				subdiv_level = 0;
+				for(int i = 0; i < (int) (value * 100/20); i++){
+					bmesh->subdivision();
+					subdiv_level++;
+				}
+			}
+
+			} });
+	
+
+		// slider->setCallback([this](float value){
+		// 	if ((int) (value * 100/20) >= subdiv_level ){
+		// 		for(int i = 0 ; i < (int) (value * 100/20) -  subdiv_level; i++){
+		// 			bmesh->subdivision();
+		// 		}
+		// 	}else{
+		// 		bmesh->generate_bmesh();
+		// 		for(int i = 0; i < (int) (value * 100/20); i++){
+		// 			bmesh->subdivision();
+		// 		}
+		// 	}
+		// });
+		// slider->setFinalCallback([&](float value) {
+		//     cout << "Final slider value: " << (int) (value * 100) << endl;
+		// });
 	}
 
 	// shader_method_window = new Window(screen, "                Shader Method                ");
