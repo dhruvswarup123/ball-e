@@ -165,6 +165,9 @@ private:
 
 	Vector2i default_window_size = Vector2i(1024, 800);
 
+	//subdivision
+	int subdiv_level = 0;
+
 	// nanogui stuff
 	bool gui_init = false;
 	Window* file_menu_window;
