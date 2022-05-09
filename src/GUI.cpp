@@ -115,8 +115,6 @@ GUI::~GUI()
 
 void GUI::init()
 {
-	bmesh = new Balle::BMesh();
-
 	// Initialize GUI
 	screen->setSize(default_window_size);
 	if (!gui_init)
@@ -124,6 +122,7 @@ void GUI::init()
 		initGUI(screen);
 		gui_init = true;
 	}
+	bmesh = new Balle::BMesh(logger);
 
 	// Initialize camera
 
@@ -811,7 +810,7 @@ void GUI::export_bmesh()
 	if (!((bmesh->shader_method == Balle::Method::mesh_faces_no_indices) ||
 		  (bmesh->shader_method == Balle::Method::mesh_wireframe_no_indices)))
 	{
-		Logger::error("Export Failed - No mesh to export.");
+		logger->error("Export Failed - No mesh to export.");
 		return;
 	}
 
@@ -900,7 +899,7 @@ void GUI::scale_node()
 		original_rad = selected->radius;
 		gui_state = GUI_STATES::SCALING;
 
-		Logger::info("GUI::scale_node: Scaling");
+		logger->info("GUI::scale_node: Scaling");
 	}
 }
 
@@ -914,7 +913,7 @@ void GUI::delete_node()
 	{
 
 		// delete it  and set selected to nullptr
-		Logger::info("Deleting");
+		logger->info("Deleting");
 		if (bmesh->delete_node(selected))
 		{
 			selected = nullptr;
@@ -942,7 +941,7 @@ void GUI::extrude_node()
 			temp->pos = selected->pos + offset;
 			selected->selected = false;
 		}
-		Logger::info("Created a new node");
+		logger->info("Created a new node");
 		selected = temp;
 		temp->equilibrium = temp->pos;
 		selected->selected = true;
@@ -959,7 +958,8 @@ void GUI::grab_node()
 	}
 	else
 	{
-		Logger::info("Grabbed");
+
+		logger->info("Grabbed");
 		grab_mouse_x = mouse_x;
 		grab_mouse_y = mouse_y;
 		original_pos = selected->pos;
@@ -991,7 +991,7 @@ void GUI::sceneIntersect(double x, double y)
 	if (gui_state == GUI_STATES::GRABBING || gui_state == GUI_STATES::SCALING)
 	{
 		gui_state = GUI_STATES::IDLE;
-		Logger::info("Done grabbing. Cant move it anymore");
+		logger->info("Done grabbing. Cant move it anymore");
 		return;
 	}
 	bool found = false;
@@ -1166,7 +1166,7 @@ void GUI::initGUI(Screen *screen)
 			} });
 		animation_menu_shake_it_button = new Button(window, "Shake it!");
 		animation_menu_shake_it_button->setCallback([this]()
-										   { this->shake_it(); });
+													{ this->shake_it(); });
 	}
 	new Label(window, "Subdivision", "sans-bold");
 	{
@@ -1181,11 +1181,9 @@ void GUI::initGUI(Screen *screen)
 		TextBox *textBox = new TextBox(panel);
 		textBox->setFixedSize(Vector2i(60, 25));
 		textBox->setValue("0");
-		cout << "shader_method is " << bmesh->shader_method << endl;
-
 		slider->setCallback([this, textBox](float value)
 							{
-			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices){
+			if (bmesh->shader_method == Balle::Method::mesh_faces_no_indices && !bmesh->shaking){
 			
             textBox->setValue(std::to_string((int) (value * 100/20)));
 			if ((int) (value * 100/20) >= subdiv_level ){
@@ -1203,25 +1201,16 @@ void GUI::initGUI(Screen *screen)
 			}
 
 			} });
-	
-
-		// slider->setCallback([this](float value){
-		// 	if ((int) (value * 100/20) >= subdiv_level ){
-		// 		for(int i = 0 ; i < (int) (value * 100/20) -  subdiv_level; i++){
-		// 			bmesh->subdivision();
-		// 		}
-		// 	}else{
-		// 		bmesh->generate_bmesh();
-		// 		for(int i = 0; i < (int) (value * 100/20); i++){
-		// 			bmesh->subdivision();
-		// 		}
-		// 	}
-		// });
-		// slider->setFinalCallback([&](float value) {
-		//     cout << "Final slider value: " << (int) (value * 100) << endl;
-		// });
 	}
+	new Label(window, "Terminal OUTPUT","sans-bold");
+	{
+		TextBox *tb = new TextBox(window);
+		tb->setHeight(200);
+		//tb->setFixedHeight(200);
+		logger = new Logger{tb};
 
+	}
+	
 	// shader_method_window = new Window(screen, "                Shader Method                ");
 	// shader_method_window->setPosition(Vector2i(default_window_size(0) - 245, 15));
 	// shader_method_window->setLayout(new GroupLayout(15, 6, 14, 5));
@@ -1417,17 +1406,6 @@ void GUI::initGUI(Screen *screen)
 	window->setPosition(Vector2i(15, 15));
 	window->setLayout(new GroupLayout(15, 6, 14, 5));
 
-	// Appearance
-
-	{
-
-
-		ComboBox* cb = new ComboBox(window, shaders_combobox_names);
-		cb->setFontSize(14);
-		cb->setCallback(
-			[this, screen](int idx) { active_shader_idx = idx; });
-		cb->setSelectedIndex(active_shader_idx);
-	}
 
 	// Shader Parameters
 

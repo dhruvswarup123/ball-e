@@ -11,7 +11,7 @@
 #include "skeletalNode.h"
 #include "primitives.h"
 #include "../json.hpp"
-
+#include "../logger.h"
 using namespace std;
 using namespace nanogui;
 using namespace CGL;
@@ -41,7 +41,7 @@ namespace Balle
 		/******************************
 		 * Constructor/Destructor     *
 		 ******************************/
-		BMesh();
+		BMesh(Logger* logger);
 		~BMesh() = default;
 
 		/******************************
@@ -93,6 +93,7 @@ namespace Balle
 		 * Debugging Function         *
 		 ******************************/
 		void print_skeleton();
+		bool shaking = false;
 
 	private:
 		/******************************
@@ -158,7 +159,8 @@ namespace Balle
 
 		// Animation
 		unsigned long long ts = 0ULL;
-		bool shaking = false;
+		
+		Logger *logger;
 	}; // END_STRUCT BMESH
 };	   // END_NAMESPACE BALLE
 #endif

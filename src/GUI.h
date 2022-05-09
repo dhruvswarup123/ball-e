@@ -6,6 +6,7 @@
 
 #include "camera.h"
 #include "bmesh/bmesh.h"
+#include "logger.h"
 
 using namespace nanogui;
 
@@ -182,6 +183,8 @@ private:
 	// save frame
 	string get_frame_name(int index);
 	void write_screen_shot(int index);
+
+	Logger *logger;
 };
 
 struct UserShader

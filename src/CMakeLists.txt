@@ -24,7 +24,8 @@ set(BALLE_VIEWER_SOURCE
     bmesh/bmesh.cpp 
     bmesh/renderer.cpp
 
-    # UI
+    # LOGGER
+    logger.cpp
 )
 
 # Windows-only sources

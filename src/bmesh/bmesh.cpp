@@ -19,7 +19,7 @@ namespace Balle
 	 * PUBLIC                      *
 	 ******************************/
 
-	BMesh::BMesh()
+	BMesh::BMesh(Logger *logger):logger(logger)
 	{
 		root = new SkeletalNode(Vector3D(0, 0, 0), 0.05, nullptr); // root has no parent
 
@@ -45,6 +45,7 @@ namespace Balle
 		// all_nodes.emplace(head);
 		all_nodes.emplace(footL);
 		all_nodes.emplace(footR);
+		
 	};
 	void BMesh::rebuild(){
 		if(mesh != nullptr){
@@ -235,7 +236,7 @@ namespace Balle
 	{
 		if (node == root)
 		{
-			Logger::info("Deleting root, trying to reassign root first.");
+			logger->info("Deleting root, trying to reassign root first.");
 			if (node->children->size() > 0)
 			{
 				SkeletalNode *parent = (*node->children)[0];
@@ -245,11 +246,11 @@ namespace Balle
 					target = (*target->children)[0];
 				}
 				__reroot(target, parent);
-				Logger::info("Reassign root succeeded.");
+				logger->info("Reassign root succeeded.");
 			}
 			else
 			{
-				Logger::warn("Deleting singular root!");
+				logger->warn("Deleting singular root!");
 				delete node->children;
 				delete node;
 				all_nodes.erase(node);
@@ -368,7 +369,7 @@ namespace Balle
 
 	void BMesh::export_to_file(const string &filename)
 	{
-		Logger::info("Saving as: " + filename);
+		logger->info("Saving as: " + filename);
 		ofstream file;
 		file.open(filename);
 
@@ -402,7 +403,7 @@ namespace Balle
 
 	void BMesh::save_to_file(const string &filename)
 	{
-		Logger::info("Saving as: " + filename);
+		logger->info("Saving as: " + filename);
 		// Load all info into json
 		json j;
 		__skeleton_to_json(j);
@@ -416,7 +417,7 @@ namespace Balle
 
 	bool BMesh::load_from_file(const string &filename)
 	{
-		Logger::info("Loading from: " + filename);
+		logger->info("Loading from: " + filename);
 		ifstream file(filename);
 		if (!file.good())
 		{
@@ -586,7 +587,7 @@ namespace Balle
 	{
 		if (mesh == nullptr)
 		{
-			Logger::error("CC subdivision: Subdividing a nullptr");
+			logger->error("CC subdivision: Subdividing a nullptr");
 			return;
 		}
 		__catmull_clark(*mesh);
@@ -745,11 +746,11 @@ namespace Balle
 			generate_new_quads(f, quadrangles);
 		}
 
-		Logger::info("CC division: call subdivision, new quad size " + to_string(quadrangles.size()));
+		logger->info("CC division: call subdivision, new quad size " + to_string(quadrangles.size()));
 
 		// 5. mapping the quads to the polygon and vertex
 		connect_new_mesh(quadrangles, polygons, vertices, mesh);
-		Logger::info("CC division: call subdivision, finish connecting new mesh");
+		logger->info("CC division: call subdivision, finish connecting new mesh");
 	}
 
 	void BMesh::__remesh_split(HalfedgeMesh &mesh)
@@ -785,7 +786,7 @@ namespace Balle
 			}
 		}
 
-		Logger::info("remesh: finish split, split edge number " + to_string(edges.size()));
+		logger->info("remesh: finish split, split edge number " + to_string(edges.size()));
 	}
 
 	void BMesh::__remesh_collapse(HalfedgeMesh &mesh)
@@ -838,7 +839,7 @@ namespace Balle
 			}
 		}
 
-		Logger::info("remesh: finish collapse, deleted edge number " + to_string(n));
+		logger->info("remesh: finish collapse, deleted edge number " + to_string(n));
 	}
 
 	void BMesh::__remesh_flip(HalfedgeMesh &mesh)
@@ -885,7 +886,7 @@ namespace Balle
 			}
 		}
 
-		Logger::info("remesh: finish flip, flip edge number " + to_string(edges.size()));
+		logger->info("remesh: finish flip, flip edge number " + to_string(edges.size()));
 	}
 
 	void BMesh::__remesh_average(HalfedgeMesh &mesh)
@@ -920,7 +921,7 @@ namespace Balle
 			v->position = v->newPosition;
 		}
 
-		Logger::info("remesh: finish vertex average");
+		logger->info("remesh: finish vertex average");
 	}
 
 	/******************************
@@ -1507,7 +1508,7 @@ namespace Balle
 				shader_method = mesh_faces_no_indices;
 			}
 			__catmull_clark(*mesh);
-			Logger::info("HalfedgeMesh building succeeded.");
+			logger->info("HalfedgeMesh building succeeded.");
 		}
 		else
 		{
@@ -1517,7 +1518,7 @@ namespace Balle
 				mesh = nullptr;
 			}
 			shader_method = polygons_no_indices;
-			Logger::warn("HalfedgeMesh building failed, using polygons instead.");
+			logger->warn("HalfedgeMesh building failed, using polygons instead.");
 		}
 	}
 
@@ -1530,7 +1531,7 @@ namespace Balle
 	{
 		if (!root)
 			return;
-		Logger::info("print_skeleton: Current node radius " + to_string(root->radius));
+		logger->info("print_skeleton: Current node radius " + to_string(root->radius));
 		for (SkeletalNode *child : *(root->children))
 		{
 			__print_skeleton(child);
