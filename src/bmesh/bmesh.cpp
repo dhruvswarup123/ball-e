@@ -123,7 +123,7 @@ namespace Balle
 		}
 		clear_mesh();
 		size_t idx = 0;
-		double t = (ts % 360) * PI / 180;
+		double t = (ts % 360) * PI / 180 * 20;
 		for (SkeletalNode *node_ptr : all_nodes)
 		{
 			if (node_ptr->interpolated || node_ptr->children->size() != 0)
