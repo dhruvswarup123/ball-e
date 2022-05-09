@@ -1164,7 +1164,7 @@ void GUI::initGUI(Screen *screen)
 					bmesh->shader_method = Balle::Method::polygons_wirefame_no_indices;
 				}
 			} });
-		animation_menu_shake_it_button = new Button(window, "Shake it!");
+		animation_menu_shake_it_button = new Button(window, "Shake it! But pls not break it!");
 		animation_menu_shake_it_button->setCallback([this]()
 													{ this->shake_it(); });
 	}
@@ -1205,6 +1205,7 @@ void GUI::initGUI(Screen *screen)
 	new Label(window, "Terminal OUTPUT", "sans-bold");
 	{
 		TextBox *tb = new TextBox(window);
+		tb->setValue("");
 		tb->setHeight(200);
 		tb->setFontSize(10);
 		logger = new Logger{tb};

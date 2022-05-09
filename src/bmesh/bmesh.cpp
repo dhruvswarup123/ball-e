@@ -123,23 +123,22 @@ namespace Balle
 		}
 		clear_mesh();
 		size_t idx = 0;
-		double t = (ts % 360) * PI / 360;
+		double t = (ts % 360) * PI / 180;
 		for (SkeletalNode *node_ptr : all_nodes)
 		{
-			if (node_ptr->interpolated)
+			if (node_ptr->interpolated || node_ptr->children->size() != 0)
 			{
 				continue;
 			}
-			size_t mode = idx % 3;
+			size_t mode = idx % 2;
+			Vector3D direction = (node_ptr->pos - node_ptr->parent->pos).unit();
 			switch (mode)
 			{
 			case 0:
-				node_ptr->pos.x = sin(t) * 0.05 + node_ptr->equilibrium.x;
+				node_ptr->pos = node_ptr->equilibrium + direction * sin(t) * 0.05;
 			case 1:
-				node_ptr->pos.y = sin(t) * 0.05 + node_ptr->equilibrium.y;
-			case 2:
 			default:
-				node_ptr->pos.z = sin(t) * 0.05 + node_ptr->equilibrium.z;
+				node_ptr->pos = node_ptr->equilibrium + direction * sin(t) * 0.05;
 			}
 			idx++;
 		}
@@ -970,6 +969,7 @@ namespace Balle
 				x = temp_x;
 			}
 		}
+		radius *= 0.8;
 
 		if ((root->parent != NULL))
 		{
