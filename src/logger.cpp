@@ -8,44 +8,44 @@ using namespace std;
 // Warnings
 void Logger::warn(const string &s)
 {
-    ss << "[warning] ";
-    ss << s << endl;
+    cout << "[warning] ";
+    cout << s << endl;
     
     if (textbox != nullptr)
     {
-        textbox->setValue(ss.str());
+        textbox->setValue("[warning] " + s);
     }
 }
 
 // Errors
 void Logger::error(const string &s)
 {
-    ss << "[!!! ERROR !!!] ";
-    ss << s << endl;
+    cout << "[!!! ERROR !!!] ";
+    cout << s << endl;
     if (textbox != nullptr)
     {
-        textbox->setValue(ss.str());
+        textbox->setValue("[!!! ERROR !!!]" + s);
     }
 }
 
 // Any general info / debugging
 void Logger::info(const string &s)
 {
-    ss << "[info] ";
-    ss << s << endl;
+    cout << "[info] ";
+    cout << s << endl;
     if (textbox != nullptr)
     {
-        textbox->setValue(ss.str());
+        textbox->setValue("[info] " + s);
     }
 }
 
 // Completed tasks
 void Logger::done(const string &s)
 {
-    ss << "[done] ";
-    ss << s << endl;
+    cout << "[done] ";
+    cout << s << endl;
     if (textbox != nullptr)
     {
-        textbox->setValue(ss.str());
+        textbox->setValue("[done] " + s);
     }
 }
