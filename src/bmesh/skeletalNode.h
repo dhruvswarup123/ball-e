@@ -14,7 +14,7 @@ namespace Balle
 	struct SkeletalNode
 	{
 	public:
-		SkeletalNode(Vector3D pos, float radius, SkeletalNode *parent) : pos(pos), radius(radius), parent(parent)
+		SkeletalNode(Vector3D pos, float radius, SkeletalNode *parent) : pos(pos), equilibrium(pos), radius(radius), parent(parent)
 		{
 			children = new vector<SkeletalNode *>;
 		};
@@ -33,6 +33,7 @@ namespace Balle
 
 		// World Coordinate position of the ball
 		Vector3D pos;
+		Vector3D equilibrium;
 		bool selected = false;
 		bool interpolated = false;
 
