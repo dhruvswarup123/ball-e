@@ -27,7 +27,6 @@ Here are all the keybinds:
 | `n` |  Go to a sibling node (deprecated)|
 | `p` |  Go to a parent node (deprecated)|
 | `c` |  Go to a child node (deprecated)|
-
 | `i` | Interpolate between the key spheres |
 | `d` | Catmull-Clark subdivision |
 | `w` | Show mesh wireframe |
