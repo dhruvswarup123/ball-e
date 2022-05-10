@@ -7,7 +7,18 @@
 [Final Deliverables](final.md)
 
 ## Usage Guide
-(To be updated soon)
+
+### Main functions
+1. Edge the skeleton by adding, grabbing, scaling, and extruding the node spheres.   
+2. Interpolate the skeleton and generate the mesh (press SPACE).  
+3. Subdivide the mesh by pressing `d` or use the control bar.   
+4. Rock and Roll using the `Shake it` button.  
+
+### Software support
+1. Save and load .balle file.
+2. After mesh generation, export .obj file that could be useful in the Blender.
+3. Press `0` to screen shot.
+4. Default camera veiws are front, side and top views
 
 ### Using the GUI
 Here are all the keybinds:
