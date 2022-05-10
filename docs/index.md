@@ -44,6 +44,7 @@ Here are all the keybinds:
 | `ctrl + r` | Remesh |
 | `ctrl + s` | Save |
 | `ctrl + l` | Load |
+| `ctrl + e` | Export |
 
 Additionally, 
 1. Left click and drag to rotate camera
