@@ -9,7 +9,7 @@
 ## Usage Guide
 
 ### Main functions
-1. Edge the skeleton by adding, grabbing, scaling, and extruding the node spheres.   
+1. Edit the skeleton by adding, grabbing, scaling, and extruding the node spheres.   
 2. Interpolate the skeleton and generate the mesh (press SPACE).  
 3. Subdivide the mesh by pressing `d` or use the control bar.   
 4. Rock and Roll using the `Shake it` button.  
