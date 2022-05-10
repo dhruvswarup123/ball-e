@@ -31,6 +31,8 @@ Here are all the keybinds:
 | `d` | Catmull-Clark subdivision |
 | `w` | Show mesh wireframe |
 | `ctrl + r` | Remesh |
+| `ctrl + s` | Save |
+| `ctrl + l` | Load |
 
 Additionally, 
 1. Left click and drag to rotate camera
