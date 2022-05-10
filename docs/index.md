@@ -4,6 +4,8 @@
 
 [Milestone Report](report.md)
 
+[Final Deliverables](final.md)
+
 ## Usage Guide
 (To be updated soon)
 
