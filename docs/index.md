@@ -7,26 +7,43 @@
 [Final Deliverables](final.md)
 
 ## Usage Guide
-(To be updated soon)
+
+### Main functions
+1. Edit the skeleton by adding, grabbing, scaling, and extruding the node spheres.   
+2. Interpolate the skeleton and generate the mesh (press SPACE).  
+3. Subdivide the mesh by pressing `d` or use the control bar.   
+4. Rock and Roll using the `Shake it` button.  
+
+### Software support
+1. Save and load .balle file.
+2. After mesh generation, export .obj file that could be useful in the Blender.
+3. Press `0` to screen shot.
+4. Default camera veiws are front, side and top views
 
 ### Using the GUI
 Here are all the keybinds:
 
 | Key | Usage  |
 | --- | ---- | 
-| `SPACE` | Reset the camera view (same as `1`) |
+| `0` | Screen Shot|
 | `1` | Set camera to front view |
 | `3` | Set camera to side view |
 | `7` | Set camera to top view |
-| `Left click and drag` | (grab) Move the selected node |
-| `Right click and drag` or `Left click and drag with control pressed` | Scale the selected sphere |
+| `Left click and drag (g)` | (grab) Move the selected node |
+| `Right click and drag` or <br /> `s` + `Left click and drag ` | Scale the selected sphere |
 | `e` |  Extrude the current node |
-| `d` | Catmull-Clark subdivision |
-| `x` | Delete the selected sphere |
-| `r` | Reset all nodes to default sticky man |
+| `x` |  Delete the selected sphere |
+| `r` | Reset all nodes to default sticky man 
 | `n` |  Go to a sibling node (deprecated)|
 | `p` |  Go to a parent node (deprecated)|
 | `c` |  Go to a child node (deprecated)|
+| `i` | Interpolate between the key spheres |
+| `SPACE` | Interpolate the skeleton and generate the msh |
+| `d` | Catmull-Clark subdivision |
+| `w` | Show mesh wireframe |
+| `ctrl + r` | Remesh |
+| `ctrl + s` | Save |
+| `ctrl + l` | Load |
 
 Additionally, 
 1. Left click and drag to rotate camera
