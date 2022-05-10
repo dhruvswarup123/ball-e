@@ -14,19 +14,25 @@ Here are all the keybinds:
 
 | Key | Usage  |
 | --- | ---- | 
-| `SPACE` | Reset the camera view (same as `1`) |
+| `SPACE` | Reset the camera view  |
+| `0` | Screen Shot|
 | `1` | Set camera to front view |
 | `3` | Set camera to side view |
 | `7` | Set camera to top view |
-| `Left click and drag` | (grab) Move the selected node |
+| `Left click and drag (g)` | (grab) Move the selected node |
 | `Right click and drag` or `Left click and drag with control pressed` | Scale the selected sphere |
 | `e` |  Extrude the current node |
-| `d` | Catmull-Clark subdivision |
-| `x` | Delete the selected sphere |
-| `r` | Reset all nodes to default sticky man |
+| `s` |  Scale the selected sphere |
+| `x` |  Delete the selected sphere |
+| `r` | Reset all nodes to default sticky man 
 | `n` |  Go to a sibling node (deprecated)|
 | `p` |  Go to a parent node (deprecated)|
 | `c` |  Go to a child node (deprecated)|
+
+| `i` | Interpolate between the key spheres |
+| `d` | Catmull-Clark subdivision |
+| `w` | Show mesh wireframe |
+| `ctrl + r` | Remesh |
 
 Additionally, 
 1. Left click and drag to rotate camera
