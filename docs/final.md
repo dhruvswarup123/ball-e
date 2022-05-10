@@ -9,7 +9,7 @@
 </head>
 
 ### The Demo Video
-<div class="iframe_div"><iframe src="https://drive.google.com/file/d/1nlvndz_cAnQgGoDyt4aCm-Ul3bdoZ0Lh/preview" width="640" height="400" allow="autoplay"></iframe></div>
+<div class="iframe_div"><iframe src="https://drive.google.com/file/d/1nlvndz_cAnQgGoDyt4aCm-Ul3bdoZ0Lh/preview" width="640" height="400" allow="autoplay" allowfullscreen></iframe></div>
 
 ### The Main Report
 <div class="iframe_div"><iframe src="https://drive.google.com/file/d/1MvjZprn3jyH2AlkuNElY_-nzbtJeQChU/preview" width="640" height="1000" allow="autoplay"></iframe></div>
