@@ -20,7 +20,7 @@ Here are all the keybinds:
 | `3` | Set camera to side view |
 | `7` | Set camera to top view |
 | `Left click and drag (g)` | (grab) Move the selected node |
-| `Right click and drag` or \\ `s` + `Left click and drag ` | Scale the selected sphere |
+| `Right click and drag` or <br /> `s` + `Left click and drag ` | Scale the selected sphere |
 | `e` |  Extrude the current node |
 | `x` |  Delete the selected sphere |
 | `r` | Reset all nodes to default sticky man 
