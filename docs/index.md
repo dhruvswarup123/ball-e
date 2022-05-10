@@ -14,7 +14,6 @@ Here are all the keybinds:
 
 | Key | Usage  |
 | --- | ---- | 
-| `SPACE` | Reset the camera view  |
 | `0` | Screen Shot|
 | `1` | Set camera to front view |
 | `3` | Set camera to side view |
@@ -28,6 +27,7 @@ Here are all the keybinds:
 | `p` |  Go to a parent node (deprecated)|
 | `c` |  Go to a child node (deprecated)|
 | `i` | Interpolate between the key spheres |
+| `SPACE` | Interpolate the skeleton and generate the msh |
 | `d` | Catmull-Clark subdivision |
 | `w` | Show mesh wireframe |
 | `ctrl + r` | Remesh |
